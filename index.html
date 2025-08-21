@@ -13,10 +13,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f1f5f9; --text-color: #0f172a; --card-bg: #ffffff;
+            --bg-color: #f3f4f6; --text-color: #111827; --card-bg: #ffffff;
             --primary-color: #4f46e5; --secondary-color: #10b981;
-            --input-border: #cbd5e1; --input-bg: #ffffff; --muted-text: #64748b;
-            --tooltip-bg: #334155; --tooltip-text-color: #ffffff;
+            --input-border: #d1d5db; --input-bg: #ffffff; --muted-text: #6b7280;
+            --tooltip-bg: #374151; --tooltip-text-color: #ffffff;
         }
         html.dark {
             --bg-color: #0f172a; --text-color: #e2e8f0; --card-bg: #1e293b;
@@ -63,7 +63,7 @@
         <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
         <div class="mt-4 flex flex-col gap-2"><button id="main-auth-btn" class="w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors">Login</button><a href="#" id="forgot-password-link" class="text-center text-sm text-indigo-500 hover:underline">Esqueceu a senha?</a></div>
         <div class="mt-4 text-center"><a href="#" id="toggle-auth-mode-link" class="text-sm muted-text hover:underline">Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span></a></div>
-        <div class="mt-6 text-center text-xs text-gray-400"><p>Versão 2.0 - Agosto de 2025 - Franzoi Tech</p></div>
+        <div class="mt-6 text-center text-xs text-gray-400"><p>Versão 1.0 - Agosto de 2025 - Franzoi Tech</p></div>
     </div>
 
     <div id="app-screen" class="hidden">
@@ -87,7 +87,7 @@
         </div>
 
         <div class="container mx-auto card p-4 md:p-6 rounded-lg shadow-xl relative">
-            <div class="absolute top-4 left-4 text-xs muted-text"><div>ver 2.0</div><div>Franzoi Tech</div></div>
+            <div class="absolute top-4 left-4 text-xs muted-text"><div>ver 1.0</div><div>Franzoi Tech</div></div>
             <div class="absolute top-4 right-4 flex items-center gap-4"><button id="theme-toggle-btn" class="p-2 rounded-full bg-slate-200 dark:bg-slate-700 text-lg">🌙</button><button id="logout-btn" class="px-4 py-1 bg-red-500 text-white text-xs font-semibold rounded-lg shadow-md hover:bg-red-600 transition-colors">Sair</button></div>
             <div class="text-center mb-6"><h1 class="text-2xl md:text-3xl font-bold mt-8">Controle de Caixa e Gastos Mensais</h1><p class="text-sm muted-text mt-2">As alterações são salvas automaticamente.</p><div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 mt-4"><button id="manage-settings-btn" class="w-full sm:w-auto px-6 py-2 bg-slate-500 text-white font-semibold rounded-lg shadow-md hover:bg-slate-600 transition-colors">Gerenciar</button><button id="save-and-download-btn" class="w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors">Criar Versão Portátil</button></div></div>
             <div class="flex justify-center flex-wrap gap-2 mb-6" id="monthTabs"></div>
@@ -149,71 +149,62 @@
                 try {
                     const docSnap = await getDoc(doc(db, 'users', currentUserId));
                     if (docSnap.exists()) { const d = docSnap.data(); state.monthlyData = d.monthlyData || {}; state.creditCards = d.creditCards || []; state.categories = d.categories && d.categories.length > 0 ? d.categories : state.categories; }
-                    for (let i = 0; i < 12; i++) { state.monthlyData[i] = state.monthlyData[i] || { pjEntries: [], pfEntries: [], expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] })) }; }
+                    for (let i = 0; i < 12; i++) { 
+                        state.monthlyData[i] = state.monthlyData[i] || { pjEntries: [], pfEntries: [], expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] })) }; 
+                        state.monthlyData[i].expenses.forEach(day => {
+                            [...day.personalEntries, ...day.businessEntries].forEach(entry => {
+                                if (!entry.category) { entry.category = 'Outros'; }
+                            });
+                        });
+                    }
                 } catch (error) { console.error("Erro ao carregar dados:", error); }
                 ui.monthContentContainer.innerHTML = '';
                 monthNames.forEach((_, index) => { ui.monthContentContainer.insertAdjacentHTML('beforeend', index === 12 ? createBalanceContentHTML() : createMonthContentHTML(index)); });
                 showMonth(state.activeMonthIndex);
             };
-
-            const exportToCSV = (monthIndex) => {
-                const data = state.monthlyData[monthIndex]; let csvContent = "data:text/csv;charset=utf-8,Dia,Tipo,Categoria,Descricao,Valor,Forma de Pagamento,Cartao\n";
-                data.expenses.forEach((day, dayIndex) => {
-                    [...day.personalEntries, ...day.businessEntries].forEach(entry => { const type = day.personalEntries.includes(entry) ? "Pessoal" : "Empresa"; const row = [dayIndex + 1, type, entry.category, `"${entry.description}"`, entry.amount, entry.paymentMethod, entry.card || ''].join(","); csvContent += row + "\n"; });
-                });
-                const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `gastos_${monthNames[monthIndex]}.csv`);
-                document.body.appendChild(link); link.click(); document.body.removeChild(link);
-            };
-
-            const exportToPDF = (monthIndex) => {
-                const { jsPDF } = window.jspdf; const doc = new jsPDF(); const data = state.monthlyData[monthIndex]; const body = [];
-                data.expenses.forEach((day, dayIndex) => { [...day.personalEntries, ...day.businessEntries].forEach(entry => { const type = day.personalEntries.includes(entry) ? "Pessoal" : "Empresa"; body.push([dayIndex + 1, type, entry.category, entry.description, formatCurrency(entry.amount), entry.paymentMethod, entry.card || '']); }); });
-                doc.autoTable({ head: [['Dia', 'Tipo', 'Categoria', 'Descrição', 'Valor', 'Pagamento', 'Cartão']], body: body, startY: 20 });
-                doc.text(`Relatório de Gastos - ${monthNames[monthIndex]}`, 14, 15); doc.save(`gastos_${monthNames[monthIndex]}.pdf`);
-            };
             
             const createMonthContentHTML = (monthIndex) => `
                 <div id="month-${monthIndex}-content" class="month-content">
-                    <div class="flex justify-end gap-2 mb-4"><button class="export-csv-btn px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 text-sm" data-month-index="${monthIndex}">Exportar CSV</button><button class="export-pdf-btn px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-600 text-sm" data-month-index="${monthIndex}">Exportar PDF</button></div>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                       <div style="background-color: var(--bg-ganhos-pj);" class="dark:border-t-4 dark:border-yellow-400 p-4 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-3">Ganhos PJ (R$)</h2><div id="pj-entries-container-${monthIndex}" class="flex flex-col gap-2 mb-2"></div><button class="add-entry-btn mt-2 w-full px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 text-sm font-medium" data-month-index="${monthIndex}" data-type="pj">+ Adicionar Ganho PJ</button></div>
-                       <div style="background-color: var(--bg-ganhos-pf);" class="dark:border-t-4 dark:border-green-400 p-4 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-3">Ganhos PF (R$)</h2><div id="pf-entries-container-${monthIndex}" class="flex flex-col gap-2 mb-2"></div><button class="add-entry-btn mt-2 w-full px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium" data-month-index="${monthIndex}" data-type="pf">+ Adicionar Ganho PF</button></div>
-                       <div class="grid gap-6">
-                           <div style="background-color: var(--bg-caixa);" class="dark:border-t-4 dark:border-blue-400 p-4 rounded-lg shadow-md"><label class="block text-sm font-medium mb-2">Caixa da empresa (R$):</label><input type="text" id="companyCash-${monthIndex}" readonly class="w-full p-3 input-field rounded-md text-lg font-semibold text-blue-700 dark:text-blue-300 bg-slate-100 dark:bg-slate-700 shadow-sm cursor-not-allowed"><label class="block text-sm font-medium mt-2 mb-2">Caixa pessoal (R$):</label><input type="text" id="personalCash-${monthIndex}" readonly class="w-full p-3 input-field rounded-md text-lg font-semibold text-blue-700 dark:text-blue-300 bg-slate-100 dark:bg-slate-700 shadow-sm cursor-not-allowed"></div>
-                           <div style="background-color: var(--bg-resumo);" class="dark:border-t-4 dark:border-purple-400 p-4 rounded-lg shadow-md">
-                               <h2 class="text-xl font-semibold mb-3">Resumo dos Saldos</h2>
-                               <div class="flex justify-between items-center text-sm mb-1"><span>Saldo Pessoal:</span><span id="remainingPersonal-${monthIndex}" class="font-bold">R$ 0,00</span></div>
-                               <div class="flex justify-between items-center text-sm mb-2"><span>Saldo Empresa:</span><span id="remainingBusiness-${monthIndex}" class="font-bold">R$ 0,00</span></div>
-                               <div class="flex justify-between items-center border-t border-slate-200 dark:border-slate-700 pt-2 mt-2"><span class="font-medium">Saldo PF+PJ:</span><span id="remainingTotal-${monthIndex}" class="text-xl font-bold">R$ 0,00</span></div>
+                    <div class="flex justify-end gap-2 mb-4">
+                        <button class="export-csv-btn px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 text-sm" data-month-index="${monthIndex}">Exportar CSV</button>
+                        <button class="export-pdf-btn px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-600 text-sm" data-month-index="${monthIndex}">Exportar PDF</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                       <div class="md:col-span-2 lg:col-span-1 p-4 rounded-lg shadow-md bg-yellow-50 dark:bg-slate-800 dark:border-t-4 dark:border-yellow-400"><h2 class="text-xl font-semibold mb-3 text-black dark:text-white">Ganhos PJ (R$)</h2><div id="pj-entries-container-${monthIndex}" class="flex flex-col gap-2 mb-2"></div><button class="add-entry-btn mt-2 w-full px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 text-sm font-medium" data-month-index="${monthIndex}" data-type="pj">+ Adicionar Ganho PJ</button></div>
+                       <div class="md:col-span-2 lg:col-span-1 p-4 rounded-lg shadow-md bg-green-50 dark:bg-slate-800 dark:border-t-4 dark:border-green-400"><h2 class="text-xl font-semibold mb-3 text-black dark:text-white">Ganhos PF (R$)</h2><div id="pf-entries-container-${monthIndex}" class="flex flex-col gap-2 mb-2"></div><button class="add-entry-btn mt-2 w-full px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium" data-month-index="${monthIndex}" data-type="pf">+ Adicionar Ganho PF</button></div>
+                       <div class="md:col-span-2 lg:col-span-1 grid gap-6">
+                           <div class="p-4 rounded-lg shadow-md bg-blue-50 dark:bg-slate-800 dark:border-t-4 dark:border-blue-400"><label class="block text-sm font-medium mb-2 text-black dark:text-white">Caixa da empresa (R$):</label><input type="text" id="companyCash-${monthIndex}" readonly class="w-full p-3 input-field rounded-md text-lg font-semibold text-blue-700 dark:text-blue-300 bg-slate-100 dark:bg-slate-700 shadow-sm cursor-not-allowed"><label class="block text-sm font-medium mt-2 mb-2 text-black dark:text-white">Caixa pessoal (R$):</label><input type="text" id="personalCash-${monthIndex}" readonly class="w-full p-3 input-field rounded-md text-lg font-semibold text-blue-700 dark:text-blue-300 bg-slate-100 dark:bg-slate-700 shadow-sm cursor-not-allowed"></div>
+                           <div class="p-4 rounded-lg shadow-md bg-purple-50 dark:bg-slate-800 dark:border-t-4 dark:border-purple-400">
+                               <h2 class="text-xl font-semibold mb-3 text-black dark:text-white">Resumo dos Saldos</h2>
+                               <div class="flex justify-between items-center text-sm mb-1 text-black dark:text-white"><span>Saldo Pessoal:</span><span id="remainingPersonal-${monthIndex}" class="font-bold">R$ 0,00</span></div>
+                               <div class="flex justify-between items-center text-sm mb-2 text-black dark:text-white"><span>Saldo Empresa:</span><span id="remainingBusiness-${monthIndex}" class="font-bold">R$ 0,00</span></div>
+                               <div class="flex justify-between items-center border-t border-slate-200 dark:border-slate-700 pt-2 mt-2 text-black dark:text-white"><span class="font-medium">Saldo PF+PJ:</span><span id="remainingTotal-${monthIndex}" class="text-xl font-bold">R$ 0,00</span></div>
                                <div id="budget-alerts-${monthIndex}" class="mt-3 text-sm"></div>
                            </div>
                        </div>
                     </div>
-                    <div class="overflow-x-auto mb-8"><table class="min-w-full card rounded-lg shadow-md"><thead><tr class="bg-slate-800 text-white uppercase text-sm"><th class="py-3 px-6 text-left rounded-tl-lg">Dia</th><th class="py-3 px-6 text-left">Gastos Pessoais</th><th class="py-3 px-6 text-left rounded-tr-lg">Gastos da Empresa</th></tr></thead><tbody id="expenseTableBody-${monthIndex}" class="text-sm font-light"></tbody></table></div>
+                    <div class="overflow-x-auto mb-8"><table class="min-w-full card rounded-lg shadow-md"><thead><tr class="bg-slate-800 text-white uppercase text-sm font-semibold"><th class="py-3 px-6 text-left rounded-tl-lg">Dia</th><th class="py-3 px-6 text-left">Gastos Pessoais</th><th class="py-3 px-6 text-left rounded-tr-lg">Gastos da Empresa</th></tr></thead><tbody id="expenseTableBody-${monthIndex}" class="text-sm font-light"></tbody></table></div>
                     <div class="grid grid-cols-1 xl:grid-cols-3 gap-8"><div class="card p-6 rounded-lg shadow-xl"><h2 class="text-xl font-semibold text-center mb-4">Balanço do Mês</h2><div class="relative mx-auto" style="max-width: 400px; height: 400px;"><canvas id="budgetPieChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-lg shadow-xl"><h2 class="text-xl font-semibold text-center mb-4">Gastos por Pagamento</h2><div class="relative mx-auto" style="max-width: 400px; height: 400px;"><canvas id="paymentMethodChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-lg shadow-xl"><h2 class="text-xl font-semibold text-center mb-4">Metas de Gastos (Pessoal)</h2><div class="relative mx-auto" style="height: 400px;"><canvas id="budgetGoalsChart-${monthIndex}"></canvas></div></div></div>
                 </div>`;
             const createBalanceContentHTML = () => `
                 <div id="month-12-content" class="month-content"><h2 class="text-2xl font-bold text-center mb-6">Balanço Anual</h2>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8 text-center">
-                        <div style="background-color: var(--bg-ganhos-pj);" class="dark:border-t-4 dark:border-yellow-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Total Ganhos PJ:</span><span id="totalAnnualPJ" class="text-xl font-bold text-yellow-600 dark:text-yellow-400">R$ 0,00</span></div>
-                        <div style="background-color: var(--bg-ganhos-pf);" class="dark:border-t-4 dark:border-green-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Total Ganhos PF:</span><span id="totalAnnualPF" class="text-xl font-bold text-green-600 dark:text-green-400">R$ 0,00</span></div>
-                        <div style="background-color: var(--bg-resumo);" class="dark:border-t-4 dark:border-purple-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Gastos Totais Anuais:</span><span id="totalAnnualExpenses" class="text-xl font-bold text-red-600 dark:text-red-400">R$ 0,00</span></div>
-                        <div style="background-color: var(--bg-caixa);" class="dark:border-t-4 dark:border-blue-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Saldo Anual:</span><span id="annualBalance" class="text-xl font-bold text-blue-700 dark:text-blue-300">R$ 0,00</span><p id="annualPerformance" class="text-lg font-semibold mt-2"></p></div>
+                        <div class="bg-yellow-50 dark:bg-slate-800 dark:border-t-4 dark:border-yellow-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Total Ganhos PJ:</span><span id="totalAnnualPJ" class="text-xl font-bold text-yellow-600 dark:text-yellow-400">R$ 0,00</span></div>
+                        <div class="bg-green-50 dark:bg-slate-800 dark:border-t-4 dark:border-green-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Total Ganhos PF:</span><span id="totalAnnualPF" class="text-xl font-bold text-green-600 dark:text-green-400">R$ 0,00</span></div>
+                        <div class="bg-purple-50 dark:bg-slate-800 dark:border-t-4 dark:border-purple-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Gastos Totais Anuais:</span><span id="totalAnnualExpenses" class="text-xl font-bold text-red-600 dark:text-red-400">R$ 0,00</span></div>
+                        <div class="bg-blue-50 dark:bg-slate-800 dark:border-t-4 dark:border-blue-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Saldo Anual:</span><span id="annualBalance" class="text-xl font-bold text-blue-700 dark:text-blue-300">R$ 0,00</span><p id="annualPerformance" class="text-lg font-semibold mt-2"></p></div>
                     </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="card p-6 rounded-lg shadow-xl lg:col-span-2"><h3 class="text-xl font-semibold text-center mb-4">Desempenho Mensal</h3><div class="relative mx-auto" style="height: 400px;"><canvas id="monthlyPerformanceBarChart"></canvas></div></div>
                         <div class="card p-6 rounded-lg shadow-xl"><h3 class="text-xl font-semibold text-center mb-4 dark:text-white">Maiores Gastos do Ano</h3><div id="top-spends-container" class="text-sm space-y-2 max-h-96 overflow-y-auto p-2"></div></div>
                     </div>
                 </div>`;
             
             const renderTabs = () => {
-                ui.monthTabsContainer.innerHTML = monthNames.map((m, i) => {
-                    const isActive = i === state.activeMonthIndex;
-                    const styles = isActive 
-                        ? `background-color: var(--bg-tab-active); color: var(--text-tab-active); font-weight: 600;` 
-                        : `background-color: var(--bg-tab-inactive); color: var(--text-tab-inactive);`;
-                    return `<button class="tab-button px-4 py-2 rounded-md text-sm transition-colors shadow-sm hover:opacity-90" style="${styles}" data-month-index="${i}">${m}</button>`;
-                }).join('');
+                const baseClasses = "px-4 py-2 rounded-md text-sm font-medium transition-transform duration-200";
+                const activeClasses = "bg-indigo-600 text-white font-semibold shadow-lg transform -translate-y-1 dark:bg-indigo-500";
+                const inactiveClasses = "bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 shadow-sm";
+                ui.monthTabsContainer.innerHTML = monthNames.map((m, i) => { const currentClasses = (i === state.activeMonthIndex) ? activeClasses : inactiveClasses; return `<button class="tab-button ${baseClasses} ${currentClasses}" data-month-index="${i}">${m}</button>`; }).join('');
             };
             window.showMonth = (monthIndex) => {
                 state.activeMonthIndex = monthIndex; Object.values(state.chartInstances).forEach(c => c?.destroy()); renderTabs();
@@ -231,7 +222,7 @@
             const renderPFEntries = (m) => { const c = document.getElementById(`pf-entries-container-${m}`); if (!c) return; c.innerHTML = ''; state.monthlyData[m].pfEntries.forEach(e => c.appendChild(createEntryElement({ monthIndex: m, entry: e, type: 'pf' }))); };
             const renderExpenseTable = (m) => {
                 const t = document.getElementById(`expenseTableBody-${m}`); if (!t) return; t.innerHTML = '';
-                for (let day = 0; day < 31; day++) { const r = document.createElement('tr'); r.className = 'border-b border-slate-200 dark:border-slate-700'; if ((day + 1) % 2 === 0) r.style.backgroundColor = 'var(--bg-table-stripe)'; r.innerHTML = `<td class="py-3 px-6 align-top">${day + 1}</td><td class="py-3 px-6 align-top"><div id="personal-entries-${m}-${day}" class="flex flex-col gap-2"></div><button class="add-entry-btn mt-2 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-xs" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="personal">+ Gasto Pessoal</button></td><td class="py-3 px-6 align-top"><div id="business-entries-${m}-${day}" class="flex flex-col gap-2"></div><button class="add-entry-btn mt-2 px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 text-xs" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="business">+ Gasto Empresa</button></td>`; t.appendChild(r); ['personal', 'business'].forEach(type => { const c = document.getElementById(`${type}-entries-${m}-${day}`); c.innerHTML = ''; state.monthlyData[m].expenses[day][`${type}Entries`].forEach(e => c.appendChild(createEntryElement({ monthIndex: m, dayIndex: day, category: type, entry: e, type: 'expense' }))); }); }
+                for (let day = 0; day < 31; day++) { const r = document.createElement('tr'); r.className = 'border-b border-slate-200 dark:border-slate-700'; if ((day + 1) % 2 === 0) r.classList.add('bg-gray-100', 'dark:bg-slate-800/50'); r.innerHTML = `<td class="py-3 px-6 align-top">${day + 1}</td><td class="py-3 px-6 align-top"><div id="personal-entries-${m}-${day}" class="flex flex-col gap-2"></div><button class="add-entry-btn mt-2 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-xs" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="personal">+ Gasto Pessoal</button></td><td class="py-3 px-6 align-top"><div id="business-entries-${m}-${day}" class="flex flex-col gap-2"></div><button class="add-entry-btn mt-2 px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 text-xs" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="business">+ Gasto Empresa</button></td>`; t.appendChild(r); ['personal', 'business'].forEach(type => { const c = document.getElementById(`${type}-entries-${m}-${day}`); c.innerHTML = ''; state.monthlyData[m].expenses[day][`${type}Entries`].forEach(e => c.appendChild(createEntryElement({ monthIndex: m, dayIndex: day, category: type, entry: e, type: 'expense' }))); }); }
             };
             const recalculateAndDisplayTotals = (m) => {
                 const d = state.monthlyData[m]; const t = { pj: d.pjEntries.reduce((s, e) => s + e.amount, 0), pf: d.pfEntries.reduce((s, e) => s + e.amount, 0), personal: d.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0), business: d.expenses.flat().reduce((a, day) => a + day.businessEntries.reduce((s, e) => s + e.amount, 0), 0) };
@@ -277,7 +268,7 @@
                 document.getElementById('totalAnnualExpenses').textContent = formatCurrency(totals.personal + totals.business); document.getElementById('annualBalance').textContent = formatCurrency(balance);
                 const perfEl = document.getElementById('annualPerformance'); perfEl.textContent = balance >= 0 ? 'POSITIVO!' : 'NEGATIVO!'; perfEl.className = `text-lg font-semibold mt-2 ${balance >= 0 ? 'text-green-500' : 'text-red-500'}`;
                 const topSpendsContainer = document.getElementById('top-spends-container');
-                topSpendsContainer.innerHTML = Object.keys(topSpends).map(cat => { const s = topSpends[cat]; return `<div class="p-2 bg-slate-100 dark:bg-slate-700 rounded-md"><strong>${cat}:</strong> ${formatCurrency(s.amount)} <span class="text-xs muted-text">(${s.description} em ${monthNames[s.month]})</span></div>`; }).join('') || '<p class="muted-text">Nenhum gasto pessoal registrado.</p>';
+                topSpendsContainer.innerHTML = Object.keys(topSpends).map(cat => { const s = topSpends[cat]; return `<div class="p-2 bg-slate-100 dark:bg-slate-700 rounded-md text-slate-800 dark:text-slate-200"><strong>${cat}:</strong> ${formatCurrency(s.amount)} <span class="text-xs muted-text">(${s.description} em ${monthNames[s.month]})</span></div>`; }).join('') || '<p class="muted-text">Nenhum gasto pessoal registrado.</p>';
                 updateAnnualCharts(monthlyPerformance);
             };
             const updateAnnualCharts = (performance) => {
@@ -302,8 +293,15 @@
                 if (t.matches('.add-entry-btn')) {
                     const { monthIndex, type, day, category } = t.dataset; const month = parseInt(monthIndex);
                     const entries = (type === 'pj') ? state.monthlyData[month].pjEntries : (type === 'pf') ? state.monthlyData[month].pfEntries : state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`];
-                    if (type === 'pj' || type === 'pf') { entries.push({ id: Date.now(), description: '', amount: 0 }); if (type === 'pj') renderPJEntries(month); else renderPFEntries(month);
-                    } else if (type === 'expense') { const n = { id: Date.now(), description: '', amount: 0, paymentMethod: 'Pix', card: state.creditCards.length > 0 ? state.creditCards[0] : '', category: state.categories[0].name }; entries.push(n); document.getElementById(`${category}-entries-${month}-${day}`).appendChild(createEntryElement({ monthIndex: month, dayIndex: parseInt(day), category, entry: n, type: 'expense' })); }
+                    if (type === 'pj' || type === 'pf') {
+                        const newEntry = { id: Date.now(), description: '', amount: 0 };
+                        entries.push(newEntry);
+                        const container = document.getElementById(`${type}-entries-container-${month}`);
+                        if(container) container.appendChild(createEntryElement({ monthIndex: month, entry: newEntry, type: type }));
+                    } else if (type === 'expense') { 
+                        const n = { id: Date.now(), description: '', amount: 0, paymentMethod: 'Pix', card: state.creditCards.length > 0 ? state.creditCards[0] : '', category: state.categories[0].name }; 
+                        entries.push(n); document.getElementById(`${category}-entries-${month}-${day}`).appendChild(createEntryElement({ monthIndex: month, dayIndex: parseInt(day), category, entry: n, type: 'expense' })); 
+                    }
                     recalculateAndDisplayTotals(month); saveDataToFirestore();
                 }
                 if (t.matches('.remove-btn')) { const { monthIndex, type, day, category, entryId } = t.dataset; const month = parseInt(monthIndex); const id = parseFloat(entryId); if (type === 'pj') { state.monthlyData[month].pjEntries = state.monthlyData[month].pjEntries.filter(e => e.id !== id); } else if (type === 'pf') { state.monthlyData[month].pfEntries = state.monthlyData[month].pfEntries.filter(e => e.id !== id); } else { state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`] = state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].filter(e => e.id !== id); } t.closest('.flex').remove(); recalculateAndDisplayTotals(month); saveDataToFirestore(); }
