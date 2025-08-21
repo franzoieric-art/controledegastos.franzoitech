@@ -126,9 +126,12 @@
     <div id="app-screen" class="hidden">
         <script id="data-storage" type="application/json"></script>
         <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-            <div class="modal-content card rounded-lg shadow-xl w-full max-w-6xl p-6 transform scale-95">
-                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">Gerenciar</h2><button id="close-modal-btn" class="px-4 py-2 bg-gray-300 dark:bg-slate-600 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500">Fechar</button></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div class="modal-content card rounded-lg shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                    <h2 class="text-xl font-bold">Gerenciar</h2>
+                    <button id="close-modal-btn" class="px-4 py-2 bg-gray-300 dark:bg-slate-600 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500">Fechar</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto">
                     <div>
                         <div class="flex items-center gap-2 mb-3"><h3 class="text-lg font-semibold">Cartões de Crédito</h3><div class="tooltip-trigger"><span class="cursor-pointer text-xs bg-slate-400 dark:bg-slate-600 rounded-full w-5 h-5 flex items-center justify-center text-white font-bold">?</span><p class="tooltip-text">Cadastre aqui os cartões que você usa.</p></div></div>
                         <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field rounded-md"><button id="add-card-btn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Adicionar</button></div>
