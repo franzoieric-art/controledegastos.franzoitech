@@ -68,24 +68,21 @@
                 padding: 1rem;
             }
 
-            /* ### CORREÇÃO PRINCIPAL AQUI ### */
-            /* Célula da tabela no celular: mudada para 'block' para que o conteúdo flua verticalmente */
             .responsive-table td {
-                display: block; /* ANTES: flex */
-                text-align: left; /* ANTES: right */
+                display: block;
+                text-align: left;
                 padding: 0.5rem 0;
                 border-bottom: 1px solid var(--input-border);
             }
             .responsive-table td:last-child {
                 border-bottom: none;
             }
-            /* Título de cada célula: agora é um bloco que fica acima do conteúdo */
             .responsive-table td::before {
                 content: attr(data-label);
-                display: block; /* NOVO: Faz o título ocupar uma linha inteira */
+                display: block;
                 font-weight: 600;
-                margin-bottom: 0.5rem; /* NOVO: Adiciona espaço abaixo do título */
-                color: var(--muted-text); /* NOVO: Estilo para diferenciar o título */
+                margin-bottom: 0.5rem;
+                color: var(--muted-text);
             }
 
             /* Barra de meses com rolagem horizontal */
@@ -157,8 +154,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // O restante do seu JavaScript continua exatamente o mesmo...
-        // ...
         const authScreen = document.getElementById('auth-screen');
         const appScreen = document.getElementById('app-screen');
         const mainAuthBtn = document.getElementById('main-auth-btn');
@@ -366,8 +361,24 @@
                 const t = event.target;
                 if (t.matches('.entry-input')) {
                     const el = t.closest('.flex'); const btn = el.querySelector('.remove-btn'); if (!btn) return; const { monthIndex, type, day, category, entryId } = btn.dataset; const month = parseInt(monthIndex); const id = parseFloat(entryId); let entry;
-                    if (type === 'pj') entry = state.monthlyData[month].pjEntries.find(e => e.id === id); else if (type === 'pf') entry = state.monthlyData[month].pfEntries.find(e => e.id === id); else entry = state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id !== id);
-                    if (entry) { const f = t.dataset.field; if (f === 'amount') entry.amount = parseFloat(t.value) || 0; else entry[f] = t.value; if (f === 'paymentMethod') { showMonth(month); } else { recalculateAndDisplayTotals(month); } saveDataToFirestore(); }
+                    if (type === 'pj') entry = state.monthlyData[month].pjEntries.find(e => e.id === id); 
+                    else if (type === 'pf') entry = state.monthlyData[month].pfEntries.find(e => e.id === id); 
+                    // ### BUG FIX AQUI ###
+                    // Corrigido de !== para === para encontrar o item correto a ser atualizado.
+                    else entry = state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id === id); 
+                    
+                    if (entry) { 
+                        const f = t.dataset.field; 
+                        if (f === 'amount') entry.amount = parseFloat(t.value) || 0; 
+                        else entry[f] = t.value; 
+                        
+                        if (f === 'paymentMethod') { 
+                            showMonth(month); // Re-renderiza o mês para mostrar/ocultar a lista de cartões
+                        } else { 
+                            recalculateAndDisplayTotals(month); 
+                        } 
+                        saveDataToFirestore(); 
+                    }
                 }
                 if (t.matches('.category-budget-input')) { const cat = state.categories.find(c => c.name === t.dataset.categoryName); if (cat) { cat.budget = parseFloat(t.value) || 0; saveDataToFirestore(); } }
                 if (t.matches('.category-name-input')) { const o = t.dataset.oldName; const n = t.value.trim(); const cat = state.categories.find(c => c.name === o); if (cat && n && !state.categories.some(c => c.name === n)) { cat.name = n; t.dataset.oldName = n; saveDataToFirestore(); } }
