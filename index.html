@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- ESSENCIAL: A meta tag de viewport que permite a responsividade -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Caixa e Gastos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f3f4f6; --text-color: #111827; --card-bg: #ffffff;
+            --primary-color: #4f46e5; --secondary-color: #10b981;
+            --input-border: #d1d5db; --input-bg: #ffffff; --muted-text: #6b7280;
+            --tooltip-bg: #374151; --tooltip-text-color: #ffffff;
+        }
+        html.dark {
+            --bg-color: #0f172a; --text-color: #e2e8f0; --card-bg: #1e293b;
+            --primary-color: #818cf8; --secondary-color: #34d399;
+            --input-border: #475569; --input-bg: #334155; --muted-text: #94a3b8;
+            --tooltip-bg: #475569; --tooltip-text-color: #e2e8f0;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+        .container { max-width: 1200px; }
+        .card { background-color: var(--card-bg); }
+        .input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); }
+        .muted-text { color: var(--muted-text); }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
+        .remove-btn { background-color: #ef4444; color: white; border-radius: 9999px; width: 1.5rem; height: 1.5rem; font-weight: bold; transition: background-color 0.2s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .remove-btn:hover { background-color: #dc2626; }
+        .month-content { display: none; }
+        .month-content.active { display: block; }
+        .modal-overlay { transition: opacity 0.2s ease-in-out; }
+        .modal-content { transition: transform 0.2s ease-in-out; }
+        .tooltip-trigger { position: relative; display: inline-flex; align-items: center; }
+        .tooltip-text {
+            visibility: hidden; opacity: 0; width: 220px;
+            background-color: var(--tooltip-bg); color: var(--tooltip-text-color);
+            text-align: center; font-size: 0.75rem; font-weight: 400;
+            border-radius: 6px; padding: 8px; position: absolute; z-index: 10;
+            bottom: 140%; left: 50%; transform: translateX(-50%);
+            transition: opacity 0.2s ease-in-out; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .tooltip-text::after {
+            content: ""; position: absolute; top: 100%; left: 50%;
+            margin-left: -5px; border-width: 5px; border-style: solid;
+            border-color: var(--tooltip-bg) transparent transparent transparent;
+        }
+        .tooltip-trigger:hover .tooltip-text { visibility: visible; opacity: 1; }
+        
+        /* RESPONSIVO: Estilos para telas menores */
+        @media (max-width: 768px) {
+            /* Tabela vira "cards" */
+            .responsive-table thead {
+                display: none;
+            }
+            .responsive-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid var(--input-border);
+                border-radius: 0.5rem;
+                padding: 1rem;
+            }
+            .responsive-table td {
+                display: flex;
+                justify-content: space-between;
+                text-align: right;
+                padding: 0.5rem 0;
+                border-bottom: 1px solid var(--input-border);
+            }
+            .responsive-table td:last-child {
+                border-bottom: none;
+            }
+            .responsive-table td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                text-align: left;
+                margin-right: 1rem;
+            }
+
+            /* NOVO: Barra de meses com rolagem horizontal */
+            #monthTabs {
+                justify-content: flex-start; /* Alinha os botões ao início */
+                flex-wrap: nowrap; /* Impede que os botões quebrem a linha */
+                overflow-x: auto; /* Adiciona a barra de rolagem horizontal */
+                -ms-overflow-style: none;  /* Oculta a barra de rolagem no IE e Edge */
+                scrollbar-width: none;  /* Oculta a barra de rolagem no Firefox */
+                padding-bottom: 10px; /* Espaço para a sombra do botão não cortar */
+            }
+
+            #monthTabs::-webkit-scrollbar {
+                display: none; /* Oculta a barra de rolagem para Webkit (Chrome, Safari) */
+            }
+
+            #monthTabs .tab-button {
+                flex-shrink: 0; /* Garante que os botões não encolham */
+            }
+        }
+    </style>
+</head>
+<body class="p-2 sm:p-4">
+    
+    <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-lg shadow-xl">
+        <div class="text-center mb-6"><div class="flex justify-center mb-4"><iframe src="https://drive.google.com/file/d/1z4DLbMUR9cp3cFz1fxS-KXBd3Vs1FO6F/preview" width="150" height="150" allow="autoplay" style="border:0;"></iframe></div><h1 id="auth-title" class="text-2xl font-bold">Acesso à Planilha</h1><p class="muted-text">Faça login ou crie uma nova conta.</p></div>
+        <div class="space-y-4"><input type="email" id="email-input" placeholder="Email" class="w-full p-3 input-field rounded-md"><input type="password" id="password-input" placeholder="Senha" class="w-full p-3 input-field rounded-md"><input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 input-field rounded-md hidden"></div>
+        <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
+        <div class="mt-4 flex flex-col gap-2"><button id="main-auth-btn" class="w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors">Login</button><a href="#" id="forgot-password-link" class="text-center text-sm text-indigo-500 hover:underline">Esqueceu a senha?</a></div>
+        <div class="mt-4 text-center"><a href="#" id="toggle-auth-mode-link" class="text-sm muted-text hover:underline">Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span></a></div>
+        <div class="mt-6 text-center text-xs text-gray-400"><p>Versão 1.0 - Agosto de 2025 - Franzoi Tech</p></div>
+    </div>
+
+    <div id="app-screen" class="hidden">
+        <script id="data-storage" type="application/json"></script>
+        <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+            <div class="modal-content card rounded-lg shadow-xl w-full max-w-3xl p-6 transform scale-95">
+                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">Gerenciar</h2><button id="close-modal-btn" class="px-4 py-2 bg-gray-300 dark:bg-slate-600 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500">Fechar</button></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <div class="flex items-center gap-2 mb-3"><h3 class="text-lg font-semibold">Cartões de Crédito</h3><div class="tooltip-trigger"><span class="cursor-pointer text-xs bg-slate-400 dark:bg-slate-600 rounded-full w-5 h-5 flex items-center justify-center text-white font-bold">?</span><p class="tooltip-text">Cadastre aqui os cartões que você usa.</p></div></div>
+                        <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field rounded-md"><button id="add-card-btn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Adicionar</button></div>
+                        <div id="card-list" class="flex flex-col gap-2 max-h-60 overflow-y-auto"></div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-3"><h3 class="text-lg font-semibold">Categorias e Metas</h3><div class="tooltip-trigger"><span class="cursor-pointer text-xs bg-slate-400 dark:bg-slate-600 rounded-full w-5 h-5 flex items-center justify-center text-white font-bold">?</span><p class="tooltip-text">Defina categorias para seus gastos e um orçamento (meta) mensal para cada uma.</p></div></div>
+                        <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field rounded-md"><button id="add-category-btn" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Adicionar</button></div>
+                        <div id="category-list" class="flex flex-col gap-2 max-h-60 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mx-auto card p-4 md:p-6 rounded-lg shadow-xl relative">
+            <div class="absolute top-4 left-4 text-xs muted-text"><div>ver 1.0</div><div>Franzoi Tech</div></div>
+            <div class="absolute top-4 right-4 flex items-center gap-4"><button id="theme-toggle-btn" class="p-2 rounded-full bg-slate-200 dark:bg-slate-700 text-lg">🌙</button><button id="logout-btn" class="px-4 py-1 bg-red-500 text-white text-xs font-semibold rounded-lg shadow-md hover:bg-red-600 transition-colors">Sair</button></div>
+            <!-- MUDANÇA: Aumentado o espaço acima do título com mt-20 -->
+            <div class="text-center mb-6"><h1 class="text-2xl md:text-3xl font-bold mt-20">Controle de Caixa e Gastos Mensais</h1><p class="text-sm muted-text mt-2">As alterações são salvas automaticamente.</p><div class="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4 mt-4"><button id="manage-settings-btn" class="w-full sm:w-auto px-6 py-2 bg-slate-500 text-white font-semibold rounded-lg shadow-md hover:bg-slate-600 transition-colors">Gerenciar</button><button id="save-and-download-btn" class="w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors">Criar Versão Portátil</button></div></div>
+            <div class="flex justify-center flex-wrap gap-2 mb-6" id="monthTabs"></div>
+            <div id="monthContentContainer"></div>
+            <div class="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700 text-center muted-text"><p class="italic text-sm">Esta planilha é Freeware, não aceite pagar por ela.</p><p class="italic text-sm mt-2">Caso tenha ajudado, doe qualquer valor para o Pix abaixo.</p><div class="mt-4 flex justify-center"><iframe src="https://drive.google.com/file/d/1s8uZhOj-lo84fpnA5Hyjz_CIEMhO80Fz/preview" width="150" height="150" allow="autoplay" style="border:0;"></iframe></div></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0", authDomain: "controle-de-gastos-74daf.firebaseapp.com", projectId: "controle-de-gastos-74daf", storageBucket: "controle-de-gastos-74daf.firebasestorage.app", messagingSenderId: "331667008487", appId: "1:331667008487:web:c5200f64ac27d0c32feb42" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        const mainAuthBtn = document.getElementById('main-auth-btn');
+        const toggleAuthModeLink = document.getElementById('toggle-auth-mode-link');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const authError = document.getElementById('auth-error');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        let currentUserId = null;
+        let isLoginMode = true;
+
+        const showError = (message) => { authError.textContent = message; };
+        const setAuthMode = (mode) => {
+            isLoginMode = mode === 'login'; authError.textContent = ''; const authTitle = document.getElementById('auth-title'); const confirmPasswordInput = document.getElementById('confirm-password-input');
+            if (isLoginMode) { authTitle.textContent = 'Acesso à Planilha'; mainAuthBtn.textContent = 'Login'; mainAuthBtn.classList.replace('bg-green-600', 'bg-indigo-600'); mainAuthBtn.classList.replace('hover:bg-green-700', 'hover:bg-indigo-700'); confirmPasswordInput.classList.add('hidden'); forgotPasswordLink.classList.remove('hidden'); toggleAuthModeLink.innerHTML = 'Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span>';
+            } else { authTitle.textContent = 'Criar Nova Conta'; mainAuthBtn.textContent = 'Criar Conta'; mainAuthBtn.classList.replace('bg-indigo-600', 'bg-green-600'); mainAuthBtn.classList.replace('hover:bg-indigo-700', 'hover:bg-green-700'); confirmPasswordInput.classList.remove('hidden'); forgotPasswordLink.classList.add('hidden'); toggleAuthModeLink.textContent = 'Já tem conta? Faça login'; }
+        };
+        const applyTheme = (theme) => { document.documentElement.classList.toggle('dark', theme === 'dark'); themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙'; };
+        themeToggleBtn.addEventListener('click', () => { const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); if (window.showMonth) window.showMonth(window.state.activeMonthIndex); });
+        applyTheme(localStorage.getItem('theme') || 'light');
+        toggleAuthModeLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode(isLoginMode ? 'signup' : 'login'); });
+        mainAuthBtn.addEventListener('click', () => {
+            const email = document.getElementById('email-input').value; const password = document.getElementById('password-input').value; showError('');
+            if (isLoginMode) { signInWithEmailAndPassword(auth, email, password).catch(error => showError('Email ou senha inválidos.'));
+            } else { const confirmPassword = document.getElementById('confirm-password-input').value; if (password !== confirmPassword) { showError('As senhas não coincidem.'); return; } createUserWithEmailAndPassword(auth, email, password).catch(error => { if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.'); else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.'); else showError('Erro ao criar conta.'); }); }
+        });
+        forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; if (!email) { showError('Por favor, insira seu email para recuperar a senha.'); return; } sendPasswordResetEmail(auth, email).then(() => { showError('Email de recuperação enviado!'); }).catch((error) => { showError('Não foi possível enviar o email.'); }); });
+        document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth); });
+        
+        onAuthStateChanged(auth, user => { if (user) { currentUserId = user.uid; authScreen.classList.add('hidden'); appScreen.classList.remove('hidden'); startApp(); } else { currentUserId = null; setAuthMode('login'); authScreen.classList.remove('hidden'); appScreen.classList.add('hidden'); } });
+
+        const startApp = () => {
+            const ui = { monthContentContainer: document.getElementById('monthContentContainer'), monthTabsContainer: document.getElementById('monthTabs'), settingsModal: document.getElementById('settings-modal'), newCardNameInput: document.getElementById('new-card-name'), cardListContainer: document.getElementById('card-list'), newCategoryNameInput: document.getElementById('new-category-name'), categoryListContainer: document.getElementById('category-list') };
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"];
+            const basePaymentMethods = ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro'];
+            window.state = { creditCards: [], categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }], monthlyData: {}, activeMonthIndex: new Date().getMonth(), chartInstances: {} };
+
+            const formatCurrency = (value) => `R$ ${value.toFixed(2).replace('.', ',')}`;
+            const saveDataToFirestore = async () => { if (!currentUserId) return; try { await setDoc(doc(db, 'users', currentUserId), { monthlyData: state.monthlyData, creditCards: state.creditCards, categories: state.categories }); } catch (e) { console.error("Erro ao salvar dados: ", e); } };
+            const loadData = async () => {
+                if (!currentUserId) return;
+                try {
+                    const docSnap = await getDoc(doc(db, 'users', currentUserId));
+                    if (docSnap.exists()) { const d = docSnap.data(); state.monthlyData = d.monthlyData || {}; state.creditCards = d.creditCards || []; state.categories = d.categories && d.categories.length > 0 ? d.categories : state.categories; }
+                    for (let i = 0; i < 12; i++) { 
+                        state.monthlyData[i] = state.monthlyData[i] || { pjEntries: [], pfEntries: [], expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] })) }; 
+                        state.monthlyData[i].expenses.forEach(day => {
+                            [...day.personalEntries, ...day.businessEntries].forEach(entry => {
+                                if (!entry.category) { entry.category = 'Outros'; }
+                            });
+                        });
+                    }
+                } catch (error) { console.error("Erro ao carregar dados:", error); }
+                ui.monthContentContainer.innerHTML = '';
+                monthNames.forEach((_, index) => { ui.monthContentContainer.insertAdjacentHTML('beforeend', index === 12 ? createBalanceContentHTML() : createMonthContentHTML(index)); });
+                showMonth(state.activeMonthIndex);
+            };
+            
+            const createMonthContentHTML = (monthIndex) => `
+                <div id="month-${monthIndex}-content" class="month-content">
+                    <div class="flex justify-end gap-2 mb-4">
+                        <button class="export-csv-btn px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 text-sm" data-month-index="${monthIndex}">Exportar CSV</button>
+                        <button class="export-pdf-btn px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-600 text-sm" data-month-index="${monthIndex}">Exportar PDF</button>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="lg:col-span-1 p-4 rounded-lg shadow-md bg-yellow-50 dark:bg-slate-800 dark:border-t-4 dark:border-yellow-400"><h2 class="text-xl font-semibold mb-3 text-black dark:text-white">Ganhos PJ (R$)</h2><div id="pj-entries-container-${monthIndex}" class="flex flex-col gap-2 mb-2"></div><button class="add-entry-btn mt-2 w-full px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 text-sm font-medium" data-month-index="${monthIndex}" data-type="pj">+ Adicionar Ganho PJ</button></div>
+                        <div class="lg:col-span-1 p-4 rounded-lg shadow-md bg-green-50 dark:bg-slate-800 dark:border-t-4 dark:border-green-400"><h2 class="text-xl font-semibold mb-3 text-black dark:text-white">Ganhos PF (R$)</h2><div id="pf-entries-container-${monthIndex}" class="flex flex-col gap-2 mb-2"></div><button class="add-entry-btn mt-2 w-full px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium" data-month-index="${monthIndex}" data-type="pf">+ Adicionar Ganho PF</button></div>
+                        <div class="lg:col-span-1 grid gap-6">
+                            <div class="p-4 rounded-lg shadow-md bg-blue-50 dark:bg-slate-800 dark:border-t-4 dark:border-blue-400"><label class="block text-sm font-medium mb-2 text-black dark:text-white">Caixa da empresa (R$):</label><input type="text" id="companyCash-${monthIndex}" readonly class="w-full p-3 input-field rounded-md text-lg font-semibold text-blue-700 dark:text-blue-300 bg-slate-100 dark:bg-slate-700 shadow-sm cursor-not-allowed"><label class="block text-sm font-medium mt-2 mb-2 text-black dark:text-white">Caixa pessoal (R$):</label><input type="text" id="personalCash-${monthIndex}" readonly class="w-full p-3 input-field rounded-md text-lg font-semibold text-blue-700 dark:text-blue-300 bg-slate-100 dark:bg-slate-700 shadow-sm cursor-not-allowed"></div>
+                            <div class="p-4 rounded-lg shadow-md bg-purple-50 dark:bg-slate-800 dark:border-t-4 dark:border-purple-400">
+                                <h2 class="text-xl font-semibold mb-3 text-black dark:text-white">Resumo dos Saldos</h2>
+                                <div class="flex justify-between items-center text-sm mb-1 text-black dark:text-white"><span>Saldo Pessoal:</span><span id="remainingPersonal-${monthIndex}" class="font-bold">R$ 0,00</span></div>
+                                <div class="flex justify-between items-center text-sm mb-2 text-black dark:text-white"><span>Saldo Empresa:</span><span id="remainingBusiness-${monthIndex}" class="font-bold">R$ 0,00</span></div>
+                                <div class="flex justify-between items-center border-t border-slate-200 dark:border-slate-700 pt-2 mt-2 text-black dark:text-white"><span class="font-medium">Saldo PF+PJ:</span><span id="remainingTotal-${monthIndex}" class="text-xl font-bold">R$ 0,00</span></div>
+                                <div id="budget-alerts-${monthIndex}" class="mt-3 text-sm"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto mb-8"><table class="min-w-full card rounded-lg shadow-md responsive-table"><thead><tr class="bg-slate-800 text-white uppercase text-sm font-semibold"><th class="py-3 px-6 text-left rounded-tl-lg">Dia</th><th class="py-3 px-6 text-left">Gastos Pessoais</th><th class="py-3 px-6 text-left rounded-tr-lg">Gastos da Empresa</th></tr></thead><tbody id="expenseTableBody-${monthIndex}" class="text-sm font-light"></tbody></table></div>
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8"><div class="card p-6 rounded-lg shadow-xl"><h2 class="text-xl font-semibold text-center mb-4">Balanço do Mês</h2><div class="relative mx-auto" style="max-width: 400px; height: 400px;"><canvas id="budgetPieChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-lg shadow-xl"><h2 class="text-xl font-semibold text-center mb-4">Gastos por Pagamento</h2><div class="relative mx-auto" style="max-width: 400px; height: 400px;"><canvas id="paymentMethodChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-lg shadow-xl"><h2 class="text-xl font-semibold text-center mb-4">Metas de Gastos (Pessoal)</h2><div class="relative mx-auto" style="height: 400px;"><canvas id="budgetGoalsChart-${monthIndex}"></canvas></div></div></div>
+                </div>`;
+            const createBalanceContentHTML = () => `
+                <div id="month-12-content" class="month-content"><h2 class="text-2xl font-bold text-center mb-6">Balanço Anual</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8 text-center">
+                        <div class="bg-yellow-50 dark:bg-slate-800 dark:border-t-4 dark:border-yellow-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Total Ganhos PJ:</span><span id="totalAnnualPJ" class="text-xl font-bold text-yellow-600 dark:text-yellow-400">R$ 0,00</span></div>
+                        <div class="bg-green-50 dark:bg-slate-800 dark:border-t-4 dark:border-green-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Total Ganhos PF:</span><span id="totalAnnualPF" class="text-xl font-bold text-green-600 dark:text-green-400">R$ 0,00</span></div>
+                        <div class="bg-purple-50 dark:bg-slate-800 dark:border-t-4 dark:border-purple-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Gastos Totais Anuais:</span><span id="totalAnnualExpenses" class="text-xl font-bold text-red-600 dark:text-red-400">R$ 0,00</span></div>
+                        <div class="bg-blue-50 dark:bg-slate-800 dark:border-t-4 dark:border-blue-400 p-4 rounded-lg shadow-md"><span class="block text-sm muted-text mb-2">Saldo Anual:</span><span id="annualBalance" class="text-xl font-bold text-blue-700 dark:text-blue-300">R$ 0,00</span><p id="annualPerformance" class="text-lg font-semibold mt-2"></p></div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card p-6 rounded-lg shadow-xl lg:col-span-2"><h3 class="text-xl font-semibold text-center mb-4">Desempenho Mensal</h3><div class="relative mx-auto" style="height: 400px;"><canvas id="monthlyPerformanceBarChart"></canvas></div></div>
+                        <div class="card p-6 rounded-lg shadow-xl"><h3 class="text-xl font-semibold text-center mb-4 dark:text-white">Maiores Gastos do Ano</h3><div id="top-spends-container" class="text-sm space-y-2 max-h-96 overflow-y-auto p-2"></div></div>
+                    </div>
+                </div>`;
+            
+            const renderTabs = () => {
+                const baseClasses = "px-4 py-2 rounded-md text-sm font-medium transition-transform duration-200";
+                const activeClasses = "bg-indigo-600 text-white font-semibold shadow-lg transform -translate-y-1 dark:bg-indigo-500";
+                const inactiveClasses = "bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600 shadow-sm";
+                ui.monthTabsContainer.innerHTML = monthNames.map((m, i) => { const currentClasses = (i === state.activeMonthIndex) ? activeClasses : inactiveClasses; return `<button class="tab-button ${baseClasses} ${currentClasses}" data-month-index="${i}">${m}</button>`; }).join('');
+            };
+            window.showMonth = (monthIndex) => {
+                state.activeMonthIndex = monthIndex; Object.values(state.chartInstances).forEach(c => c?.destroy()); renderTabs();
+                document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+                const contentEl = document.getElementById(`month-${monthIndex}-content`);
+                if(contentEl) { contentEl.classList.add('active'); if (monthIndex < 12) { renderPJEntries(monthIndex); renderPFEntries(monthIndex); renderExpenseTable(monthIndex); recalculateAndDisplayTotals(monthIndex); } else { renderBalanceSummary(); } }
+            };
+            const createEntryElement = (config) => {
+                const { monthIndex, dayIndex, category, entry, type } = config; const d = document.createElement('div'); d.classList.add('flex', 'items-center', 'gap-2', 'w-full', 'flex-wrap'); let r = '', p = '', c = '', s = '';
+                if (type === 'expense') { r = `<button class="remove-btn" data-type="expense" data-month-index="${monthIndex}" data-day="${dayIndex}" data-category="${category}" data-entry-id="${entry.id}">X</button>`; p = `<select class="entry-input p-2 input-field rounded-md text-sm w-full sm:w-auto" data-field="paymentMethod">${basePaymentMethods.map(m => `<option value="${m}" ${entry.paymentMethod === m ? 'selected' : ''}>${m}</option>`).join('')}</select>`; if (entry.paymentMethod === 'Crédito') c = `<select class="entry-input p-2 input-field rounded-md text-sm w-full sm:w-auto" data-field="card">${state.creditCards.map(c => `<option value="${c}" ${entry.card === c ? 'selected' : ''}>${c}</option>`).join('')}</select>`; s = `<select class="entry-input p-2 input-field rounded-md text-sm w-full sm:w-auto" data-field="category">${state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`; } else { r = `<button class="remove-btn" data-type="${type}" data-month-index="${monthIndex}" data-entry-id="${entry.id}">X</button>`; }
+                d.innerHTML = `<input type="text" value="${entry.description}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field rounded-md text-sm" data-field="description"><input type="number" value="${entry.amount}" min="0" step="0.01" placeholder="0.00" class="entry-input w-24 p-2 input-field rounded-md text-sm" data-field="amount">${s}${p}<span class="card-selector-container">${c}</span>${r}`;
+                return d;
+            };
+            const renderPJEntries = (m) => { const c = document.getElementById(`pj-entries-container-${m}`); if (!c) return; c.innerHTML = ''; state.monthlyData[m].pjEntries.forEach(e => c.appendChild(createEntryElement({ monthIndex: m, entry: e, type: 'pj' }))); };
+            const renderPFEntries = (m) => { const c = document.getElementById(`pf-entries-container-${m}`); if (!c) return; c.innerHTML = ''; state.monthlyData[m].pfEntries.forEach(e => c.appendChild(createEntryElement({ monthIndex: m, entry: e, type: 'pf' }))); };
+            const renderExpenseTable = (m) => {
+                const t = document.getElementById(`expenseTableBody-${m}`); if (!t) return; t.innerHTML = '';
+                for (let day = 0; day < 31; day++) { const r = document.createElement('tr'); r.className = 'border-b border-slate-200 dark:border-slate-700'; if ((day + 1) % 2 === 0) r.classList.add('bg-gray-100', 'dark:bg-slate-800/50'); 
+                r.innerHTML = `<td class="py-3 px-6 align-top" data-label="Dia">${day + 1}</td><td class="py-3 px-6 align-top" data-label="Gastos Pessoais"><div id="personal-entries-${m}-${day}" class="flex flex-col gap-2"></div><button class="add-entry-btn mt-2 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-xs" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="personal">+ Gasto Pessoal</button></td><td class="py-3 px-6 align-top" data-label="Gastos da Empresa"><div id="business-entries-${m}-${day}" class="flex flex-col gap-2"></div><button class="add-entry-btn mt-2 px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 text-xs" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="business">+ Gasto Empresa</button></td>`; t.appendChild(r); ['personal', 'business'].forEach(type => { const c = document.getElementById(`${type}-entries-${m}-${day}`); c.innerHTML = ''; state.monthlyData[m].expenses[day][`${type}Entries`].forEach(e => c.appendChild(createEntryElement({ monthIndex: m, dayIndex: day, category: type, entry: e, type: 'expense' }))); }); }
+            };
+            const recalculateAndDisplayTotals = (m) => {
+                const d = state.monthlyData[m]; const t = { pj: d.pjEntries.reduce((s, e) => s + e.amount, 0), pf: d.pfEntries.reduce((s, e) => s + e.amount, 0), personal: d.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0), business: d.expenses.flat().reduce((a, day) => a + day.businessEntries.reduce((s, e) => s + e.amount, 0), 0) };
+                t.remainingPersonal = t.pf - t.personal; t.remainingBusiness = t.pj - t.business; t.remainingTotal = (t.pj + t.pf) - (t.personal + t.business);
+                document.getElementById(`companyCash-${m}`).value = formatCurrency(t.pj); document.getElementById(`personalCash-${m}`).value = formatCurrency(t.pf);
+                const rpEl = document.getElementById(`remainingPersonal-${m}`); rpEl.textContent = formatCurrency(t.remainingPersonal); rpEl.className = `font-bold ${t.remainingPersonal < 0 ? 'text-red-500' : 'text-green-500'}`;
+                const rbEl = document.getElementById(`remainingBusiness-${m}`); rbEl.textContent = formatCurrency(t.remainingBusiness); rbEl.className = `font-bold ${t.remainingBusiness < 0 ? 'text-red-500' : 'text-green-500'}`;
+                const rtEl = document.getElementById(`remainingTotal-${m}`); rtEl.textContent = formatCurrency(t.remainingTotal); rtEl.className = `text-xl font-bold ${t.remainingTotal < 0 ? 'text-red-500' : 'text-blue-500'}`;
+                updateBudgetAlerts(m); updateAllCharts(m, { totalPersonal: t.personal, totalBusiness: t.business, remainingBudget: t.remainingTotal });
+            };
+            const updateBudgetAlerts = (m) => {
+                const c = document.getElementById(`budget-alerts-${m}`); const expenses = state.categories.reduce((a, cat) => ({ ...a, [cat.name]: 0 }), {});
+                state.monthlyData[m].expenses.forEach(d => { d.personalEntries.forEach(e => { if (expenses[e.category] !== undefined) expenses[e.category] += e.amount; }); });
+                const alerts = state.categories.map(cat => { const s = expenses[cat.name]; return (s > cat.budget && cat.budget > 0) ? `<li class="text-amber-600 dark:text-amber-400 font-medium">${cat.name}: ${formatCurrency(s - cat.budget)} acima da meta.</li>` : ''; }).filter(Boolean);
+                if (alerts.length > 0) { c.innerHTML = `<p class="font-bold text-amber-700 dark:text-amber-500 mt-2">Atenção ao Orçamento:</p><ul class="list-disc list-inside">${alerts.join('')}</ul>`; } else { c.innerHTML = ''; }
+            };
+            const updateAllCharts = (m, totals) => {
+                const chartTextColor = document.documentElement.classList.contains('dark') ? '#e2e8f0' : '#334155'; const gridColor = document.documentElement.classList.contains('dark') ? '#475569' : '#e2e8f0';
+                const options = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartTextColor } } } };
+                const barOptions = { ...options, scales: { y: { ticks: { color: chartTextColor }, grid: { color: gridColor } }, x: { ticks: { color: chartTextColor }, grid: { color: gridColor } } } };
+                const pieCtx = document.getElementById(`budgetPieChart-${m}`).getContext('2d'); if (state.chartInstances.pie) state.chartInstances.pie.destroy(); state.chartInstances.pie = new Chart(pieCtx, { type: 'pie', data: { labels: ['Pessoais', 'Empresa', 'Saldo'], datasets: [{ data: [totals.totalPersonal, totals.totalBusiness, Math.max(0, totals.remainingBudget)], backgroundColor: ['#ef4444', '#22c55e', '#3b82f6'] }] }, options });
+                const paymentLabels = [...basePaymentMethods.filter(m => m !== 'Crédito'), ...state.creditCards.map(c => `Crédito (${c})`)];
+                const paymentTotals = Object.fromEntries(paymentLabels.map(l => [l, 0])); state.monthlyData[m].expenses.forEach(d => { [...d.personalEntries, ...d.businessEntries].forEach(e => { let k = e.paymentMethod === 'Crédito' ? `Crédito (${e.card})` : e.paymentMethod; if (paymentTotals[k] !== undefined) paymentTotals[k] += e.amount; }); });
+                const paymentCtx = document.getElementById(`paymentMethodChart-${m}`).getContext('2d'); if (state.chartInstances.payment) state.chartInstances.payment.destroy(); state.chartInstances.payment = new Chart(paymentCtx, { type: 'doughnut', data: { labels: paymentLabels, datasets: [{ data: Object.values(paymentTotals), backgroundColor: ['#38bdf8', '#34d399', '#facc15', '#a78bfa', '#f87171', '#fb923c', '#db2777', '#6d28d9'].slice(0, paymentLabels.length) }] }, options });
+                const expensesByCategory = state.categories.reduce((a, c) => ({ ...a, [c.name]: 0 }), {}); state.monthlyData[m].expenses.forEach(d => { d.personalEntries.forEach(e => { if (expensesByCategory[e.category] !== undefined) expensesByCategory[e.category] += e.amount; }); });
+                const spentData = state.categories.map(c => expensesByCategory[c.name]); const budgetData = state.categories.map(c => c.budget); const barColors = spentData.map((s, i) => (s > budgetData[i] && budgetData[i] > 0) ? '#f97316' : '#ef4444');
+                const goalsCtx = document.getElementById(`budgetGoalsChart-${m}`).getContext('2d'); if (state.chartInstances.goals) state.chartInstances.goals.destroy(); state.chartInstances.goals = new Chart(goalsCtx, { type: 'bar', data: { labels: state.categories.map(c => c.name), datasets: [ { label: 'Gasto', data: spentData, backgroundColor: barColors }, { label: 'Meta', data: budgetData, backgroundColor: '#3b82f6' } ] }, options: { ...barOptions, indexAxis: 'y' } });
+            };
+            const renderBalanceSummary = () => {
+                let totals = { pj: 0, pf: 0, personal: 0, business: 0 }; let monthlyPerformance = { gains: [], expenses: [] }; let topSpends = {};
+                for (let i = 0; i < 12; i++) {
+                    const monthData = state.monthlyData[i]; let monthGains = 0; let monthExpenses = 0;
+                    monthData.pjEntries.forEach(e => { totals.pj += e.amount; monthGains += e.amount; });
+                    monthData.pfEntries.forEach(e => { totals.pf += e.amount; monthGains += e.amount; });
+                    monthData.expenses.forEach(day => {
+                        day.personalEntries.forEach(e => { totals.personal += e.amount; monthExpenses += e.amount; if (e.amount > 0 && (!topSpends[e.category] || e.amount > topSpends[e.category].amount)) topSpends[e.category] = { ...e, month: i }; });
+                        day.businessEntries.forEach(e => { totals.business += e.amount; monthExpenses += e.amount; });
+                    });
+                    monthlyPerformance.gains.push(monthGains); monthlyPerformance.expenses.push(monthExpenses);
+                }
+                const balance = (totals.pj + totals.pf) - (totals.personal + totals.business);
+                document.getElementById('totalAnnualPJ').textContent = formatCurrency(totals.pj); document.getElementById('totalAnnualPF').textContent = formatCurrency(totals.pf);
+                document.getElementById('totalAnnualExpenses').textContent = formatCurrency(totals.personal + totals.business); document.getElementById('annualBalance').textContent = formatCurrency(balance);
+                const perfEl = document.getElementById('annualPerformance'); perfEl.textContent = balance >= 0 ? 'POSITIVO!' : 'NEGATIVO!'; perfEl.className = `text-lg font-semibold mt-2 ${balance >= 0 ? 'text-green-500' : 'text-red-500'}`;
+                const topSpendsContainer = document.getElementById('top-spends-container');
+                topSpendsContainer.innerHTML = Object.keys(topSpends).map(cat => { const s = topSpends[cat]; return `<div class="p-2 bg-slate-100 dark:bg-slate-700 rounded-md text-slate-800 dark:text-slate-200"><strong>${cat}:</strong> ${formatCurrency(s.amount)} <span class="text-xs muted-text">(${s.description} em ${monthNames[s.month]})</span></div>`; }).join('') || '<p class="muted-text">Nenhum gasto pessoal registrado.</p>';
+                updateAnnualCharts(monthlyPerformance);
+            };
+            const updateAnnualCharts = (performance) => {
+                const chartTextColor = document.documentElement.classList.contains('dark') ? '#e2e8f0' : '#334155'; const gridColor = document.documentElement.classList.contains('dark') ? '#475569' : '#e2e8f0';
+                const barOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartTextColor } } }, scales: { y: { ticks: { color: chartTextColor }, grid: { color: gridColor } }, x: { ticks: { color: chartTextColor }, grid: { color: gridColor } } } };
+                const barCtx = document.getElementById('monthlyPerformanceBarChart').getContext('2d');
+                if(state.chartInstances.annualBar) state.chartInstances.annualBar.destroy();
+                state.chartInstances.annualBar = new Chart(barCtx, { type: 'bar', data: { labels: monthNames.slice(0, 12), datasets: [{ label: 'Ganhos Totais', data: performance.gains, backgroundColor: '#22c55e' }, { label: 'Gastos Totais', data: performance.expenses, backgroundColor: '#ef4444' }] }, options: barOptions });
+            };
+            const renderCardList = () => { ui.cardListContainer.innerHTML = state.creditCards.map(c => `<div class="flex items-center justify-between p-2 rounded-md bg-slate-100 dark:bg-slate-700"><span class="text-slate-800 dark:text-slate-200">${c}</span><button class="remove-card-btn text-red-500 hover:text-red-700" data-card-name="${c}">X</button></div>`).join(''); };
+            const renderCategoryList = () => { ui.categoryListContainer.innerHTML = state.categories.map(c => `<div class="flex items-center justify-between p-2 rounded-md bg-slate-100 dark:bg-slate-700 gap-2"><input type="text" value="${c.name}" class="category-name-input flex-grow p-1 input-field rounded-md" data-old-name="${c.name}"><input type="number" value="${c.budget}" min="0" class="category-budget-input w-24 p-1 input-field rounded-md" data-category-name="${c.name}"><button class="remove-category-btn text-red-500 hover:text-red-700" data-category-name="${c.name}">X</button></div>`).join(''); };
+            
+            loadData();
+            document.getElementById('save-and-download-btn').addEventListener('click', () => alert("Função de download em breve!"));
+            document.getElementById('manage-settings-btn').addEventListener('click', () => { renderCardList(); renderCategoryList(); ui.settingsModal.classList.remove('hidden'); setTimeout(() => ui.settingsModal.querySelector('.modal-content').classList.remove('scale-95'), 10); });
+            document.getElementById('close-modal-btn').addEventListener('click', () => { ui.settingsModal.querySelector('.modal-content').classList.add('scale-95'); setTimeout(() => ui.settingsModal.classList.add('hidden'), 200); showMonth(state.activeMonthIndex); });
+            document.getElementById('add-card-btn').addEventListener('click', () => { const n = ui.newCardNameInput.value.trim(); if (n && !state.creditCards.includes(n)) { state.creditCards.push(n); ui.newCardNameInput.value = ''; renderCardList(); saveDataToFirestore(); } });
+            document.getElementById('add-category-btn').addEventListener('click', () => { const n = ui.newCategoryNameInput.value.trim(); if (n && !state.categories.some(c => c.name === n)) { state.categories.push({ name: n, budget: 0 }); ui.newCategoryNameInput.value = ''; renderCategoryList(); saveDataToFirestore(); } });
+            document.body.addEventListener('click', (event) => {
+                const t = event.target;
+                if (t.matches('.tab-button')) showMonth(parseInt(t.dataset.monthIndex));
+                if (t.matches('.add-entry-btn')) {
+                    const { monthIndex, type, day, category } = t.dataset; const month = parseInt(monthIndex);
+                    const entries = (type === 'pj') ? state.monthlyData[month].pjEntries : (type === 'pf') ? state.monthlyData[month].pfEntries : state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`];
+                    if (type === 'pj' || type === 'pf') {
+                        const newEntry = { id: Date.now(), description: '', amount: 0 };
+                        entries.push(newEntry);
+                        const container = document.getElementById(`${type}-entries-container-${month}`);
+                        if(container) container.appendChild(createEntryElement({ monthIndex: month, entry: newEntry, type: type }));
+                    } else if (type === 'expense') { 
+                        const n = { id: Date.now(), description: '', amount: 0, paymentMethod: 'Pix', card: state.creditCards.length > 0 ? state.creditCards[0] : '', category: state.categories[0].name }; 
+                        entries.push(n); document.getElementById(`${category}-entries-${month}-${day}`).appendChild(createEntryElement({ monthIndex: month, dayIndex: parseInt(day), category, entry: n, type: 'expense' })); 
+                    }
+                    recalculateAndDisplayTotals(month); saveDataToFirestore();
+                }
+                if (t.matches('.remove-btn')) { const { monthIndex, type, day, category, entryId } = t.dataset; const month = parseInt(monthIndex); const id = parseFloat(entryId); if (type === 'pj') { state.monthlyData[month].pjEntries = state.monthlyData[month].pjEntries.filter(e => e.id !== id); } else if (type === 'pf') { state.monthlyData[month].pfEntries = state.monthlyData[month].pfEntries.filter(e => e.id !== id); } else { state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`] = state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].filter(e => e.id !== id); } t.closest('.flex').remove(); recalculateAndDisplayTotals(month); saveDataToFirestore(); }
+                if (t.matches('.remove-card-btn')) { state.creditCards = state.creditCards.filter(c => c !== t.dataset.cardName); renderCardList(); saveDataToFirestore(); }
+                if (t.matches('.remove-category-btn')) { state.categories = state.categories.filter(c => c.name !== t.dataset.categoryName); renderCategoryList(); saveDataToFirestore(); }
+            });
+            document.body.addEventListener('input', (event) => {
+                const t = event.target;
+                if (t.matches('.entry-input')) {
+                    const el = t.closest('.flex'); const btn = el.querySelector('.remove-btn'); if (!btn) return; const { monthIndex, type, day, category, entryId } = btn.dataset; const month = parseInt(monthIndex); const id = parseFloat(entryId); let entry;
+                    if (type === 'pj') entry = state.monthlyData[month].pjEntries.find(e => e.id === id); else if (type === 'pf') entry = state.monthlyData[month].pfEntries.find(e => e.id === id); else entry = state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id !== id);
+                    if (entry) { const f = t.dataset.field; if (f === 'amount') entry.amount = parseFloat(t.value) || 0; else entry[f] = t.value; if (f === 'paymentMethod') { showMonth(month); } else { recalculateAndDisplayTotals(month); } saveDataToFirestore(); }
+                }
+                if (t.matches('.category-budget-input')) { const cat = state.categories.find(c => c.name === t.dataset.categoryName); if (cat) { cat.budget = parseFloat(t.value) || 0; saveDataToFirestore(); } }
+                if (t.matches('.category-name-input')) { const o = t.dataset.oldName; const n = t.value.trim(); const cat = state.categories.find(c => c.name === o); if (cat && n && !state.categories.some(c => c.name === n)) { cat.name = n; t.dataset.oldName = n; saveDataToFirestore(); } }
+            });
+        };
+    </script>
+</body>
+</html>
