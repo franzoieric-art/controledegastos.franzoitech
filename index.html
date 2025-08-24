@@ -130,7 +130,7 @@
                 <p class="font-mono text-sm text-indigo-500 dark:text-indigo-400 select-all">franzoitechcorp@gmail.com</p>
             </div>
             <div class="mt-6 text-center text-xs text-gray-400">
-                <p>Versão 1.2 - Agosto de 2025 - Franzoi Tech</p>
+                <p>Versão 2.1 - Agosto de 2025 - Franzoi Tech</p>
             </div>
         </div>
     </div>
@@ -140,7 +140,7 @@
             <div class="modal-content card rounded-lg shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center mb-4 flex-shrink-0">
                     <h2 class="text-xl font-bold">Gerenciar</h2>
-                    <button id="close-modal-btn" class="px-4 py-2 bg-gray-300 dark:bg-slate-600 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 text-black">Fechar</button>
+                    <button id="close-modal-btn" class="px-4 py-2 bg-gray-300 dark:bg-slate-600 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500">Fechar</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto">
                     <div>
@@ -182,7 +182,7 @@
 
         <div class="container mx-auto card p-4 md:p-6 rounded-lg shadow-xl relative">
             <div id="save-feedback">Salvo ✓</div>
-            <div class="absolute top-4 left-4 text-xs muted-text"><div>versão 1.2</div><div>Franzoi Tech</div></div>
+            <div class="absolute top-4 left-4 text-xs muted-text"><div>versão 2.1</div><div>Franzoi Tech</div></div>
             <div class="absolute top-4 right-4 flex items-center gap-4"><button id="theme-toggle-btn" class="p-2 rounded-full bg-slate-200 dark:bg-slate-700 text-lg">🌙</button><button id="logout-btn" class="px-4 py-1 bg-red-500 text-white text-xs font-semibold rounded-lg shadow-md hover:bg-red-600 transition-colors">Sair</button></div>
             <div class="text-center mb-6"><h1 class="text-2xl md:text-3xl font-bold mt-20">Controle de Caixa e Gastos Mensais</h1><p class="text-sm muted-text mt-2">As alterações são salvas automaticamente.</p>
                 <div class="flex justify-center items-center gap-4 mt-4">
@@ -482,7 +482,7 @@
                         const tableContainer = document.getElementById(`expense-table-container-${monthIndex}`);
                         if (tableContainer) {
                             const isHidden = tableContainer.classList.toggle('hidden');
-                            t.textContent = isHidden ? 'Mostrar Dias ▼' : 'Ocultar Dias ▲';
+                            t.textContent = isHidden ? 'Mostrar Detalhes dos Dias ▼' : 'Ocultar Detalhes dos Dias ▲';
                         }
                     }
                     if (t.matches('.add-entry-btn')) { const { monthIndex, type, day, category } = t.dataset; const month = parseInt(monthIndex); const entries = (type === 'pj') ? this.state.monthlyData[month].pjEntries : (type === 'pf') ? this.state.monthlyData[month].pfEntries : this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`]; if (type === 'pj' || type === 'pf') { const newEntry = { id: Date.now(), description: '', amount: 0 }; entries.push(newEntry); document.getElementById(`${type}-entries-container-${month}`).appendChild(this.render.createEntryElement({ monthIndex: month, entry: newEntry, type: type })); } else if (type === 'expense') { const n = { id: Date.now(), description: '', amount: 0, paymentMethod: 'Pix', card: this.state.creditCards.length > 0 ? this.state.creditCards[0] : '', category: this.state.categories[0].name }; entries.push(n); document.getElementById(`${category}-entries-${month}-${day}`).appendChild(this.render.createEntryElement({ monthIndex: month, dayIndex: parseInt(day), category, entry: n, type: 'expense' })); } this.recalculateAndDisplayTotals(month); this.saveDataToFirestore(); }
@@ -491,10 +491,52 @@
                     if (t.matches('.remove-category-btn')) { const categoryNameToRemove = t.dataset.categoryName; for (let i = 0; i < 12; i++) { this.state.monthlyData[i].expenses.forEach(day => { day.personalEntries.forEach(entry => { if (entry.category === categoryNameToRemove) entry.category = 'Outros'; }); }); } this.state.categories = this.state.categories.filter(c => c.name !== categoryNameToRemove); this.render.renderCategoryList(); this.saveDataToFirestore(); }
                     if (t.matches('.remove-recurring-btn')) { const index = parseInt(t.dataset.index); this.state.recurringEntries.splice(index, 1); this.render.renderRecurringList(); this.saveDataToFirestore(); }
                 });
+                
+                // CORREÇÃO APLICADA AQUI
                 document.body.addEventListener('input', (event) => {
                     const t = event.target;
-                    if (t.matches('.entry-input')) { const el = t.closest('.flex'); const btn = el.querySelector('.remove-btn'); if (!btn) return; const { monthIndex, type, day, category, entryId } = btn.dataset; const month = parseInt(monthIndex); const id = parseFloat(entryId); let entry; if (type === 'pj') entry = this.state.monthlyData[month].pjEntries.find(e => e.id === id); else if (type === 'pf') entry = this.state.monthlyData[month].pfEntries.find(e => e.id !== id); }
+                    if (t.matches('.entry-input')) {
+                        const el = t.closest('.flex');
+                        const btn = el.querySelector('.remove-btn');
+                        if (!btn) return;
+                        const { monthIndex, type, day, category, entryId } = btn.dataset;
+                        const month = parseInt(monthIndex);
+                        const id = parseFloat(entryId);
+                        let entry;
+
+                        if (type === 'pj') {
+                            entry = this.state.monthlyData[month].pjEntries.find(e => e.id === id);
+                        } else if (type === 'pf') {
+                            entry = this.state.monthlyData[month].pfEntries.find(e => e.id === id);
+                        } else {
+                            entry = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id === id);
+                        }
+
+                        if (entry) {
+                            const field = t.dataset.field;
+                            if (field === 'amount') {
+                                entry.amount = parseFloat(t.value) || 0;
+                            } else {
+                                entry[field] = t.value;
+                            }
+                            
+                            if (field === 'paymentMethod') {
+                                this.showMonth(month); // Re-renderiza para mostrar/esconder o seletor de cartão
+                            } else {
+                                this.recalculateAndDisplayTotals(month);
+                            }
+                            this.debouncedSave();
+                        }
+                    }
+                     if (t.matches('.category-budget-input')) {
+                        const cat = this.state.categories.find(c => c.name === t.dataset.categoryName);
+                        if (cat) {
+                            cat.budget = parseFloat(t.value) || 0;
+                            this.debouncedSave();
+                        }
+                    }
                 });
+
                 document.body.addEventListener('change', (event) => {
                     const t = event.target;
                     if (t.matches('.category-name-input')) { const oldName = t.dataset.oldName; const newName = t.value.trim(); const categoryExists = this.state.categories.some(c => c.name === newName); if (newName && oldName !== newName && !categoryExists) { for (let i = 0; i < 12; i++) { this.state.monthlyData[i].expenses.forEach(day => { day.personalEntries.forEach(entry => { if (entry.category === oldName) entry.category = newName; }); }); } const cat = this.state.categories.find(c => c.name === oldName); if (cat) cat.name = newName; t.dataset.oldName = newName; this.state.recurringEntries.forEach(r => { if (r.category === oldName) r.category = newName; }); this.saveDataToFirestore(); } else if (categoryExists && oldName !== newName) { alert('Já existe uma categoria com este nome.'); t.value = oldName; } }
@@ -504,7 +546,7 @@
             render: {
                 createMonthContentHTML: (monthIndex) => `<div id="month-${monthIndex}-content" class="month-content"><div class="flex justify-end gap-2 mb-4"><button class="export-csv-btn px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 text-sm" data-month-index="${monthIndex}">Exportar CSV</button><button class="export-pdf-btn px-4 py-2 bg-rose-500 text-white rounded-md hover:bg-rose-600 text-sm" data-month-index="${monthIndex}">Exportar PDF</button></div><div class="text-center mb-4"><button class="toggle-summary-btn px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors" data-month-index="${monthIndex}">Ocultar Resumo ▲</button></div><div id="summary-grid-${monthIndex}" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"><div class="lg:col-span-1 p-4 rounded-lg shadow-md summary-pj border-t-4 border-yellow-400"><h2 class="text-xl font-semibold mb-3 summary-text">Ganhos PJ (R$)</h2><div id="pj-entries-container-${monthIndex}" class="flex flex-col gap-2 mb-2"></div><button class="add-entry-btn mt-2 w-full px-3 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 text-sm font-medium" data-month-index="${monthIndex}" data-type="pj">+ Adicionar Ganho PJ</button></div><div class="lg:col-span-1 p-4 rounded-lg shadow-md summary-pf border-t-4 border-green-400"><h2 class="text-xl font-semibold mb-3 summary-text">Ganhos PF (R$)</h2><div id="pf-entries-container-${monthIndex}" class="flex flex-col gap-2 mb-2"></div><button class="add-entry-btn mt-2 w-full px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium" data-month-index="${monthIndex}" data-type="pf">+ Adicionar Ganho PF</button></div><div class="lg:col-span-1 grid gap-6"><div class="p-4 rounded-lg shadow-md summary-caixa border-t-4 border-blue-400"><label class="block text-sm font-medium mb-2 summary-text">Caixa da empresa (R$):</label><input type="text" id="companyCash-${monthIndex}" readonly class="w-full p-3 input-field rounded-md text-lg font-semibold text-blue-700 dark:text-blue-300 shadow-sm cursor-not-allowed"><label class="block text-sm font-medium mt-2 mb-2 summary-text">Caixa pessoal (R$):</label><input type="text" id="personalCash-${monthIndex}" readonly class="w-full p-3 input-field rounded-md text-lg font-semibold text-blue-700 dark:text-blue-300 shadow-sm cursor-not-allowed"></div><div class="p-4 rounded-lg shadow-md summary-resumo border-t-4 border-purple-400"><h2 class="text-xl font-semibold mb-3 summary-text">Resumo do Mês</h2><div class="flex justify-between items-center text-sm mb-1 summary-text"><span>Gasto Pessoal:</span><span id="totalPersonalExpenses-${monthIndex}" class="font-bold text-red-500">R$ 0,00</span></div><div class="flex justify-between items-center text-sm mb-2 summary-text"><span>Gasto Empresa:</span><span id="totalBusinessExpenses-${monthIndex}" class="font-bold text-red-500">R$ 0,00</span></div><div class="flex justify-between items-center text-sm mb-1 pt-2 border-t border-slate-200 dark:border-slate-600 summary-text"><span>Saldo Pessoal:</span><span id="remainingPersonal-${monthIndex}" class="font-bold">R$ 0,00</span></div><div class="flex justify-between items-center text-sm mb-2 summary-text"><span>Saldo Empresa:</span><span id="remainingBusiness-${monthIndex}" class="font-bold">R$ 0,00</span></div><div class="flex justify-between items-center border-t border-slate-200 dark:border-slate-700 pt-2 mt-2 summary-text"><span class="font-medium">Saldo Total:</span><span id="remainingTotal-${monthIndex}" class="text-xl font-bold">R$ 0,00</span></div><div id="budget-alerts-${monthIndex}" class="mt-3 text-sm"></div></div></div></div>
                         <div class="text-center mb-4">
-                            <button class="toggle-days-btn px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors" data-month-index="${monthIndex}">Mostrar Dias ▼</button>
+                            <button class="toggle-days-btn px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition-colors" data-month-index="${monthIndex}">Mostrar Detalhes dos Dias ▼</button>
                         </div>
                         <div id="expense-table-container-${monthIndex}" class="mb-8 hidden">
                             <div class="overflow-x-auto"><table class="min-w-full card rounded-lg shadow-md responsive-table"><thead><tr class="custom-table-header uppercase text-sm font-semibold"><th class="py-3 px-6 text-left rounded-tl-lg">Dia</th><th class="py-3 px-6 text-left">Gastos Pessoais</th><th class="py-3 px-6 text-left rounded-tr-lg">Gastos da Empresa</th></tr></thead><tbody id="expenseTableBody-${monthIndex}" class="text-sm font-light"></tbody></table></div>
