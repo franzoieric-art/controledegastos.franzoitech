@@ -625,7 +625,7 @@
                         }
                     }
                     
-                    if (t.matches('.ai-analysis-btn')) this.ai.getFinancialAnalysis(parseInt(t.dataset.monthIndex));
+                    if (t.closest('.ai-analysis-btn')) this.ai.getFinancialAnalysis(parseInt(t.closest('.ai-analysis-btn').dataset.monthIndex));
                     if (t.closest('.suggest-category-btn')) {
                         const btn = t.closest('.suggest-category-btn');
                         const el = btn.closest('.flex');
