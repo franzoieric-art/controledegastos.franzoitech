@@ -217,8 +217,8 @@
 
         <div class="container mx-auto card p-4 md:p-8 rounded-2xl relative">
             
-            <div class="relative flex flex-col-reverse sm:flex-row sm:justify-between sm:items-start mb-8 pt-8">
-                <div class="text-center sm:text-left mt-4 sm:mt-0">
+            <div class="flex flex-col sm:flex-row justify-between items-start mb-8 pt-8">
+                <div class="w-full text-center sm:text-left">
                     <h1 class="text-5xl md:text-6xl font-semibold">
                         Painel Financeiro
                     </h1>
@@ -229,7 +229,7 @@
                         <button id="manage-settings-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Gerenciar</button>
                     </div>
                 </div>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-4 absolute top-0 right-0 sm:relative p-4 sm:p-0">
                     <button id="theme-toggle-btn" class="p-2 rounded-full text-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">🌙</button>
                     <button id="logout-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Sair</button>
                 </div>
