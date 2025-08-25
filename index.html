@@ -217,21 +217,26 @@
 
         <div class="container mx-auto card p-4 md:p-8 rounded-2xl relative">
             
-            <div class="flex flex-col sm:flex-row justify-between items-start mb-8 pt-8">
-                <div class="w-full text-center sm:text-left">
-                    <h1 class="text-5xl md:text-6xl font-semibold">
-                        Painel Financeiro
-                    </h1>
-                    <p class="mt-4 text-xl muted-text">
-                        Sua central de controle financeiro.
-                    </p>
-                    <div class="flex justify-center sm:justify-start items-center gap-4 mt-6">
-                        <button id="manage-settings-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Gerenciar</button>
-                    </div>
+            <div class="flex justify-between items-start mb-8">
+                <div class="text-xs muted-text">
+                    <p class="font-bold">Rico Plus</p>
+                    <p>by Franzoi Tech</p>
                 </div>
-                <div class="flex items-center gap-4 absolute top-0 right-0 sm:relative p-4 sm:p-0">
+                <div class="flex items-center gap-4">
                     <button id="theme-toggle-btn" class="p-2 rounded-full text-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">🌙</button>
                     <button id="logout-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Sair</button>
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h1 class="text-5xl md:text-6xl font-semibold">
+                    Painel Financeiro
+                </h1>
+                <p class="mt-4 text-xl muted-text">
+                    Sua central de controle financeiro.
+                </p>
+                <div class="flex justify-center items-center gap-4 mt-6">
+                    <button id="manage-settings-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Gerenciar</button>
                 </div>
             </div>
 
