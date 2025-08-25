@@ -626,12 +626,13 @@
                     }
                     
                     if (t.matches('.ai-analysis-btn')) this.ai.getFinancialAnalysis(parseInt(t.dataset.monthIndex));
-                    if (t.matches('.suggest-category-btn')) {
-                        const el = t.closest('.flex');
+                    if (t.closest('.suggest-category-btn')) {
+                        const btn = t.closest('.suggest-category-btn');
+                        const el = btn.closest('.flex');
                         const entryId = el.querySelector('.remove-btn').dataset.entryId;
                         const descriptionInput = el.querySelector('[data-field="description"]');
                         if (descriptionInput.value) {
-                            this.ai.getCategorySuggestion(descriptionInput.value, entryId, t);
+                            this.ai.getCategorySuggestion(descriptionInput.value, entryId, btn);
                         }
                     }
 
