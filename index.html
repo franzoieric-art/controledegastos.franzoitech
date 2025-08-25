@@ -146,11 +146,11 @@
     <div id="app-screen" class="hidden">
         <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
-                <div class="flex justify-between items-center mb-4 flex-shrink-0">
-                    <h2 class="text-xl font-bold">Gerenciar</h2>
+                <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                    <h2 class="text-2xl font-bold">Gerenciar</h2>
                     <button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 overflow-y-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto">
                     <div>
                         <h3 class="text-lg font-semibold mb-3">Cartões de Crédito</h3>
                         <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
@@ -161,7 +161,7 @@
                         <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
                         <div id="category-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
                     </div>
-                    <div>
+                    <div class="lg:col-span-2">
                         <h3 class="text-lg font-semibold mb-3">Lançamentos Recorrentes</h3>
                         <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);">
                             <input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field">
@@ -191,11 +191,11 @@
             </div>
             
             <div class="text-center mb-8 pt-8">
-                <h1 class="text-4xl md:text-5xl font-bold">
+                <h1 class="text-5xl md:text-6xl font-semibold">
                     Painel Financeiro
                 </h1>
-                <p class="mt-2 text-lg muted-text">
-                    Gerencie suas finanças com a simplicidade da Franzoi Tech.
+                <p class="mt-4 text-xl muted-text">
+                    Sua central de controle financeiro.
                 </p>
                 <div class="flex justify-center items-center gap-4 mt-6">
                     <button id="manage-settings-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Gerenciar</button>
