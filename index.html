@@ -722,7 +722,7 @@
                         resultDiv.innerHTML = response;
                     } catch (error) {
                         console.error("Erro na análise da IA:", error);
-                        resultDiv.innerHTML = `<p class="text-red-500">Ocorreu um erro ao gerar a análise. Tente novamente mais tarde.</p><p class="muted-text">(${error.message})</p>`;
+                        resultDiv.innerHTML = `<p style="color: var(--red-color);">Ocorreu um erro ao gerar a análise. Tente novamente mais tarde.</p><p class="muted-text">(${error.message})</p>`;
                     }
                 },
 
