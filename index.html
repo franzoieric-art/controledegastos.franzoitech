@@ -374,11 +374,14 @@
                         App.ui.saveFeedback.classList.remove('show');
                     }, 2000);
                 },
-                // --- NOVA FUNÇÃO DE LIMPEZA ADICIONADA AQUI ---
+                // --- FUNÇÃO DE LIMPEZA MELHORADA ---
                 cleanAIResponse(text) {
                     if (typeof text !== 'string') return '';
-                    // Remove os marcadores de bloco de código (```, """, ''') e a palavra 'html', e apara os espaços.
-                    return text.replace(/[`"']{3}(html)?/g, '').trim();
+                    // 1. Remove a tag de início, como ```html ou """html
+                    let cleanedText = text.replace(/[`"']{3}html/g, '');
+                    // 2. Remove quaisquer tags de três aspas/crases restantes
+                    cleanedText = cleanedText.replace(/[`"']{3}/g, '');
+                    return cleanedText.trim();
                 }
             },
             
@@ -499,10 +502,7 @@
             
             exportMonthToCSV(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
-                if (!monthData) {
-                    console.error("Dados do mês não encontrados para exportação CSV:", monthIndex);
-                    return;
-                }
+                if (!monthData) { return; }
                 const monthName = this.constants.monthNames[monthIndex];
                 let csvContent = "data:text/csv;charset=utf-8,";
                 csvContent += "Tipo;Dia;Descricao;Valor;Categoria;Metodo de Pagamento;Cartao\r\n";
@@ -528,10 +528,7 @@
             },
             exportMonthToPDF(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
-                if (!monthData) {
-                    console.error("Dados do mês não encontrados para exportação PDF:", monthIndex);
-                    return;
-                }
+                if (!monthData) { return; }
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 const monthName = this.constants.monthNames[monthIndex];
@@ -900,5 +897,4 @@
         });
     </script>
 </body>
-</html>
 </html>
