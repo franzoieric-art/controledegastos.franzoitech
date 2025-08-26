@@ -373,6 +373,12 @@
                     setTimeout(() => {
                         App.ui.saveFeedback.classList.remove('show');
                     }, 2000);
+                },
+                // --- NOVA FUNÇÃO DE LIMPEZA ADICIONADA AQUI ---
+                cleanAIResponse(text) {
+                    if (typeof text !== 'string') return '';
+                    // Remove os marcadores de bloco de código (```, """, ''') e a palavra 'html', e apara os espaços.
+                    return text.replace(/[`"']{3}(html)?/g, '').trim();
                 }
             },
             
@@ -714,12 +720,8 @@
                     Analise de forma didática e concisa. Forneça um resumo geral do mês (ganhos vs. gastos), identifique os 3 maiores gastos (se houver), e ofereça uma dica de como melhorar as finanças no próximo mês, com base nos dados. Use HTML simples (<p>, <ul>, <li>, <h3>) para formatar a resposta.`;
                     
                     try {
-                        let textResponse = await this.callVercelFunction(prompt);
-                        
-                        // Limpa a resposta da IA para remover marcadores de código
-                        textResponse = textResponse.replace(/^```html\s*/, '').replace(/```$/, '');
-
-                        resultDiv.innerHTML = textResponse.trim();
+                        const textResponse = await this.callVercelFunction(prompt);
+                        resultDiv.innerHTML = App.helpers.cleanAIResponse(textResponse);
                     } catch (error) {
                         console.error("Erro na análise da IA:", error);
                         resultDiv.innerHTML = `<p class="text-red-500">Ocorreu um erro ao gerar a análise. Tente novamente mais tarde.</p><p class="muted-text">(${error.message})</p>`;
@@ -733,11 +735,9 @@
                     const prompt = `Dada a descrição "${description}", qual seria a categoria financeira mais apropriada de uma lista pré-definida: ${App.state.categories.map(c => c.name).join(', ')}. Responda **apenas o nome da categoria**, sem qualquer outro texto ou pontuação. Se nenhuma categoria se encaixar, responda "Outros".`;
                     
                     try {
-                        let response = await this.callVercelFunction(prompt);
+                        const rawResponse = await this.callVercelFunction(prompt);
+                        const suggestedCategory = App.helpers.cleanAIResponse(rawResponse);
                         
-                        // Limpa a resposta para o caso da IA retornar ```Categoria```
-                        const suggestedCategory = response.replace(/`/g, '').trim();
-
                         const selectEl = document.querySelector(`.remove-btn[data-entry-id="${entryId}"]`).closest('.flex').querySelector('[data-field="category"]');
                         
                         if (selectEl) {
@@ -747,7 +747,7 @@
                                 const event = new Event('input', { bubbles: true });
                                 selectEl.dispatchEvent(event);
                             } else {
-                                console.log(`Categoria sugerida inválida: ${suggestedCategory}`);
+                                console.log(`Categoria sugerida inválida: '${suggestedCategory}'`);
                             }
                         }
                     } catch (error) {
@@ -900,4 +900,5 @@
         });
     </script>
 </body>
+</html>
 </html>
