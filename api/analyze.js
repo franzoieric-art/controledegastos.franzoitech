@@ -12,7 +12,8 @@ module.exports = async (req, res) => {
 
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-pro"});
+        // A linha abaixo foi alterada
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash"}); 
 
         const prompt = req.body.prompt; // O prompt virá da sua requisição do front-end
 
