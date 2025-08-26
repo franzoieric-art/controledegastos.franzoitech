@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
         const genAI = new GoogleGenerativeAI(API_KEY);
         
         // Usando o modelo compatível com a chave "Free" do AI Studio
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         const prompt = req.body.prompt;
 
