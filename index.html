@@ -691,8 +691,6 @@
             },
             
             ai: {
-                API_KEY: "AIzaSyBdtjXHyAmZAGNZCyOPPnzp8WysrfVcmKc",
-                
                 async getFinancialAnalysis(monthIndex) {
                     const modal = App.ui.aiAnalysisModal;
                     const resultDiv = App.ui.aiAnalysisResult;
@@ -716,11 +714,11 @@
                     Analise de forma didática e concisa. Forneça um resumo geral do mês (ganhos vs. gastos), identifique os 3 maiores gastos (se houver), e ofereça uma dica de como melhorar as finanças no próximo mês, com base nos dados. Use HTML simples (<p>, <ul>, <li>, <h3>) para formatar a resposta.`;
                     
                     try {
-                        const response = await this.callGeminiAPI(prompt);
+                        const response = await this.callVercelFunction(prompt);
                         resultDiv.innerHTML = response;
                     } catch (error) {
                         console.error("Erro na análise da IA:", error);
-                        resultDiv.innerHTML = `<p style="color: var(--red-color);">Ocorreu um erro ao gerar a análise. Tente novamente mais tarde.</p><p class="muted-text">(${error.message})</p>`;
+                        resultDiv.innerHTML = `<p class="text-red-500">Ocorreu um erro ao gerar a análise. Tente novamente mais tarde.</p><p class="muted-text">(${error.message})</p>`;
                     }
                 },
 
@@ -731,7 +729,7 @@
                     const prompt = `Dada a descrição "${description}", qual seria a categoria financeira mais apropriada de uma lista pré-definida: ${App.state.categories.map(c => c.name).join(', ')}. Responda **apenas o nome da categoria**, sem qualquer outro texto ou pontuação. Se nenhuma categoria se encaixar, responda "Outros".`;
                     
                     try {
-                        const response = await this.callGeminiAPI(prompt);
+                        const response = await this.callVercelFunction(prompt);
                         const suggestedCategory = response.trim();
                         const selectEl = document.querySelector(`.remove-btn[data-entry-id="${entryId}"]`).closest('.flex').querySelector('[data-field="category"]');
                         
@@ -753,27 +751,21 @@
                     }
                 },
                 
-                async callGeminiAPI(prompt) {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.API_KEY}`;
-                    const body = {
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { maxOutputTokens: 2048, temperature: 0.3 },
-                    };
-                    const response = await fetch(url, {
+                async callVercelFunction(prompt) {
+                    const response = await fetch('/api/analyze', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body),
+                        body: JSON.stringify({ prompt: prompt }),
                     });
 
                     if (!response.ok) {
-                        throw new Error(`Erro de API: ${response.status} ${response.statusText}`);
+                        throw new Error(`Erro na sua função serverless: ${response.status} ${response.statusText}`);
                     }
 
-                    const data = await response.json();
-                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    const text = await response.text();
                     
                     if (!text) {
-                        throw new Error('Resposta da IA está vazia ou mal formatada.');
+                        throw new Error('Resposta da sua função serverless está vazia.');
                     }
                     
                     return text;
