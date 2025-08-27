@@ -570,11 +570,10 @@
                     dayData.businessEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Empresa', e.description, '-', `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2).replace('.', ',')]));
                 });
                 
-                // --- GRÁFICO --- CORREÇÃO APLICADA AQUI
+                // --- GRÁFICO ---
                 let chartImage = null;
                 try {
-                    // Captura o gráfico diretamente da instância do Chart.js, que é mais confiável
-                    const chartInstance = this.state.chartInstances.pie;
+                    const chartInstance = this.state.chartInstances.pie; // Referencia a instância do gráfico de pizza
                     if (chartInstance) {
                         chartImage = chartInstance.toBase64Image('image/png', 1);
                     }
@@ -584,14 +583,14 @@
 
                 // --- FUNÇÕES AUXILIARES DE RENDERIZAÇÃO ---
                 const addWatermark = (doc) => {
-                    doc.setFontSize(50);
-                    doc.setTextColor(230, 230, 230); // Cor mais clara
+                    doc.setFontSize(40); // Tamanho da fonte da marca d'água
+                    doc.setTextColor(240, 240, 240, 0.3); // Cor muito clara com transparência
                     doc.setFont('helvetica', 'bold');
                     doc.text("Rico Plus by Franzoi Tech", pageWidth / 2, pageHeight / 1.8, {
                         angle: -45,
                         align: 'center'
                     });
-                    doc.setTextColor(0, 0, 0); // Reseta a cor do texto
+                    doc.setTextColor(0, 0, 0); // Reseta a cor do texto para preto
                 };
                 
                 const addHeaderAndFooter = (data) => {
@@ -607,14 +606,15 @@
                     
                     const pageCount = doc.internal.getNumberOfPages();
                     doc.setFontSize(8);
-                    // --- CORREÇÃO DA HORA APLICADA AQUI ---
                     doc.text(`Rico Plus by Franzoi Tech | Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, pageHeight - 10);
                     doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
                 };
 
                 // --- CONSTRUÇÃO DO PDF ---
+                let finalY = 40;
+
                 doc.autoTable({
-                    startY: 40,
+                    startY: finalY,
                     margin: { left: 14, right: 106 },
                     head: [['Resumo Geral', 'Valor']],
                     body: [
@@ -623,27 +623,38 @@
                         [{ content: 'Saldo Final', styles: { fontStyle: 'bold', fillColor: '#f0f0f0' } }, { content: this.helpers.formatCurrency(balance), styles: { fontStyle: 'bold', fillColor: '#f0f0f0' } }]
                     ],
                     theme: 'grid',
-                    headStyles: { fillColor: [22, 160, 133] }
+                    headStyles: { fillColor: [22, 160, 133] },
+                    didParseCell: function(data) {
+                        if (data.section === 'body' && data.row.index === 2 && data.cell.text[0] === 'Saldo Final') {
+                            data.cell.styles.fontStyle = 'bold';
+                            data.cell.styles.fillColor = '#f0f0f0';
+                        }
+                    }
                 });
+                finalY = doc.lastAutoTable.finalY + 10; // Atualiza finalY após a tabela
 
                 if (categoryBody.length > 0) {
                     doc.autoTable({
-                        startY: 40,
+                        startY: 40, // Mantém a posição Y inicial para a tabela lateral
                         margin: { left: 108, right: 14 },
                         head: [['Gastos por Categoria', 'Total']],
                         body: categoryBody,
                         theme: 'striped',
                         headStyles: { fillColor: [41, 128, 185] }
                     });
+                    // O finalY não precisa ser atualizado por esta tabela se ela estiver ao lado
+                    // Mas precisamos garantir que a próxima autoTable ou imagem comece abaixo da mais baixa
+                    finalY = Math.max(finalY, (doc.lastAutoTable.finalY || 40) + 10);
                 }
                 
                 if (chartImage) {
-                    const chartStartY = (doc.lastAutoTable.finalY || 40) + 10;
-                    doc.addImage(chartImage, 'PNG', 14, chartStartY, 90, 90);
+                    // Posiciona o gráfico abaixo da última tabela gerada
+                    doc.addImage(chartImage, 'PNG', 14, finalY, 90, 90);
+                    finalY += 100; // Espaço para o gráfico + um pouco de margem
                 }
 
                 doc.autoTable({
-                    startY: 180,
+                    startY: finalY, // Começa a tabela de transações após o gráfico e as tabelas
                     head: [['Data', 'Tipo', 'Descrição', 'Cat.', 'Pag.', 'Valor (R$)']],
                     body: transactionsBody,
                     theme: 'grid',
@@ -655,6 +666,7 @@
                     margin: { top: 38, bottom: 20 }
                 });
 
+                // Este loop garante que o cabeçalho, rodapé e marca d'água estejam em todas as páginas.
                 const pageCountFinal = doc.internal.getNumberOfPages();
                 for(let i = 1; i <= pageCountFinal; i++) {
                     doc.setPage(i);
@@ -993,7 +1005,7 @@
                 renderCardList: () => { App.ui.cardListContainer.innerHTML = App.state.creditCards.map(c => `<div class="flex items-center justify-between p-2 rounded-lg" style="background-color: var(--input-bg);"><span class="text-color">${c}</span><button class="remove-card-btn text-red-500 hover:text-red-700" data-card-name="${c}">×</button></div>`).join(''); },
                 renderCategoryList: () => { App.ui.categoryListContainer.innerHTML = App.state.categories.map(c => `<div class="flex items-center justify-between p-2 rounded-lg gap-2" style="background-color: var(--input-bg);"><input type="text" value="${c.name}" class="category-name-input flex-grow p-1 input-field" data-old-name="${c.name}"><input type="number" value="${c.budget}" min="0" class="category-budget-input w-24 p-1 input-field" data-category-name="${c.name}"><button class="remove-category-btn text-red-500 hover:text-red-700" data-category-name="${c.name}">×</button></div>`).join(''); },
                 renderRecurringList: () => { App.ui.recurringListContainer.innerHTML = App.state.recurringEntries.map((r, i) => `<div class="text-xs p-2 rounded-lg flex justify-between items-center" style="background-color: var(--input-bg);"><div><p class="font-bold text-color">${r.description} (${App.helpers.formatCurrency(r.amount)})</p><p class="muted-text">Todo dia ${r.dayOfMonth} - ${r.type}</p></div><button class="remove-recurring-btn text-red-500 hover:text-red-700 font-bold" data-index="${i}">×</button></div>`).join(''); },
-                renderSettingsModal: () => { App.render.renderCardList(); App.render.renderCategoryList(); App.render.renderRecurringList(); document.getElementById('recurring-category').innerHTML = App.state.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join(''); document.getElementById('recurring-payment').innerHTML = App.constants.basePaymentMethods.map(m => `<option value="${m}">${m}</option>`).join(''); document.getElementById('recurring-card').innerHTML = App.state.creditCards.map(c => `<option value="${c}">${c}</option>`).join(''); App.ui.settingsModal.classList.remove('hidden'); setTimeout(() => App.ui.settingsModal.querySelector('.modal-content').classList.remove('scale-95'), 10); }
+                renderSettingsModal: () => { App.render.renderCardList(); App.render.renderCategoryList(); document.getElementById('recurring-category').innerHTML = App.state.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join(''); document.getElementById('recurring-payment').innerHTML = App.constants.basePaymentMethods.map(m => `<option value="${m}">${m}</option>`).join(''); document.getElementById('recurring-card').innerHTML = App.state.creditCards.map(c => `<option value="${c}">${c}</option>`).join(''); App.ui.settingsModal.classList.remove('hidden'); setTimeout(() => App.ui.settingsModal.querySelector('.modal-content').classList.remove('scale-95'), 10); }
             }
         };
         
