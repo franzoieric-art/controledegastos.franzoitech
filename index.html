@@ -374,12 +374,9 @@
                         App.ui.saveFeedback.classList.remove('show');
                     }, 2000);
                 },
-                // --- FUNÇÃO DE LIMPEZA MELHORADA ---
                 cleanAIResponse(text) {
                     if (typeof text !== 'string') return '';
-                    // 1. Remove a tag de início, como ```html ou """html
                     let cleanedText = text.replace(/[`"']{3}html/g, '');
-                    // 2. Remove quaisquer tags de três aspas/crases restantes
                     cleanedText = cleanedText.replace(/[`"']{3}/g, '');
                     return cleanedText.trim();
                 }
@@ -500,13 +497,37 @@
                 if (wasModified) { this.saveDataToFirestore(); }
             },
             
+            // --- FUNÇÃO DE EXPORTAÇÃO CSV OTIMIZADA ---
             exportMonthToCSV(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
                 if (!monthData) { return; }
                 const monthName = this.constants.monthNames[monthIndex];
+
+                // Calcula os totais
+                const pjTotal = monthData.pjEntries.reduce((s, e) => s + e.amount, 0);
+                const pfTotal = monthData.pfEntries.reduce((s, e) => s + e.amount, 0);
+                const personalTotal = monthData.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0);
+                const businessTotal = monthData.expenses.flat().reduce((a, day) => a + day.businessEntries.reduce((s, e) => s + e.amount, 0), 0);
+                const totalGains = pjTotal + pfTotal;
+                const totalExpenses = personalTotal + businessTotal;
+                const balance = totalGains - totalExpenses;
+
                 let csvContent = "data:text/csv;charset=utf-8,";
+                
+                // Adiciona o bloco de resumo
+                csvContent += `Relatorio Financeiro - ${monthName}\r\n`;
+                csvContent += "\r\n"; // Linha em branco
+                csvContent += "Resumo do Mes\r\n";
+                csvContent += `Total de Ganhos;${totalGains.toFixed(2).replace('.', ',')}\r\n`;
+                csvContent += `Total de Gastos;${totalExpenses.toFixed(2).replace('.', ',')}\r\n`;
+                csvContent += `Saldo Final;${balance.toFixed(2).replace('.', ',')}\r\n`;
+                csvContent += "\r\n"; // Linha em branco
+                
+                // Adiciona a tabela de transações
+                csvContent += "Detalhes das Transacoes\r\n";
                 csvContent += "Tipo;Dia;Descricao;Valor;Categoria;Metodo de Pagamento;Cartao\r\n";
                 const sanitize = (str) => `"${(str || '').replace(/"/g, '""')}"`;
+                
                 monthData.pjEntries.forEach(e => csvContent += `Ganho PJ;;${sanitize(e.description)};${e.amount.toFixed(2).replace('.', ',')};;;\r\n`);
                 monthData.pfEntries.forEach(e => csvContent += `Ganho PF;;${sanitize(e.description)};${e.amount.toFixed(2).replace('.', ',')};;;\r\n`);
                 monthData.expenses.forEach((dayData, dayIndex) => {
@@ -519,6 +540,7 @@
                     processEntries(dayData.personalEntries, 'Gasto Pessoal');
                     processEntries(dayData.businessEntries, 'Gasto Empresa');
                 });
+
                 const link = document.createElement("a");
                 link.setAttribute("href", encodeURI(csvContent));
                 link.setAttribute("download", `relatorio_${monthName}.csv`);
@@ -526,32 +548,82 @@
                 link.click();
                 document.body.removeChild(link);
             },
+            
+            // --- FUNÇÃO DE EXPORTAÇÃO PDF OTIMIZADA ---
             exportMonthToPDF(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
                 if (!monthData) { return; }
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 const monthName = this.constants.monthNames[monthIndex];
-                doc.setFontSize(18);
-                doc.text(`Relatório Financeiro - ${monthName}`, 14, 22);
-                doc.setFontSize(11);
-                doc.setTextColor(100);
+                
+                // Cabeçalho
+                doc.setFontSize(20);
+                doc.text("Relatório Financeiro Mensal", 105, 20, { align: 'center' });
+                doc.setFontSize(12);
+                doc.text(`Período: ${monthName}`, 105, 28, { align: 'center' });
+                doc.setFontSize(10);
+                doc.setTextColor(150);
+                doc.text(`Gerado por: Rico Plus - Franzoi Tech | Data: ${new Date().toLocaleDateString('pt-BR')}`, 105, 34, { align: 'center'});
+
+                // Calcula os totais
                 const pjTotal = monthData.pjEntries.reduce((s, e) => s + e.amount, 0);
                 const pfTotal = monthData.pfEntries.reduce((s, e) => s + e.amount, 0);
                 const personalTotal = monthData.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0);
                 const businessTotal = monthData.expenses.flat().reduce((a, day) => a + day.businessEntries.reduce((s, e) => s + e.amount, 0), 0);
                 const balance = (pjTotal + pfTotal) - (personalTotal + businessTotal);
-                const summaryText = `Ganhos PJ: ${this.helpers.formatCurrency(pjTotal)}\nGanhos PF: ${this.helpers.formatCurrency(pfTotal)}\nGastos Pessoais: ${this.helpers.formatCurrency(personalTotal)}\nGastos Empresa: ${this.helpers.formatCurrency(businessTotal)}\n--------------------------------------------------\nSaldo do Mês: ${this.helpers.formatCurrency(balance)}`;
-                doc.text(summaryText, 14, 32);
-                const head = [['Data', 'Tipo', 'Descrição', 'Categoria', 'Pagamento', 'Valor (R$)']];
-                const body = [];
-                monthData.pjEntries.forEach(e => body.push(['-', 'Ganho PJ', e.description, '-', '-', e.amount.toFixed(2)]));
-                monthData.pfEntries.forEach(e => body.push(['-', 'Ganho PF', e.description, '-', '-', e.amount.toFixed(2)]));
-                monthData.expenses.forEach((dayData, dayIndex) => {
-                    dayData.personalEntries.forEach(e => body.push([dayIndex + 1, 'Gasto Pessoal', e.description, e.category, `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2)]));
-                    dayData.businessEntries.forEach(e => body.push([dayIndex + 1, 'Gasto Empresa', e.description, '-', `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2)]));
+
+                // Resumo Geral
+                doc.autoTable({
+                    startY: 45,
+                    head: [['Resumo Geral do Mês', '']],
+                    body: [
+                        ['Total Ganhos PJ', this.helpers.formatCurrency(pjTotal)],
+                        ['Total Ganhos PF', this.helpers.formatCurrency(pfTotal)],
+                        ['Total Gastos Pessoais', this.helpers.formatCurrency(personalTotal)],
+                        ['Total Gastos Empresa', this.helpers.formatCurrency(businessTotal)],
+                        [{ content: 'Saldo Final do Mês', styles: { fontStyle: 'bold' } }, { content: this.helpers.formatCurrency(balance), styles: { fontStyle: 'bold' } }]
+                    ],
+                    theme: 'grid',
+                    headStyles: { fillColor: [22, 160, 133] }
                 });
-                doc.autoTable({ head: head, body: body, startY: 80, theme: 'striped', headStyles: { fillColor: [41, 128, 185] } });
+
+                // Calcula gastos por categoria
+                const expensesByCategory = {};
+                monthData.expenses.flat().forEach(day => {
+                    day.personalEntries.forEach(entry => {
+                        expensesByCategory[entry.category] = (expensesByCategory[entry.category] || 0) + entry.amount;
+                    });
+                });
+                const categoryBody = Object.keys(expensesByCategory).map(cat => [cat, this.helpers.formatCurrency(expensesByCategory[cat])]);
+
+                // Tabela de Gastos por Categoria
+                if (categoryBody.length > 0) {
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY + 10,
+                        head: [['Gastos por Categoria (Pessoal)', 'Total']],
+                        body: categoryBody,
+                        theme: 'striped',
+                        headStyles: { fillColor: [41, 128, 185] }
+                    });
+                }
+
+                // Tabela de Transações
+                const transactionsBody = [];
+                monthData.pjEntries.forEach(e => transactionsBody.push(['-', 'Ganho PJ', e.description, '-', '-', e.amount.toFixed(2)]));
+                monthData.pfEntries.forEach(e => transactionsBody.push(['-', 'Ganho PF', e.description, '-', '-', e.amount.toFixed(2)]));
+                monthData.expenses.forEach((dayData, dayIndex) => {
+                    dayData.personalEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Pessoal', e.description, e.category, `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2)]));
+                    dayData.businessEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Empresa', e.description, '-', `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2)]));
+                });
+
+                doc.autoTable({
+                    startY: doc.lastAutoTable.finalY + 10,
+                    head: [['Data', 'Tipo', 'Descrição', 'Categoria', 'Pagamento', 'Valor (R$)']],
+                    body: transactionsBody,
+                    theme: 'grid'
+                });
+
                 doc.save(`relatorio_${monthName}.pdf`);
             },
             
@@ -709,19 +781,19 @@
 
                     const prompt = `Aja como um analista financeiro sênior, fornecendo um resumo claro e direto para um usuário.
 
-Recebi os seguintes dados mensais:
-Ganhos Pessoais (PF): ${JSON.stringify(data.pfEntries)}
-Ganhos PJ: ${JSON.stringify(data.pjEntries)}
-Gastos Pessoais: ${JSON.stringify(data.expenses.flatMap(day => day.personalEntries))}
-Gastos da Empresa: ${JSON.stringify(data.expenses.flatMap(day => day.businessEntries))}
+                    Recebi os seguintes dados mensais:
+                    Ganhos Pessoais (PF): ${JSON.stringify(data.pfEntries)}
+                    Ganhos PJ: ${JSON.stringify(data.pjEntries)}
+                    Gastos Pessoais: ${JSON.stringify(data.expenses.flatMap(day => day.personalEntries))}
+                    Gastos da Empresa: ${JSON.stringify(data.expenses.flatMap(day => day.businessEntries))}
 
-Siga estas regras estritamente:
-1.  **Forneça um "Resumo Geral"** do mês (total de ganhos vs. total de gastos).
-2.  **Liste os "Gastos Pessoais Detalhados" por categoria**. Para cada categoria, mostre **apenas o valor total já somado**, nunca a lista de transações individuais. O formato deve ser, por exemplo: "<li>Alimentação: R$ 500,00</li>".
-3.  **Identifique os "3 Maiores Gastos Individuais"** do mês, se houver.
-4.  **Ofereça uma "Dica de Melhoria"** curta e objetiva para o próximo mês.
-5.  **Formate sua resposta usando apenas as seguintes tags HTML**: <h3> para títulos, <p> para parágrafos, e <ul> com <li> para listas. Seja limpo e organizado.
-6.  **NÃO inclua marcadores de código** como \`\`\`html no início ou no fim da sua resposta.`;
+                    Siga estas regras estritamente:
+                    1.  **Forneça um "Resumo Geral"** do mês (total de ganhos vs. total de gastos).
+                    2.  **Liste os "Gastos Pessoais Detalhados" por categoria**. Para cada categoria, mostre **apenas o valor total já somado**, nunca a lista de transações individuais. O formato deve ser, por exemplo: "<li>Alimentação: R$ 500,00</li>".
+                    3.  **Identifique os "3 Maiores Gastos Individuais"** do mês, se houver.
+                    4.  **Ofereça uma "Dica de Melhoria"** curta e objetiva para o próximo mês.
+                    5.  **Formate sua resposta usando apenas as seguintes tags HTML**: <h3> para títulos, <p> para parágrafos, e <ul> com <li> para listas. Seja limpo e organizado.
+                    6.  **NÃO inclua marcadores de código** como \`\`\`html no início ou no fim da sua resposta.`;
                     
                     try {
                         const textResponse = await this.callVercelFunction(prompt);
