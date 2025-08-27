@@ -547,7 +547,6 @@
                 const pageHeight = doc.internal.pageSize.height;
                 const pageWidth = doc.internal.pageSize.width;
 
-                // --- DADOS ---
                 const pjTotal = monthData.pjEntries.reduce((s, e) => s + e.amount, 0);
                 const pfTotal = monthData.pfEntries.reduce((s, e) => s + e.amount, 0);
                 const personalTotal = monthData.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0);
@@ -570,16 +569,20 @@
                     dayData.businessEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Empresa', e.description, '-', `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2).replace('.', ',')]));
                 });
                 
-                // --- FUNÇÕES AUXILIARES DE RENDERIZAÇÃO ---
                 const addWatermark = (doc) => {
+                    // --- CORREÇÃO FINAL DA MARCA D'ÁGUA ---
+                    doc.saveGraphicsState(); // Salva o estado atual (cor, opacidade, etc.)
+                    doc.setGState(new doc.GState({opacity: 0.05})); // Define a opacidade para 5%
+                    
                     doc.setFontSize(40);
-                    // --- CORREÇÃO DA MARCA D'ÁGUA: Cor mais clara e opacidade muito menor ---
-                    doc.setTextColor(245, 245, 245); // Quase branco
+                    doc.setTextColor(200, 200, 200); // Cor cinza bem clara
+                    doc.setFont('helvetica', 'bold');
                     doc.text("Rico Plus by Franzoi Tech", pageWidth / 2, pageHeight / 1.8, {
                         angle: -45,
                         align: 'center'
                     });
-                    doc.setTextColor(0, 0, 0); // Reseta a cor do texto para preto
+                    
+                    doc.restoreGraphicsState(); // Restaura o estado para que o resto não fique transparente
                 };
                 
                 const addHeaderAndFooter = (data) => {
@@ -589,18 +592,15 @@
                     doc.setFontSize(10);
                     doc.setFont('helvetica', 'normal');
                     doc.text(`Período: ${monthName}`, 14, 26);
-                    
                     doc.setLineWidth(0.5);
                     doc.line(14, 30, pageWidth - 14, 30);
-                    
                     const pageCount = doc.internal.getNumberOfPages();
                     doc.setFontSize(8);
                     doc.text(`Rico Plus by Franzoi Tech | Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, pageHeight - 10);
                     doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
                 };
 
-                // --- CONSTRUÇÃO DO PDF ---
-                let finalY = 40; // Variável para controlar a posição vertical
+                let finalY = 40;
 
                 doc.autoTable({
                     startY: finalY,
@@ -625,11 +625,9 @@
                     });
                     finalY = doc.lastAutoTable.finalY + 10;
                 }
-                
-                // --- GRÁFICO REMOVIDO DAQUI ---
 
                 doc.autoTable({
-                    startY: finalY, // Começa a tabela de transações após os resumos
+                    startY: finalY,
                     head: [['Data', 'Tipo', 'Descrição', 'Cat.', 'Pag.', 'Valor (R$)']],
                     body: transactionsBody,
                     theme: 'grid',
@@ -644,7 +642,6 @@
                 const pageCountFinal = doc.internal.getNumberOfPages();
                 for(let i = 1; i <= pageCountFinal; i++) {
                     doc.setPage(i);
-                    // Adiciona a marca d'água e o cabeçalho/rodapé em cada página
                     addWatermark(doc);
                     addHeaderAndFooter({ pageNumber: i, pageCount: pageCountFinal });
                 }
