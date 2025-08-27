@@ -497,13 +497,10 @@
                 if (wasModified) { this.saveDataToFirestore(); }
             },
             
-            // --- FUNÇÃO DE EXPORTAÇÃO CSV OTIMIZADA ---
             exportMonthToCSV(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
                 if (!monthData) { return; }
                 const monthName = this.constants.monthNames[monthIndex];
-
-                // Calcula os totais
                 const pjTotal = monthData.pjEntries.reduce((s, e) => s + e.amount, 0);
                 const pfTotal = monthData.pfEntries.reduce((s, e) => s + e.amount, 0);
                 const personalTotal = monthData.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0);
@@ -511,23 +508,15 @@
                 const totalGains = pjTotal + pfTotal;
                 const totalExpenses = personalTotal + businessTotal;
                 const balance = totalGains - totalExpenses;
-
                 let csvContent = "data:text/csv;charset=utf-8,";
-                
-                // Adiciona o bloco de resumo
-                csvContent += `Relatorio Financeiro - ${monthName}\r\n`;
-                csvContent += "\r\n"; // Linha em branco
+                csvContent += `Relatorio Financeiro - ${monthName}\r\n\r\n`;
                 csvContent += "Resumo do Mes\r\n";
                 csvContent += `Total de Ganhos;${totalGains.toFixed(2).replace('.', ',')}\r\n`;
                 csvContent += `Total de Gastos;${totalExpenses.toFixed(2).replace('.', ',')}\r\n`;
-                csvContent += `Saldo Final;${balance.toFixed(2).replace('.', ',')}\r\n`;
-                csvContent += "\r\n"; // Linha em branco
-                
-                // Adiciona a tabela de transações
+                csvContent += `Saldo Final;${balance.toFixed(2).replace('.', ',')}\r\n\r\n`;
                 csvContent += "Detalhes das Transacoes\r\n";
                 csvContent += "Tipo;Dia;Descricao;Valor;Categoria;Metodo de Pagamento;Cartao\r\n";
                 const sanitize = (str) => `"${(str || '').replace(/"/g, '""')}"`;
-                
                 monthData.pjEntries.forEach(e => csvContent += `Ganho PJ;;${sanitize(e.description)};${e.amount.toFixed(2).replace('.', ',')};;;\r\n`);
                 monthData.pfEntries.forEach(e => csvContent += `Ganho PF;;${sanitize(e.description)};${e.amount.toFixed(2).replace('.', ',')};;;\r\n`);
                 monthData.expenses.forEach((dayData, dayIndex) => {
@@ -540,7 +529,6 @@
                     processEntries(dayData.personalEntries, 'Gasto Pessoal');
                     processEntries(dayData.businessEntries, 'Gasto Empresa');
                 });
-
                 const link = document.createElement("a");
                 link.setAttribute("href", encodeURI(csvContent));
                 link.setAttribute("download", `relatorio_${monthName}.csv`);
@@ -548,47 +536,25 @@
                 link.click();
                 document.body.removeChild(link);
             },
-            
-            // --- FUNÇÃO DE EXPORTAÇÃO PDF OTIMIZADA ---
+
+            // --- FUNÇÃO DE EXPORTAÇÃO PDF TOTALMENTE ATUALIZADA ---
             exportMonthToPDF(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
                 if (!monthData) { return; }
+
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 const monthName = this.constants.monthNames[monthIndex];
-                
-                // Cabeçalho
-                doc.setFontSize(20);
-                doc.text("Relatório Financeiro Mensal", 105, 20, { align: 'center' });
-                doc.setFontSize(12);
-                doc.text(`Período: ${monthName}`, 105, 28, { align: 'center' });
-                doc.setFontSize(10);
-                doc.setTextColor(150);
-                doc.text(`Gerado por: Rico Plus - Franzoi Tech | Data: ${new Date().toLocaleDateString('pt-BR')}`, 105, 34, { align: 'center'});
+                const pageHeight = doc.internal.pageSize.height;
+                const pageWidth = doc.internal.pageSize.width;
 
-                // Calcula os totais
+                // --- DADOS ---
                 const pjTotal = monthData.pjEntries.reduce((s, e) => s + e.amount, 0);
                 const pfTotal = monthData.pfEntries.reduce((s, e) => s + e.amount, 0);
                 const personalTotal = monthData.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0);
                 const businessTotal = monthData.expenses.flat().reduce((a, day) => a + day.businessEntries.reduce((s, e) => s + e.amount, 0), 0);
                 const balance = (pjTotal + pfTotal) - (personalTotal + businessTotal);
 
-                // Resumo Geral
-                doc.autoTable({
-                    startY: 45,
-                    head: [['Resumo Geral do Mês', '']],
-                    body: [
-                        ['Total Ganhos PJ', this.helpers.formatCurrency(pjTotal)],
-                        ['Total Ganhos PF', this.helpers.formatCurrency(pfTotal)],
-                        ['Total Gastos Pessoais', this.helpers.formatCurrency(personalTotal)],
-                        ['Total Gastos Empresa', this.helpers.formatCurrency(businessTotal)],
-                        [{ content: 'Saldo Final do Mês', styles: { fontStyle: 'bold' } }, { content: this.helpers.formatCurrency(balance), styles: { fontStyle: 'bold' } }]
-                    ],
-                    theme: 'grid',
-                    headStyles: { fillColor: [22, 160, 133] }
-                });
-
-                // Calcula gastos por categoria
                 const expensesByCategory = {};
                 monthData.expenses.flat().forEach(day => {
                     day.personalEntries.forEach(entry => {
@@ -597,32 +563,108 @@
                 });
                 const categoryBody = Object.keys(expensesByCategory).map(cat => [cat, this.helpers.formatCurrency(expensesByCategory[cat])]);
 
-                // Tabela de Gastos por Categoria
+                const transactionsBody = [];
+                monthData.pjEntries.forEach(e => transactionsBody.push(['-', 'Ganho PJ', e.description, '-', '-', e.amount.toFixed(2).replace('.', ',')]));
+                monthData.pfEntries.forEach(e => transactionsBody.push(['-', 'Ganho PF', e.description, '-', '-', e.amount.toFixed(2).replace('.', ',')]));
+                monthData.expenses.forEach((dayData, dayIndex) => {
+                    dayData.personalEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Pessoal', e.description, e.category, `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2).replace('.', ',')]));
+                    dayData.businessEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Empresa', e.description, '-', `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2).replace('.', ',')]));
+                });
+                
+                // --- GRÁFICO ---
+                let chartImage = null;
+                try {
+                    const chartCanvas = document.getElementById(`budgetPieChart-${monthIndex}`);
+                    if (chartCanvas) {
+                        chartImage = chartCanvas.toDataURL('image/png');
+                    }
+                } catch(e) {
+                    console.error("Erro ao converter gráfico para imagem:", e);
+                }
+
+                // --- FUNÇÕES AUXILIARES DE RENDERIZAÇÃO ---
+                const addWatermark = (doc) => {
+                    doc.setFontSize(50);
+                    doc.setTextColor(220, 220, 220);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text("Rico Plus by Franzoi Tech", pageWidth / 2, pageHeight / 2, {
+                        angle: -45,
+                        align: 'center'
+                    });
+                    doc.setTextColor(0, 0, 0); // Reseta a cor do texto
+                };
+                
+                const addHeaderAndFooter = (data) => {
+                    // Cabeçalho
+                    doc.setFontSize(16);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text("Relatório Financeiro", 14, 20);
+                    doc.setFontSize(10);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text(`Período: ${monthName}`, 14, 26);
+                    
+                    doc.setLineWidth(0.5);
+                    doc.line(14, 30, pageWidth - 14, 30);
+                    
+                    // Rodapé
+                    const pageCount = doc.internal.getNumberOfPages();
+                    doc.setFontSize(8);
+                    doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
+                    doc.text(`Rico Plus by Franzoi Tech | Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, pageHeight - 10);
+                };
+
+                // --- CONSTRUÇÃO DO PDF ---
+                // Dashboard (Página 1)
+                doc.autoTable({
+                    startY: 40,
+                    margin: { left: 14, right: 106 }, // Lado esquerdo da página
+                    head: [['Resumo Geral', 'Valor']],
+                    body: [
+                        ['Total Ganhos', this.helpers.formatCurrency(pjTotal + pfTotal)],
+                        ['Total Gastos', this.helpers.formatCurrency(personalTotal + businessTotal)],
+                        [{ content: 'Saldo Final', styles: { fontStyle: 'bold', fillColor: '#f0f0f0' } }, { content: this.helpers.formatCurrency(balance), styles: { fontStyle: 'bold', fillColor: '#f0f0f0' } }]
+                    ],
+                    theme: 'grid',
+                    headStyles: { fillColor: [22, 160, 133] }
+                });
+
                 if (categoryBody.length > 0) {
                     doc.autoTable({
-                        startY: doc.lastAutoTable.finalY + 10,
-                        head: [['Gastos por Categoria (Pessoal)', 'Total']],
+                        startY: 40,
+                        margin: { left: 108, right: 14 }, // Lado direito da página
+                        head: [['Gastos por Categoria', 'Total']],
                         body: categoryBody,
                         theme: 'striped',
                         headStyles: { fillColor: [41, 128, 185] }
                     });
                 }
+                
+                if (chartImage) {
+                    const startY = Math.max(doc.lastAutoTable.finalY, 80); // Garante que o gráfico não sobreponha tabelas
+                    doc.addImage(chartImage, 'PNG', 14, startY + 5, 80, 80);
+                }
 
-                // Tabela de Transações
-                const transactionsBody = [];
-                monthData.pjEntries.forEach(e => transactionsBody.push(['-', 'Ganho PJ', e.description, '-', '-', e.amount.toFixed(2)]));
-                monthData.pfEntries.forEach(e => transactionsBody.push(['-', 'Ganho PF', e.description, '-', '-', e.amount.toFixed(2)]));
-                monthData.expenses.forEach((dayData, dayIndex) => {
-                    dayData.personalEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Pessoal', e.description, e.category, `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2)]));
-                    dayData.businessEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Empresa', e.description, '-', `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2)]));
-                });
-
+                // Tabela de Transações (Começa em nova página se necessário, ou abaixo do gráfico)
                 doc.autoTable({
-                    startY: doc.lastAutoTable.finalY + 10,
-                    head: [['Data', 'Tipo', 'Descrição', 'Categoria', 'Pagamento', 'Valor (R$)']],
+                    startY: 170, // Posição fixa para iniciar a tabela de transações
+                    head: [['Data', 'Tipo', 'Descrição', 'Cat.', 'Pag.', 'Valor (R$)']],
                     body: transactionsBody,
-                    theme: 'grid'
+                    theme: 'grid',
+                    didDrawPage: (data) => {
+                        addWatermark(doc);
+                        addHeaderAndFooter(data);
+                    },
+                    headStyles: { fillColor: [44, 62, 80] },
+                    margin: { top: 38, bottom: 20 }
                 });
+
+                // Adiciona o cabeçalho/rodapé na primeira página também, após tudo ser desenhado
+                const pageCount = doc.internal.getNumberOfPages();
+                for(let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    addWatermark(doc);
+                    addHeaderAndFooter({ pageNumber: i, pageCount: pageCount });
+                }
 
                 doc.save(`relatorio_${monthName}.pdf`);
             },
