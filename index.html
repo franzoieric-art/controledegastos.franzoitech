@@ -537,7 +537,6 @@
                 document.body.removeChild(link);
             },
 
-            // --- FUNÇÃO DE EXPORTAÇÃO PDF TOTALMENTE ATUALIZADA ---
             exportMonthToPDF(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
                 if (!monthData) { return; }
@@ -571,12 +570,13 @@
                     dayData.businessEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Empresa', e.description, '-', `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2).replace('.', ',')]));
                 });
                 
-                // --- GRÁFICO ---
+                // --- GRÁFICO --- CORREÇÃO APLICADA AQUI
                 let chartImage = null;
                 try {
-                    const chartCanvas = document.getElementById(`budgetPieChart-${monthIndex}`);
-                    if (chartCanvas) {
-                        chartImage = chartCanvas.toDataURL('image/png');
+                    // Captura o gráfico diretamente da instância do Chart.js, que é mais confiável
+                    const chartInstance = this.state.chartInstances.pie;
+                    if (chartInstance) {
+                        chartImage = chartInstance.toBase64Image('image/png', 1);
                     }
                 } catch(e) {
                     console.error("Erro ao converter gráfico para imagem:", e);
@@ -585,9 +585,9 @@
                 // --- FUNÇÕES AUXILIARES DE RENDERIZAÇÃO ---
                 const addWatermark = (doc) => {
                     doc.setFontSize(50);
-                    doc.setTextColor(220, 220, 220);
+                    doc.setTextColor(230, 230, 230); // Cor mais clara
                     doc.setFont('helvetica', 'bold');
-                    doc.text("Rico Plus by Franzoi Tech", pageWidth / 2, pageHeight / 2, {
+                    doc.text("Rico Plus by Franzoi Tech", pageWidth / 2, pageHeight / 1.8, {
                         angle: -45,
                         align: 'center'
                     });
@@ -595,7 +595,6 @@
                 };
                 
                 const addHeaderAndFooter = (data) => {
-                    // Cabeçalho
                     doc.setFontSize(16);
                     doc.setFont('helvetica', 'bold');
                     doc.text("Relatório Financeiro", 14, 20);
@@ -606,18 +605,17 @@
                     doc.setLineWidth(0.5);
                     doc.line(14, 30, pageWidth - 14, 30);
                     
-                    // Rodapé
                     const pageCount = doc.internal.getNumberOfPages();
                     doc.setFontSize(8);
-                    doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
+                    // --- CORREÇÃO DA HORA APLICADA AQUI ---
                     doc.text(`Rico Plus by Franzoi Tech | Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, pageHeight - 10);
+                    doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
                 };
 
                 // --- CONSTRUÇÃO DO PDF ---
-                // Dashboard (Página 1)
                 doc.autoTable({
                     startY: 40,
-                    margin: { left: 14, right: 106 }, // Lado esquerdo da página
+                    margin: { left: 14, right: 106 },
                     head: [['Resumo Geral', 'Valor']],
                     body: [
                         ['Total Ganhos', this.helpers.formatCurrency(pjTotal + pfTotal)],
@@ -631,7 +629,7 @@
                 if (categoryBody.length > 0) {
                     doc.autoTable({
                         startY: 40,
-                        margin: { left: 108, right: 14 }, // Lado direito da página
+                        margin: { left: 108, right: 14 },
                         head: [['Gastos por Categoria', 'Total']],
                         body: categoryBody,
                         theme: 'striped',
@@ -640,13 +638,12 @@
                 }
                 
                 if (chartImage) {
-                    const startY = Math.max(doc.lastAutoTable.finalY, 80); // Garante que o gráfico não sobreponha tabelas
-                    doc.addImage(chartImage, 'PNG', 14, startY + 5, 80, 80);
+                    const chartStartY = (doc.lastAutoTable.finalY || 40) + 10;
+                    doc.addImage(chartImage, 'PNG', 14, chartStartY, 90, 90);
                 }
 
-                // Tabela de Transações (Começa em nova página se necessário, ou abaixo do gráfico)
                 doc.autoTable({
-                    startY: 170, // Posição fixa para iniciar a tabela de transações
+                    startY: 180,
                     head: [['Data', 'Tipo', 'Descrição', 'Cat.', 'Pag.', 'Valor (R$)']],
                     body: transactionsBody,
                     theme: 'grid',
@@ -658,12 +655,11 @@
                     margin: { top: 38, bottom: 20 }
                 });
 
-                // Adiciona o cabeçalho/rodapé na primeira página também, após tudo ser desenhado
-                const pageCount = doc.internal.getNumberOfPages();
-                for(let i = 1; i <= pageCount; i++) {
+                const pageCountFinal = doc.internal.getNumberOfPages();
+                for(let i = 1; i <= pageCountFinal; i++) {
                     doc.setPage(i);
                     addWatermark(doc);
-                    addHeaderAndFooter({ pageNumber: i, pageCount: pageCount });
+                    addHeaderAndFooter({ pageNumber: i });
                 }
 
                 doc.save(`relatorio_${monthName}.pdf`);
