@@ -64,77 +64,25 @@
     <div id="app-screen" class="hidden">
         
         <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
-        <div class="flex justify-between items-center mb-6 flex-shrink-0">
-            <h2 class="text-2xl font-bold">Minha Conta</h2>
-            <button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
-        </div>
-        <div class="overflow-y-auto space-y-6">
-            <div>
-                <h3 class="text-lg font-semibold mb-3">Informações do Perfil</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label>
-                        <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field">
-                    </div>
-                    <div>
-                        <label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label>
-                        <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;">
-                    </div>
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                    <h2 class="text-2xl font-bold">Minha Conta</h2>
+                    <button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
                 </div>
-                 <button id="save-profile-btn" class="mt-4 w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações do Perfil</button>
-            </div>
-
-            <div class="border-t pt-6 relative" style="border-color: var(--border-color);">
-                
-                <div class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/50 dark:bg-black/50" style="backdrop-filter: blur(4px);">
-                    <div class="px-4 py-2 rounded-full font-semibold text-sm" style="background-color: var(--primary-color); color: white;">
-                        Em Breve
-                    </div>
-                </div>
-                <h3 class="text-xl font-bold mb-1">Conectar Assistente IA via WhatsApp</h3>
-                <p class="muted-text text-sm mb-4">Configure a integração para lançar despesas e interagir com seu painel diretamente do WhatsApp.</p>
-                
-                <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
-                    <h4 class="font-semibold">Passo 1: Suas Credenciais da Meta</h4>
-                    <p class="text-xs muted-text -mt-3">Insira as credenciais da sua API encontradas no <a href="#" class="underline" style="color: var(--primary-color);">Painel de Desenvolvedores</a>.</p>
+                <div class="overflow-y-auto space-y-6">
                     <div>
-                        <label for="whatsapp-phone-id" class="block text-sm font-medium muted-text mb-1">ID do Número de Telefone</label>
-                        <input type="text" id="whatsapp-phone-id" placeholder="Ex: 102030405060708" class="w-full p-3 input-field">
-                    </div>
-                    <div>
-                        <label for="whatsapp-token" class="block text-sm font-medium muted-text mb-1">Token de Acesso da API</label>
-                        <input type="password" id="whatsapp-token" placeholder="Cole seu token permanente aqui" class="w-full p-3 input-field">
-                    </div>
-                </div>
-
-                <div class="p-4 rounded-xl space-y-4 mt-4" style="background-color: var(--input-bg);">
-                    <h4 class="font-semibold">Passo 2: Configurar Webhook na Meta</h4>
-                    <p class="text-xs muted-text -mt-3">Copie os valores abaixo e cole-os na seção "Webhook" da sua aplicação na Meta.</p>
-                     <div>
-                        <label class="block text-sm font-medium muted-text mb-1">URL do Webhook (para colar na Meta)</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="whatsapp-webhook-url" class="w-full p-3 input-field" readonly>
-                            <button id="copy-webhook-url-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Copiar</button>
+                        <h3 class="text-lg font-semibold mb-3">Informações do Perfil</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label>
+                                <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field">
+                            </div>
+                            <div>
+                                <label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label>
+                                <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;">
+                            </div>
                         </div>
                     </div>
-                     <div>
-                        <label class="block text-sm font-medium muted-text mb-1">Token de Verificação do Webhook (para colar na Meta)</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="whatsapp-verify-token" class="w-full p-3 input-field" readonly>
-                             <button id="generate-verify-token-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Gerar</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-4 flex items-center justify-between">
-                    <div class="text-sm muted-text">Status: <span id="whatsapp-status" class="font-semibold" style="color: var(--primary-color);">Indisponível</span></div>
-                    <button id="save-integration-btn" class="px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);" disabled>Salvar Configuração</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
                     <div class="border-t pt-6" style="border-color: var(--border-color);">
                         <h3 class="text-xl font-bold mb-1">Conectar Assistente IA via WhatsApp</h3>
