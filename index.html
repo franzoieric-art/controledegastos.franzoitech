@@ -140,13 +140,11 @@
         .prose li {
             margin-bottom: 0.5em;
         }
-
-        /* CSS ADICIONADO para a nova barra de navegação */
         .main-nav {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1.5rem; /* Espaço entre os botões */
+            gap: 1.5rem;
         }
         .main-nav a {
             text-decoration: none;
@@ -162,7 +160,7 @@
     
     <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
 
-        <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-2xl">
+    <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-2xl">
         <div class="text-center mb-6"><div class="flex justify-center mb-4"><iframe src="https://drive.google.com/file/d/1z4DLbMUR9cp3cFz1fxS-KXBd3Vs1FO6F/preview" width="100" height="100" allow="autoplay" style="border:0;"></iframe></div><h1 id="auth-title" class="text-2xl font-bold">Acesso ao Painel</h1><p class="muted-text">Faça login ou crie sua conta.</p></div>
         <div class="space-y-4"><input type="email" id="email-input" placeholder="Email" class="w-full p-3 input-field"><input type="password" id="password-input" placeholder="Senha" class="w-full p-3 input-field"><input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 input-field hidden"></div>
         <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
@@ -170,8 +168,8 @@
         <div class="mt-4 text-center"><a href="#" id="toggle-auth-mode-link" class="text-sm muted-text hover:underline">Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span></a></div>
     </div>
 
-        <div id="app-screen" class="hidden">
-                <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+    <div id="app-screen" class="hidden">
+        <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center mb-6 flex-shrink-0">
                     <h2 class="text-2xl font-bold">Gerenciar</h2>
@@ -279,7 +277,7 @@
             apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0", 
             authDomain: "controle-de-gastos-74daf.firebaseapp.com", 
             projectId: "controle-de-gastos-74daf", 
-            storageBucket: "controle-de-gastos-74daf.appspot.com", // CORRIGIDO
+            storageBucket: "controle-de-gastos-74daf.appspot.com",
             messagingSenderId: "331667008487", 
             appId: "1:331667008487:web:c5200f64ac27d0c32feb42" 
         };
@@ -335,7 +333,6 @@
         forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; if (!email) { showError('Por favor, insira seu email para recuperar a senha.'); return; } sendPasswordResetEmail(auth, email).then(() => { showError('Email de recuperação enviado!'); }).catch((error) => { showError('Não foi possível enviar o email.'); }); });
         document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth); });
 
-        // NOVO: Botão de Login na navegação
         document.getElementById('login-nav-btn').addEventListener('click', () => {
             document.getElementById('app-screen').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
