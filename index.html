@@ -194,43 +194,53 @@
         </div>
 
         <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
-                <div class="flex justify-between items-center mb-6 flex-shrink-0">
-                    <h2 class="text-2xl font-bold">Gerenciar</h2>
-                    <button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto">
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3">Cartões de Crédito</h3>
-                        <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
-                        <div id="card-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3">Categorias e Metas</h3>
-                        <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
-                        <div id="category-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-                    <div class="lg:col-span-2">
-                        <h3 class="text-lg font-semibold mb-3">Lançamentos Recorrentes</h3>
-                        <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);">
-                            <input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field">
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field">
-                                <input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field">
-                            </div>
-                            <select id="recurring-type" class="w-full p-2 input-field"></select>
-                            <div id="recurring-expense-fields" class="space-y-2 hidden">
-                                <select id="recurring-category" class="w-full p-2 input-field"></select>
-                                <select id="recurring-payment" class="w-full p-2 input-field"></select>
-                                <select id="recurring-card" class="w-full p-2 input-field hidden"></select>
-                            </div>
-                            <button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button>
-                        </div>
-                        <div id="recurring-list" class="flex flex-col gap-2 max-h-60 overflow-y-auto"></div>
-                    </div>
-                </div>
-            </div>
+    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+        <div class="flex justify-between items-center mb-6 flex-shrink-0">
+            <h2 class="text-2xl font-bold">Gerenciar</h2>
+            <button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
         </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto">
+            
+            <div>
+                <h3 class="text-lg font-semibold mb-3">Cartões de Crédito</h3>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field">
+                    <button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button>
+                </div>
+                <div id="card-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold mb-3">Categorias e Metas</h3>
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field">
+                    <button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button>
+                </div>
+                <div id="category-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold mb-3">Lançamentos Recorrentes</h3>
+                <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);">
+                    <input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field">
+                        <input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field">
+                    </div>
+                    <select id="recurring-type" class="w-full p-2 input-field"></select>
+                    <div id="recurring-expense-fields" class="space-y-2 hidden">
+                        <select id="recurring-category" class="w-full p-2 input-field"></select>
+                        <select id="recurring-payment" class="w-full p-2 input-field"></select>
+                        <select id="recurring-card" class="w-full p-2 input-field hidden"></select>
+                    </div>
+                    <button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button>
+                </div>
+                <div id="recurring-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+            </div>
+            
+        </div>
+    </div>
+</div>
         
         <div id="ai-analysis-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
