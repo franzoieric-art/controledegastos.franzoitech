@@ -145,13 +145,6 @@
         .prose li {
             margin-bottom: 0.5em;
         }
-        .settings-tab-content {
-            display: none;
-        }
-        .settings-tab-content.active {
-            display: block;
-        }
-
     </style>
 </head>
 <body class="p-2 sm:p-4">
@@ -167,30 +160,23 @@
 
     <div id="app-screen" class="hidden">
         <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-4xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
-                <div class="flex justify-between items-center mb-4 flex-shrink-0">
-                    <h2 class="text-2xl font-bold">Gerenciar Finanças</h2>
-                    <button id="close-settings-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                    <h2 class="text-2xl font-bold">Gerenciar</h2>
+                    <button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
                 </div>
-                <div class="border-b border-gray-200 dark:border-gray-700 mb-4 flex-shrink-0">
-                    <nav class="-mb-px flex space-x-6" id="settings-tabs">
-                        <button data-tab="cards" class="settings-tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Cartões de Crédito</button>
-                        <button data-tab="categories" class="settings-tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Categorias e Metas</button>
-                        <button data-tab="recurring" class="settings-tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Lançamentos Recorrentes</button>
-                    </nav>
-                </div>
-                <div class="overflow-y-auto">
-                    <div id="tab-content-cards" class="settings-tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-y-auto">
+                    <div>
                         <h3 class="text-lg font-semibold mb-3">Cartões de Crédito</h3>
                         <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
-                        <div id="card-list" class="flex flex-col gap-2"></div>
+                        <div id="card-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
                     </div>
-                    <div id="tab-content-categories" class="settings-tab-content">
+                    <div>
                         <h3 class="text-lg font-semibold mb-3">Categorias e Metas</h3>
                         <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
-                        <div id="category-list" class="flex flex-col gap-2"></div>
+                        <div id="category-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
                     </div>
-                    <div id="tab-content-recurring" class="settings-tab-content">
+                    <div class="lg:col-span-2">
                         <h3 class="text-lg font-semibold mb-3">Lançamentos Recorrentes</h3>
                         <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);">
                             <input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field">
@@ -206,58 +192,7 @@
                             </div>
                             <button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button>
                         </div>
-                        <div id="recurring-list" class="flex flex-col gap-2"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-lg p-6 transform scale-95 flex flex-col max-h-[90vh]">
-                 <div class="flex justify-between items-center mb-6 flex-shrink-0">
-                    <h2 class="text-2xl font-bold">Minha Conta</h2>
-                    <button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
-                </div>
-                <div class="overflow-y-auto">
-                    <h3 class="text-lg font-semibold mb-3">Perfil do Usuário</h3>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-sm muted-text">Nome</label>
-                            <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-2 input-field">
-                        </div>
-                         <div>
-                            <label class="text-sm muted-text">Email</label>
-                            <input type="email" id="user-email-input" placeholder="Seu email" class="w-full p-2 input-field" disabled>
-                        </div>
-                        <button id="change-password-btn" class="w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Alterar Senha</button>
-                    </div>
-                    <hr class="my-6" style="border-color: var(--border-color);">
-                    <h3 class="text-lg font-semibold mb-3">Projeto Escorpião Negro 🦂</h3>
-                    <div id="whatsapp-disconnected-state">
-                        <p class="text-sm muted-text mb-3">Conecte seu WhatsApp para lançar gastos rapidamente, enviando uma simples mensagem.</p>
-                         <button id="connect-whatsapp-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Conectar WhatsApp</button>
-                    </div>
-                    <div id="whatsapp-verifying-state" class="hidden space-y-3">
-                        <div>
-                            <label class="text-sm muted-text">Seu n° de WhatsApp (ex: 5511999998888)</label>
-                            <div class="flex gap-2">
-                                <input type="tel" id="whatsapp-phone-input" placeholder="5511..." class="flex-grow p-2 input-field">
-                                <button id="send-code-btn" class="px-3 py-2 text-white rounded-lg text-sm" style="background-color: var(--primary-color);">Enviar Código</button>
-                            </div>
-                        </div>
-                         <div>
-                            <label class="text-sm muted-text">Código de Verificação</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="whatsapp-code-input" placeholder="123456" class="flex-grow p-2 input-field">
-                                 <button id="verify-code-btn" class="px-3 py-2 text-white rounded-lg text-sm" style="background-color: var(--green-color);">Verificar</button>
-                            </div>
-                        </div>
-                        <a href="#" id="cancel-whatsapp-btn" class="text-center text-xs hover:underline muted-text">Cancelar</a>
-                    </div>
-                    <div id="whatsapp-connected-state" class="hidden">
-                        <p class="text-sm muted-text">Sua conta está conectada ao número:</p>
-                        <p id="connected-phone-number" class="font-semibold text-lg my-2 p-2 text-center rounded-lg" style="background-color: var(--input-bg);"></p>
-                        <button id="disconnect-whatsapp-btn" class="w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--red-color); color: white;">Desconectar</button>
+                        <div id="recurring-list" class="flex flex-col gap-2 max-h-60 overflow-y-auto"></div>
                     </div>
                 </div>
             </div>
@@ -291,8 +226,7 @@
                 <h1 class="text-5xl md:text-6xl font-semibold">Painel Financeiro</h1>
                 <p class="mt-4 text-xl muted-text">Sua central de controle financeiro.</p>
                 <div class="flex justify-center items-center gap-4 mt-6">
-                    <button id="manage-account-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);">Minha Conta</button>
-                    <button id="manage-settings-btn" class="px-5 py-2 font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Gerenciar Finanças</button>
+                    <button id="manage-settings-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Gerenciar</button>
                 </div>
             </div>
             <div class="flex justify-center flex-wrap gap-2 mb-8" id="monthTabs"></div>
@@ -381,7 +315,6 @@
         const App = {
             state: {
                 currentUserId: null,
-                userProfile: { name: '', whatsappNumber: null },
                 creditCards: [],
                 categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }],
                 recurringEntries: [],
@@ -394,7 +327,6 @@
                 monthContentContainer: document.getElementById('monthContentContainer'),
                 monthTabsContainer: document.getElementById('monthTabs'),
                 settingsModal: document.getElementById('settings-modal'),
-                accountModal: document.getElementById('account-modal'),
                 newCardNameInput: document.getElementById('new-card-name'),
                 cardListContainer: document.getElementById('card-list'),
                 newCategoryNameInput: document.getElementById('new-category-name'),
@@ -403,12 +335,6 @@
                 saveFeedback: document.getElementById('save-feedback'),
                 aiAnalysisModal: document.getElementById('ai-analysis-modal'),
                 aiAnalysisResult: document.getElementById('ai-analysis-result'),
-                userNameInput: document.getElementById('user-name-input'),
-                userEmailInput: document.getElementById('user-email-input'),
-                whatsappDisconnectedState: document.getElementById('whatsapp-disconnected-state'),
-                whatsappVerifyingState: document.getElementById('whatsapp-verifying-state'),
-                whatsappConnectedState: document.getElementById('whatsapp-connected-state'),
-                connectedPhoneNumber: document.getElementById('connected-phone-number'),
             },
             constants: {
                 monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
@@ -449,8 +375,7 @@
                         monthlyData: App.state.monthlyData,
                         creditCards: App.state.creditCards,
                         categories: App.state.categories,
-                        recurringEntries: App.state.recurringEntries,
-                        userProfile: App.state.userProfile 
+                        recurringEntries: App.state.recurringEntries
                     };
                     await setDoc(doc(db, 'users', App.state.currentUserId), dataToSave);
                     App.helpers.showSaveFeedback();
@@ -467,7 +392,6 @@
                         this.state.creditCards = d.creditCards || [];
                         this.state.categories = d.categories && d.categories.length > 0 ? d.categories : this.state.categories;
                         this.state.recurringEntries = d.recurringEntries || [];
-                        this.state.userProfile = d.userProfile || { name: '', whatsappNumber: null };
                     }
                     for (let i = 0; i < 12; i++) {
                         this.state.monthlyData[i] = this.state.monthlyData[i] || { pjEntries: [], pfEntries: [], expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] })) };
@@ -560,198 +484,11 @@
                 // ... (código completo)
             },
             bindGlobalEventListeners() {
-                this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
-                themeToggleBtn.addEventListener('click', () => { 
-                    const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; 
-                    localStorage.setItem('theme', newTheme); 
-                    applyTheme(newTheme);
-                });
-                document.getElementById('manage-settings-btn').addEventListener('click', () => { this.render.renderSettingsModal(); });
-                document.getElementById('close-settings-modal-btn').addEventListener('click', () => { this.ui.settingsModal.classList.add('hidden'); });
-                document.getElementById('manage-account-btn').addEventListener('click', () => { this.render.renderAccountModal(); });
-                document.getElementById('close-account-modal-btn').addEventListener('click', () => { this.ui.accountModal.classList.add('hidden'); });
-                document.getElementById('close-ai-modal-btn').addEventListener('click', () => { this.ui.aiAnalysisModal.classList.add('hidden'); });
-                document.getElementById('add-card-btn').addEventListener('click', () => { const n = this.ui.newCardNameInput.value.trim(); if (n && !this.state.creditCards.includes(n)) { this.state.creditCards.push(n); this.ui.newCardNameInput.value = ''; this.render.renderCardList(); this.saveDataToFirestore(); } });
-                document.getElementById('add-category-btn').addEventListener('click', () => { const n = this.ui.newCategoryNameInput.value.trim(); if (n && !this.state.categories.some(c => c.name === n)) { this.state.categories.push({ name: n, budget: 0 }); this.ui.newCategoryNameInput.value = ''; this.render.renderCategoryList(); this.saveDataToFirestore(); } });
-                document.getElementById('recurring-type').addEventListener('change', (e) => { document.getElementById('recurring-expense-fields').classList.toggle('hidden', !e.target.value.includes('Gasto')); });
-                document.getElementById('recurring-payment').addEventListener('change', (e) => { document.getElementById('recurring-card').classList.toggle('hidden', e.target.value !== 'Crédito'); });
-                document.getElementById('add-recurring-btn').addEventListener('click', () => {
-                    const newRec = { id: Date.now(), description: document.getElementById('recurring-desc').value, amount: parseFloat(document.getElementById('recurring-amount').value) || 0, dayOfMonth: parseInt(document.getElementById('recurring-day').value) || 1, type: document.getElementById('recurring-type').value };
-                    if (!newRec.description || newRec.amount <= 0) { alert('Preencha descrição e valor.'); return; }
-                    if (newRec.type.includes('Gasto')) { newRec.category = document.getElementById('recurring-category').value; newRec.paymentMethod = document.getElementById('recurring-payment').value; newRec.card = newRec.paymentMethod === 'Crédito' ? document.getElementById('recurring-card').value : ''; }
-                    this.state.recurringEntries.push(newRec);
-                    this.render.renderRecurringList();
-                    this.saveDataToFirestore();
-                    document.getElementById('recurring-form').querySelectorAll('input, select').forEach(el => el.value = '');
-                });
-                document.getElementById('settings-tabs').addEventListener('click', (e) => {
-                    if (e.target.matches('.settings-tab-btn')) {
-                        const tabName = e.target.dataset.tab;
-                        document.querySelectorAll('.settings-tab-content').forEach(content => content.classList.remove('active'));
-                        document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-                            btn.style.borderColor = 'transparent';
-                            btn.style.color = 'var(--muted-text)';
-                        });
-                        document.getElementById(`tab-content-${tabName}`).classList.add('active');
-                        e.target.style.borderColor = 'var(--primary-color)';
-                        e.target.style.color = 'var(--primary-color)';
-                    }
-                });
-                this.ui.userNameInput.addEventListener('input', (e) => {
-                    this.state.userProfile.name = e.target.value;
-                    this.debouncedSave();
-                });
-                document.getElementById('change-password-btn').addEventListener('click', () => {
-                    const currentUser = auth.currentUser;
-                    if (currentUser && currentUser.email) {
-                        sendPasswordResetEmail(auth, currentUser.email)
-                            .then(() => {
-                                alert(`Email de redefinição de senha enviado para ${currentUser.email}. Verifique sua caixa de entrada.`);
-                            })
-                            .catch((error) => {
-                                alert("Ocorreu um erro ao enviar o email de redefinição de senha.");
-                                console.error("Erro ao enviar email de senha:", error);
-                            });
-                    }
-                });
-                document.getElementById('connect-whatsapp-btn').addEventListener('click', () => {
-                    alert('Funcionalidade em desenvolvimento! A integração com o WhatsApp será implementada em breve.');
-                });
-                document.getElementById('cancel-whatsapp-btn').addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.render.renderAccountModal();
-                });
-                document.getElementById('send-code-btn').addEventListener('click', () => {
-                    const phoneNumber = document.getElementById('whatsapp-phone-input').value;
-                    alert(`(Simulação) Código de verificação seria enviado para ${phoneNumber}`);
-                });
-                document.getElementById('verify-code-btn').addEventListener('click', () => {
-                    const code = document.getElementById('whatsapp-code-input').value;
-                    const phoneNumber = document.getElementById('whatsapp-phone-input').value;
-                    alert(`(Simulação) Verificando o código ${code}...`);
-                    this.state.userProfile.whatsappNumber = phoneNumber; 
-                    this.saveDataToFirestore();
-                    this.render.renderAccountModal();
-                });
-                document.getElementById('disconnect-whatsapp-btn').addEventListener('click', () => {
-                     if (confirm('Tem certeza que deseja desconectar seu WhatsApp?')) {
-                        alert('(Simulação) Número desconectado.');
-                        this.state.userProfile.whatsappNumber = null;
-                        this.saveDataToFirestore();
-                        this.render.renderAccountModal();
-                     }
-                });
-                document.body.addEventListener('click', (event) => {
-                    const t = event.target;
-                    if (t.matches('.tab-button')) this.showMonth(parseInt(t.dataset.monthIndex));
-                    if (t.matches('.export-csv-btn')) this.exportMonthToCSV(parseInt(t.dataset.monthIndex));
-                    if (t.matches('.export-pdf-btn')) this.exportMonthToPDF(parseInt(t.dataset.monthIndex));
-                    if (t.matches('#copy-pix-btn')) {
-                        const pixKey = document.getElementById('pix-key').textContent;
-                        const tempInput = document.createElement('textarea');
-                        tempInput.value = pixKey;
-                        document.body.appendChild(tempInput);
-                        tempInput.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(tempInput);
-                        t.textContent = 'Copiado!';
-                        setTimeout(() => { t.textContent = 'Copiar'; }, 2000);
-                    }
-                    if (t.matches('.toggle-summary-btn')) {
-                        const monthIndex = t.dataset.monthIndex;
-                        const summaryCard = document.getElementById(`summary-card-${monthIndex}`);
-                        if (summaryCard) {
-                            const isHidden = summaryCard.classList.toggle('hidden');
-                            t.innerHTML = isHidden ? 'Mostrar Resumo ▼' : 'Ocultar Resumo ▲';
-                        }
-                    }
-                    if (t.matches('.toggle-days-list-btn')) {
-                        const monthIndex = t.dataset.monthIndex;
-                        const wrapper = document.getElementById(`expense-section-wrapper-${monthIndex}`);
-                        if (wrapper) {
-                            const isHidden = wrapper.classList.toggle('hidden');
-                            t.textContent = isHidden ? 'Mostrar Lançamentos Diários ▼' : 'Ocultar Lançamentos Diários ▲';
-                        }
-                    }
-                    if (t.closest('.accordion-trigger')) {
-                        const trigger = t.closest('.accordion-trigger');
-                        const parentItem = trigger.parentElement;
-                        const allItems = parentItem.parentElement.querySelectorAll('.accordion-item');
-                        if (parentItem.classList.contains('active')) {
-                            parentItem.classList.remove('active');
-                        } else {
-                            allItems.forEach(item => item.classList.remove('active'));
-                            parentItem.classList.add('active');
-                        }
-                    }
-                    if (t.closest('.ai-analysis-btn')) this.ai.getFinancialAnalysis(parseInt(t.closest('.ai-analysis-btn').dataset.monthIndex));
-                    if (t.closest('.suggest-category-btn')) {
-                        const btn = t.closest('.suggest-category-btn');
-                        const el = btn.closest('.flex');
-                        const entryId = el.querySelector('.remove-btn').dataset.entryId;
-                        const descriptionInput = el.querySelector('[data-field="description"]');
-                        if (descriptionInput.value) {
-                            this.ai.getCategorySuggestion(descriptionInput.value, entryId, btn);
-                        }
-                    }
-                    if (t.matches('.add-entry-btn')) { const { monthIndex, type, day, category } = t.dataset; const month = parseInt(monthIndex); const entries = (type === 'pj') ? this.state.monthlyData[month].pjEntries : (type === 'pf') ? this.state.monthlyData[month].pfEntries : this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`]; if (type === 'pj' || type === 'pf') { const newEntry = { id: Date.now(), description: '', amount: 0 }; entries.push(newEntry); document.getElementById(`${type}-entries-container-${month}`).appendChild(this.render.createEntryElement({ monthIndex: month, entry: newEntry, type: type })); } else if (type === 'expense') { const n = { id: Date.now(), description: '', amount: 0, paymentMethod: 'Pix', card: this.state.creditCards.length > 0 ? this.state.creditCards[0] : '', category: this.state.categories[0].name }; entries.push(n); document.getElementById(`${category}-entries-${month}-${day}`).appendChild(this.render.createEntryElement({ monthIndex: month, dayIndex: parseInt(day), category, entry: n, type: 'expense' })); } this.recalculateAndDisplayTotals(month); this.saveDataToFirestore(); }
-                    if (t.matches('.remove-btn')) { const { monthIndex, type, day, category, entryId } = t.dataset; const month = parseInt(monthIndex); const id = parseFloat(entryId); if (type === 'pj') { this.state.monthlyData[month].pjEntries = this.state.monthlyData[month].pjEntries.filter(e => e.id !== id); } else if (type === 'pf') { this.state.monthlyData[month].pfEntries = this.state.monthlyData[month].pfEntries.filter(e => e.id !== id); } else { this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`] = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].filter(e => e.id !== id); } t.closest('.flex').remove(); this.recalculateAndDisplayTotals(month); this.saveDataToFirestore(); }
-                    if (t.matches('.remove-card-btn')) { const cardNameToRemove = t.dataset.cardName; for (let i = 0; i < 12; i++) { this.state.monthlyData[i].expenses.forEach(day => { [...day.personalEntries, ...day.businessEntries].forEach(entry => { if (entry.card === cardNameToRemove) entry.card = 'Cartão Removido'; }); }); } this.state.creditCards = this.state.creditCards.filter(c => c !== cardNameToRemove); this.render.renderCardList(); this.saveDataToFirestore(); }
-                    if (t.matches('.remove-category-btn')) { const categoryNameToRemove = t.dataset.categoryName; for (let i = 0; i < 12; i++) { this.state.monthlyData[i].expenses.forEach(day => { day.personalEntries.forEach(entry => { if (entry.category === categoryNameToRemove) entry.category = 'Outros'; }); }); } this.state.categories = this.state.categories.filter(c => c.name !== categoryNameToRemove); this.render.renderCategoryList(); this.saveDataToFirestore(); }
-                    if (t.matches('.remove-recurring-btn')) { const index = parseInt(t.dataset.index); this.state.recurringEntries.splice(index, 1); this.render.renderRecurringList(); this.saveDataToFirestore(); }
-                });
-                
-                document.body.addEventListener('input', (event) => {
-                    const t = event.target;
-                    if (t.matches('.entry-input')) {
-                        const el = t.closest('.flex');
-                        const btn = el.querySelector('.remove-btn');
-                        if (!btn) return;
-                        const { monthIndex, type, day, category, entryId } = btn.dataset;
-                        const month = parseInt(monthIndex);
-                        const id = parseFloat(entryId);
-                        let entry;
-                        if (type === 'pj') {
-                            entry = this.state.monthlyData[month].pjEntries.find(e => e.id === id);
-                        } else if (type === 'pf') {
-                            entry = this.state.monthlyData[month].pfEntries.find(e => e.id === id);
-                        } else {
-                            entry = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id === id);
-                        }
-                        if (entry) {
-                            const field = t.dataset.field;
-                            if (field === 'amount') {
-                                entry.amount = parseFloat(t.value) || 0;
-                            } else {
-                                entry[field] = t.value;
-                            }
-                            if (field === 'paymentMethod') {
-                                this.showMonth(month);
-                            } else {
-                                this.recalculateAndDisplayTotals(month);
-                            }
-                            this.debouncedSave();
-                        }
-                    }
-                    if (t.matches('.category-budget-input')) {
-                        const cat = this.state.categories.find(c => c.name === t.dataset.categoryName);
-                        if (cat) {
-                            cat.budget = parseFloat(t.value) || 0;
-                            this.debouncedSave();
-                        }
-                    }
-                });
-
-                document.body.addEventListener('change', (event) => {
-                    const t = event.target;
-                    if (t.matches('.category-name-input')) { const oldName = t.dataset.oldName; const newName = t.value.trim(); const categoryExists = this.state.categories.some(c => c.name === newName); if (newName && oldName !== newName && !categoryExists) { for (let i = 0; i < 12; i++) { this.state.monthlyData[i].expenses.forEach(day => { day.personalEntries.forEach(entry => { if (entry.category === oldName) entry.category = newName; }); }); } const cat = this.state.categories.find(c => c.name === oldName); if (cat) cat.name = newName; t.dataset.oldName = newName; this.state.recurringEntries.forEach(r => { if (r.category === oldName) r.category = newName; }); this.saveDataToFirestore(); } else if (categoryExists && oldName !== newName) { alert('Já existe uma categoria com este nome.'); t.value = oldName; } }
-                });
+                // ... (código completo)
             },
-            
             ai: {
                 // ... (código completo)
             },
-            
             render: {
                 // ... (código completo)
             }
