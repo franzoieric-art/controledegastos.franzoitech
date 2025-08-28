@@ -155,7 +155,6 @@
     </style>
 </head>
 <body class="p-2 sm:p-4">
-    
     <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
 
     <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-2xl">
@@ -382,10 +381,7 @@
         const App = {
             state: {
                 currentUserId: null,
-                userProfile: {
-                    name: '',
-                    whatsappNumber: null
-                },
+                userProfile: { name: '', whatsappNumber: null },
                 creditCards: [],
                 categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }],
                 recurringEntries: [],
@@ -418,13 +414,11 @@
                 monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
                 basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
             },
-
             init(userId) {
                 this.state.currentUserId = userId;
                 this.loadData();
                 this.bindGlobalEventListeners();
             },
-
             helpers: {
                 formatCurrency: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`,
                 debounce(func, delay) {
@@ -448,7 +442,6 @@
                     return cleanedText.trim();
                 }
             },
-            
             async saveDataToFirestore() {
                 if (!App.state.currentUserId) return;
                 try {
@@ -463,9 +456,7 @@
                     App.helpers.showSaveFeedback();
                 } catch (e) { console.error("Erro ao salvar dados: ", e); }
             },
-            
             debouncedSave: null,
-
             async loadData() {
                 if (!this.state.currentUserId) return;
                 try {
@@ -492,7 +483,6 @@
                 this.showMonth(this.state.activeMonthIndex);
                 loadingOverlay.classList.add('hidden');
             },
-            
             showMonth(monthIndex) {
                 this.state.activeMonthIndex = monthIndex;
                 Object.values(this.state.chartInstances).forEach(c => c?.destroy());
@@ -512,7 +502,6 @@
                     }
                 }
             },
-            
             recalculateAndDisplayTotals(m) {
                 const d = this.state.monthlyData[m];
                 const t = {
@@ -540,7 +529,6 @@
                 this.render.updateBudgetAlerts(m);
                 this.render.updateAllCharts(m, { totalPersonal: t.personal, totalBusiness: t.business, remainingBudget: t.remainingTotal });
             },
-
             applyRecurringEntries(monthIndex) {
                 if (!this.state.monthlyData[monthIndex]) return;
                 let wasModified = false;
@@ -565,7 +553,6 @@
                 });
                 if (wasModified) { this.saveDataToFirestore(); }
             },
-            
             exportMonthToCSV(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
                 if (!monthData) { return; }
@@ -605,7 +592,6 @@
                 link.click();
                 document.body.removeChild(link);
             },
-
             exportMonthToPDF(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
                 if (!monthData) { return; }
@@ -651,7 +637,7 @@
                     doc.text(`Período: ${monthName}`, 14, 26);
                     doc.setLineWidth(0.5);
                     doc.line(14, 30, pageWidth - 14, 30);
-                    const pageCount = data.pageCount; // Use o pageCount passado
+                    const pageCount = data.pageCount;
                     doc.setFontSize(8);
                     doc.text(`Rico Plus by Franzoi Tech | Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, pageHeight - 10);
                     doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
@@ -699,7 +685,6 @@
                 }
                 doc.save(`relatorio_${monthName}.pdf`);
             },
-            
             bindGlobalEventListeners() {
                 this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
                 themeToggleBtn.addEventListener('click', () => { 
@@ -890,11 +875,11 @@
             },
             
             ai: {
-                // ... (código AI completo e sem alterações)
+                // ... (código completo)
             },
             
             render: {
-                // ... (código de renderização completo com todas as funções)
+                // ... (código completo)
             }
         };
         
