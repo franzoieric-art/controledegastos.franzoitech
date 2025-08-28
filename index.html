@@ -468,32 +468,45 @@
             },
             
             bindGlobalEventListeners() {
-                this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
-                themeToggleBtn.addEventListener('click', () => { const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); });
-                
-                document.getElementById('manage-settings-btn').addEventListener('click', () => { this.render.renderSettingsModal(); });
-                document.getElementById('close-modal-btn').addEventListener('click', () => { this.ui.settingsModal.classList.add('hidden'); this.showMonth(this.state.activeMonthIndex); });
-                document.getElementById('manage-account-btn').addEventListener('click', () => { this.render.renderAccountModal(); });
-                document.getElementById('close-account-modal-btn').addEventListener('click', () => { this.ui.accountModal.classList.add('hidden'); });
+    this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
+    themeToggleBtn.addEventListener('click', () => { const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); });
+    
+    // Listeners do modal de Gerenciamento
+    document.getElementById('manage-settings-btn').addEventListener('click', () => { this.render.renderSettingsModal(); });
+    document.getElementById('close-modal-btn').addEventListener('click', () => { this.ui.settingsModal.classList.add('hidden'); this.showMonth(this.state.activeMonthIndex); });
+    
+    // Listeners do modal da Conta
+    document.getElementById('manage-account-btn').addEventListener('click', () => { this.render.renderAccountModal(); });
+    document.getElementById('close-account-modal-btn').addEventListener('click', () => { this.ui.accountModal.classList.add('hidden'); });
 
-                document.getElementById('save-integration-btn').addEventListener('click', () => {
-                    App.state.profile.name = App.ui.userNameInput.value;
-                    const wa = App.state.integrations.whatsapp;
-                    wa.phoneNumberId = App.ui.whatsappPhoneId.value;
-                    wa.accessToken = App.ui.whatsappToken.value;
-                    wa.webhookVerifyToken = App.ui.whatsappVerifyToken.value;
-                    this.saveDataToFirestore();
-                    this.render.renderAccountModal();
-                });
-                document.getElementById('generate-verify-token-btn').addEventListener('click', () => {
-                    const newToken = this.helpers.generateRandomToken();
-                    App.ui.whatsappVerifyToken.value = newToken;
-                });
-                document.getElementById('copy-webhook-url-btn').addEventListener('click', (e) => {
-                    navigator.clipboard.writeText(App.ui.whatsappWebhookUrl.value);
-                    e.target.textContent = 'Copiado!';
-                    setTimeout(() => { e.target.textContent = 'Copiar'; }, 2000);
-                });
+    // --- CORREÇÃO ADICIONADA AQUI ---
+    // Conecta a ação de salvar ao botão de perfil
+    document.getElementById('save-profile-btn').addEventListener('click', () => {
+        this.state.profile.name = this.ui.userNameInput.value;
+        this.saveDataToFirestore();
+    });
+    // --- FIM DA CORREÇÃO ---
+
+    // Listeners da Integração WhatsApp (permanecem para uso futuro)
+    document.getElementById('save-integration-btn').addEventListener('click', () => {
+        // Esta lógica só será executada quando o botão for habilitado no futuro
+        const wa = this.state.integrations.whatsapp;
+        wa.phoneNumberId = this.ui.whatsappPhoneId.value;
+        wa.accessToken = this.ui.whatsappToken.value;
+        wa.webhookVerifyToken = this.ui.whatsappVerifyToken.value;
+        this.saveDataToFirestore();
+        this.render.renderAccountModal();
+    });
+    document.getElementById('generate-verify-token-btn').addEventListener('click', () => {
+        const newToken = this.helpers.generateRandomToken();
+        this.ui.whatsappVerifyToken.value = newToken;
+    });
+    document.getElementById('copy-webhook-url-btn').addEventListener('click', (e) => {
+        navigator.clipboard.writeText(this.ui.whatsappWebhookUrl.value);
+        e.target.textContent = 'Copiado!';
+        setTimeout(() => { e.target.textContent = 'Copiar'; }, 2000);
+    });
+}
 
                 document.getElementById('close-ai-modal-btn').addEventListener('click', () => { this.ui.aiAnalysisModal.classList.add('hidden'); });
                 document.getElementById('add-card-btn').addEventListener('click', () => { const n = this.ui.newCardNameInput.value.trim(); if (n && !this.state.creditCards.includes(n)) { this.state.creditCards.push(n); this.ui.newCardNameInput.value = ''; this.render.renderCardList(); this.saveDataToFirestore(); } });
