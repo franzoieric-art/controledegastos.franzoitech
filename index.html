@@ -707,11 +707,15 @@
                     localStorage.setItem('theme', newTheme); 
                     applyTheme(newTheme);
                 });
+                
+                // Listeners dos Modais
                 document.getElementById('manage-settings-btn').addEventListener('click', () => { this.render.renderSettingsModal(); });
                 document.getElementById('close-settings-modal-btn').addEventListener('click', () => { this.ui.settingsModal.classList.add('hidden'); });
                 document.getElementById('manage-account-btn').addEventListener('click', () => { this.render.renderAccountModal(); });
                 document.getElementById('close-account-modal-btn').addEventListener('click', () => { this.ui.accountModal.classList.add('hidden'); });
                 document.getElementById('close-ai-modal-btn').addEventListener('click', () => { this.ui.aiAnalysisModal.classList.add('hidden'); });
+
+                // Listeners do Modal "Gerenciar Finanças"
                 document.getElementById('add-card-btn').addEventListener('click', () => { const n = this.ui.newCardNameInput.value.trim(); if (n && !this.state.creditCards.includes(n)) { this.state.creditCards.push(n); this.ui.newCardNameInput.value = ''; this.render.renderCardList(); this.saveDataToFirestore(); } });
                 document.getElementById('add-category-btn').addEventListener('click', () => { const n = this.ui.newCategoryNameInput.value.trim(); if (n && !this.state.categories.some(c => c.name === n)) { this.state.categories.push({ name: n, budget: 0 }); this.ui.newCategoryNameInput.value = ''; this.render.renderCategoryList(); this.saveDataToFirestore(); } });
                 document.getElementById('recurring-type').addEventListener('change', (e) => { document.getElementById('recurring-expense-fields').classList.toggle('hidden', !e.target.value.includes('Gasto')); });
@@ -725,10 +729,13 @@
                     this.saveDataToFirestore();
                     document.getElementById('recurring-form').querySelectorAll('input, select').forEach(el => el.value = '');
                 });
+
+                // --- PROJETO ESCORPIÃO NEGRO: Listener ATUALIZADO ---
                 document.getElementById('connect-whatsapp-btn').addEventListener('click', () => {
-                    this.ui.whatsappDisconnectedState.classList.add('hidden');
-                    this.ui.whatsappVerifyingState.classList.remove('hidden');
+                    alert('Funcionalidade em desenvolvimento! A integração com o WhatsApp será implementada em breve.');
                 });
+                
+                // O resto dos listeners continuam iguais para manter a estrutura
                 document.getElementById('cancel-whatsapp-btn').addEventListener('click', (e) => {
                     e.preventDefault();
                     this.render.renderAccountModal();
@@ -753,6 +760,7 @@
                         this.render.renderAccountModal();
                      }
                 });
+
                 document.body.addEventListener('click', (event) => {
                     const t = event.target;
                     if (t.matches('.tab-button')) this.showMonth(parseInt(t.dataset.monthIndex));
