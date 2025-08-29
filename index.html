@@ -539,11 +539,60 @@
                 document.body.addEventListener('change', (event) => { const t = event.target; if (t.matches('.category-name-input')) { const oldName = t.dataset.oldName; const newName = t.value.trim(); const categoryExists = this.state.categories.some(c => c.name === newName); if (newName && oldName !== newName && !categoryExists) { for (let i = 0; i < 12; i++) { this.state.monthlyData[i].expenses.forEach(day => { day.personalEntries.forEach(entry => { if (entry.category === oldName) entry.category = newName; }); }); } const cat = this.state.categories.find(c => c.name === oldName); if (cat) cat.name = newName; t.dataset.oldName = newName; this.state.recurringEntries.forEach(r => { if (r.category === oldName) r.category = newName; }); this.saveDataToFirestore(); } else if (categoryExists && oldName !== newName) { alert('Já existe uma categoria com este nome.'); t.value = oldName; } } });
             },
             
-            ai: {
-                async getFinancialAnalysis(monthIndex) { /* ... Lógica existente ... */ },
-                async getCategorySuggestion(description, entryId, button) { /* ... Lógica existente ... */ },
-                async callVercelFunction(prompt) { /* ... Lógica existente ... */ }
+            // COLE ESTE CÓDIGO NO LUGAR DO SEU BLOCO "ai: { ... }"
+ai: {
+    async getFinancialAnalysis(monthIndex) {
+        console.log(`Iniciando análise de IA para o mês ${monthIndex}...`);
+        
+        App.ui.aiAnalysisModal.classList.remove('hidden');
+        App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados...</p>';
+
+        try {
+            const monthData = App.state.monthlyData[monthIndex];
+            if (!monthData) throw new Error("Dados do mês não encontrados.");
+
+            const prompt = `Analise os dados financeiros do seguinte mês: ${JSON.stringify(monthData)}. Forneça um resumo dos ganhos e gastos, aponte a maior categoria de despesa e dê 3 sugestões práticas e personalizadas para melhorar a saúde financeira no próximo mês. Formate a resposta em HTML simples usando tags como <h3> e <ul>.`;
+
+            const analysisResult = await this.callVercelFunction(prompt);
+
+            const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
+            App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
+
+        } catch (error) {
+            console.error("Erro ao obter análise da IA:", error);
+            App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados. Verifique o console para mais detalhes.</p>';
+        }
+    },
+
+    // Lógica para sugestão de categoria (exemplo)
+    async getCategorySuggestion(description, entryId, button) {
+        // Implementação futura, se desejar.
+        console.log(`Buscando sugestão de categoria para: ${description}`);
+    },
+
+    // Esta é a função que faz a chamada de rede
+    async callVercelFunction(prompt) {
+        // ⚠️ IMPORTANTE: Substitua pela URL REAL da sua função na Vercel!
+        const VERCEL_API_URL = "https://controledegastos1-0.vercel.app/api/analyze";
+
+        const response = await fetch(VERCEL_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
+            body: JSON.stringify({ prompt: prompt })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro na API da Vercel: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        // Ajuste 'data.analysis' conforme o que sua API realmente retorna.
+        // Pode ser data.result, data.completion, etc.
+        return data.analysis; 
+    }
+},
             
             render: {
                 createMonthContentHTML: (monthIndex) => `<div id="month-${monthIndex}-content" class="month-content"><div class="flex justify-end gap-2 mb-4"><button class="export-csv-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar CSV</button><button class="export-pdf-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar PDF</button></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"><div class="lg:col-span-1 p-5 rounded-2xl card border-t-4 border-yellow-400"><h2 class="text-xl font-semibold mb-4">Ganhos PJ</h2><div id="pj-entries-container-${monthIndex}" class="flex flex-col gap-3 mb-3"></div><button class="add-entry-btn mt-2 w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}" data-type="pj">+ Adicionar Ganho PJ</button></div><div class="lg:col-span-1 p-5 rounded-2xl card border-t-4 border-green-400"><h2 class="text-xl font-semibold mb-4">Ganhos PF</h2><div id="pf-entries-container-${monthIndex}" class="flex flex-col gap-3 mb-3"></div><button class="add-entry-btn mt-2 w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}" data-type="pf">+ Adicionar Ganho PF</button></div><div class="lg:col-span-1 grid gap-6"><div><div class="p-5 rounded-2xl card border-t-4 border-blue-400 space-y-4"><div class="space-y-1"><label class="block text-sm font-medium muted-text">Caixa da empresa:</label><p id="companyCash-${monthIndex}" class="text-2xl font-semibold">R$ 0,00</p></div><div class="space-y-1"><label class="block text-sm font-medium muted-text">Caixa pessoal:</label><p id="personalCash-${monthIndex}" class="text-2xl font-semibold">R$ 0,00</p></div></div></div><div><div class="flex justify-end mb-2"><button class="toggle-summary-btn text-sm font-medium hover:underline" style="color: var(--primary-color);" data-month-index="${monthIndex}">Ocultar Resumo ▼</button></div><div id="summary-card-${monthIndex}" class="p-5 rounded-2xl card border-t-4 border-purple-400"><h2 class="text-xl font-semibold mb-4">Resumo do Mês</h2><div class="space-y-2 text-sm"><div class="flex justify-between items-center"><span>Gasto Pessoal:</span><span id="totalPersonalExpenses-${monthIndex}" class="font-semibold" style="color: var(--red-color);">R$ 0,00</span></div><div class="flex justify-between items-center"><span>Gasto Empresa:</span><span id="totalBusinessExpenses-${monthIndex}" class="font-semibold" style="color: var(--red-color);">R$ 0,00</span></div><div class="flex justify-between items-center pt-2 border-t" style="border-color: var(--border-color);"><span>Saldo Pessoal:</span><span id="remainingPersonal-${monthIndex}" class="font-semibold">R$ 0,00</span></div><div class="flex justify-between items-center"><span>Saldo Empresa:</span><span id="remainingBusiness-${monthIndex}" class="font-semibold">R$ 0,00</span></div><div class="flex justify-between items-center border-t pt-2 mt-2" style="border-color: var(--border-color);"><span class="font-semibold">Saldo Total:</span><span id="remainingTotal-${monthIndex}" class="text-xl font-bold">R$ 0,00</span></div></div><div id="budget-alerts-${monthIndex}" class="mt-3 text-xs"></div></div></div></div></div><div class="text-center mb-4"><button class="ai-analysis-btn px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')" data-month-index="${monthIndex}">Analisar Mês com IA ✨</button></div><div class="flex justify-center mb-4"><button class="toggle-days-list-btn text-sm font-medium hover:underline" style="color: var(--primary-color);" data-month-index="${monthIndex}">Mostrar Lançamentos Diários ▼</button></div><div id="expense-section-wrapper-${monthIndex}" class="hidden"><div id="expense-accordion-container-${monthIndex}" class="space-y-2 mb-8"></div></div><div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-8"><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Balanço do Mês</h2><div class="relative mx-auto" style="max-width: 300px; height: 300px;"><canvas id="budgetPieChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Gastos por Pagamento</h2><div class="relative mx-auto" style="max-width: 300px; height: 300px;"><canvas id="paymentMethodChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Metas de Gastos (Pessoal)</h2><div class="relative mx-auto" style="height: 300px;"><canvas id="budgetGoalsChart-${monthIndex}"></canvas></div></div></div></div>`,
