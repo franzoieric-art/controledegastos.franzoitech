@@ -15,7 +15,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    <style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <style>
         :root {
             --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
             --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
@@ -556,7 +557,7 @@ ai: {
             const analysisResult = await this.callVercelFunction(prompt);
 
             const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
-            App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
+            App.ui.aiAnalysisResult.innerHTML = marked.parse(cleanedResponse);
 
         } catch (error) {
             console.error("Erro ao obter análise da IA:", error);
