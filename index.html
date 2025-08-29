@@ -477,15 +477,11 @@
                 document.getElementById('manage-account-btn').addEventListener('click', () => { this.render.renderAccountModal(); });
                 document.getElementById('close-account-modal-btn').addEventListener('click', () => { this.ui.accountModal.classList.add('hidden'); });
 
-                document.getElementById('save-integration-btn').addEventListener('click', () => {
-                    App.state.profile.name = App.ui.userNameInput.value;
-                    const wa = App.state.integrations.whatsapp;
-                    wa.phoneNumberId = App.ui.whatsappPhoneId.value;
-                    wa.accessToken = App.ui.whatsappToken.value;
-                    wa.webhookVerifyToken = App.ui.whatsappVerifyToken.value;
-                    this.saveDataToFirestore();
-                    this.render.renderAccountModal();
-                });
+                document.getElementById('save-profile-btn').addEventListener('click', () => {
+    App.state.profile.name = App.ui.userNameInput.value;
+    App.saveDataToFirestore();
+    App.helpers.showSaveFeedback();
+});
                 document.getElementById('generate-verify-token-btn').addEventListener('click', () => {
                     const newToken = this.helpers.generateRandomToken();
                     App.ui.whatsappVerifyToken.value = newToken;
