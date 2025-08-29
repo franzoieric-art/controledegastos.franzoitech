@@ -9,7 +9,7 @@
     <style>
         :root { --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73; --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --border-color: #d2d2d7; --green-color: #30a14f; --red-color: #d82c0d; }
         html.dark { --bg-color: #000000; --card-bg: #1d1d1f; --text-color: #f5f5f7; --muted-text: #86868b; --input-bg: #3a3a3c; --input-border: #545458; --primary-color: #2997ff; --border-color: #424245; --green-color: #32d74b; --red-color: #ff453a; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
         .card { background-color: var(--card-bg); border: 1px solid var(--border-color); }
         .input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
         .month-content { display: none; } .month-content.active { display: block; }
@@ -24,10 +24,45 @@
     </div>
 
     <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-2xl">
+        <div class="text-center mb-6">
+            <h1 id="auth-title" class="text-2xl font-bold">Acesso ao Painel</h1>
+            <p class="text-gray-500 dark:text-gray-400">Faça login ou crie sua conta.</p>
         </div>
+        <div class="space-y-4">
+            <input type="email" id="email-input" placeholder="Email" class="w-full p-3 input-field">
+            <input type="password" id="password-input" placeholder="Senha" class="w-full p-3 input-field">
+            <input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 input-field hidden">
+        </div>
+        <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
+        <div class="mt-4 flex flex-col gap-2">
+            <button id="main-auth-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl" style="background-color: var(--primary-color);">Entrar</button>
+            <a href="#" id="forgot-password-link" class="text-center text-sm" style="color: var(--primary-color);">Esqueceu a senha?</a>
+        </div>
+        <div class="mt-4 text-center">
+            <a href="#" id="toggle-auth-mode-link" class="text-sm text-gray-600 dark:text-gray-300 hover:underline">Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span></a>
+        </div>
+    </div>
 
     <div id="app-screen" class="hidden">
+        <div class="container mx-auto card p-4 md:p-8 rounded-2xl relative">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <p class="font-bold">Rico Plus</p>
+                    <p class="text-xs">by Franzoi Tech</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle-btn" class="p-2 rounded-full text-lg">🌙</button>
+                    <button id="logout-btn" class="px-4 py-2 text-sm font-semibold rounded-lg">Sair</button>
+                </div>
+            </div>
+            <div class="text-center mb-8">
+                <h1 class="text-5xl md:text-6xl font-semibold">Painel Financeiro</h1>
+                <p class="mt-4 text-xl text-gray-500 dark:text-gray-400">Sua central de controle financeiro.</p>
+            </div>
+            <div class="flex justify-center flex-wrap gap-2 mb-8" id="monthTabs"></div>
+            <div id="monthContentContainer"></div>
         </div>
+    </div>
 
     <script type="module">
         import { firebaseConfig } from './js/config.js';
@@ -35,18 +70,70 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
+        // Inicialização do Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
+
+        // Referências Globais
         const authScreen = document.getElementById('auth-screen');
         const appScreen = document.getElementById('app-screen');
         const loadingOverlay = document.getElementById('loading-overlay');
+        let App = {}; // Objeto principal da aplicação
+
+        // Lógica de Autenticação
+        let isLoginMode = true;
+        const mainAuthBtn = document.getElementById('main-auth-btn');
+        const toggleAuthModeLink = document.getElementById('toggle-auth-mode-link');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const authError = document.getElementById('auth-error');
+        const confirmPasswordInput = document.getElementById('confirm-password-input');
+        const authTitle = document.getElementById('auth-title');
+
+        const setAuthMode = (mode) => {
+            isLoginMode = mode === 'login';
+            authError.textContent = '';
+            if (isLoginMode) {
+                authTitle.textContent = 'Acesso ao Painel';
+                mainAuthBtn.textContent = 'Entrar';
+                confirmPasswordInput.classList.add('hidden');
+                forgotPasswordLink.classList.remove('hidden');
+                toggleAuthModeLink.innerHTML = 'Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span>';
+            } else {
+                authTitle.textContent = 'Criar Nova Conta';
+                mainAuthBtn.textContent = 'Criar Conta';
+                confirmPasswordInput.classList.remove('hidden');
+                forgotPasswordLink.classList.add('hidden');
+                toggleAuthModeLink.textContent = 'Já tem conta? Faça login';
+            }
+        };
+
+        toggleAuthModeLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            setAuthMode(isLoginMode ? 'signup' : 'login');
+        });
+
+        mainAuthBtn.addEventListener('click', () => {
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            authError.textContent = '';
+            if (isLoginMode) {
+                signInWithEmailAndPassword(auth, email, password).catch(() => authError.textContent = 'Email ou senha inválidos.');
+            } else {
+                const confirmPassword = confirmPasswordInput.value;
+                if (password !== confirmPassword) {
+                    authError.textContent = 'As senhas não coincidem.';
+                    return;
+                }
+                createUserWithEmailAndPassword(auth, email, password).catch(err => authError.textContent = 'Erro ao criar conta.');
+            }
+        });
         
-        let App = {}; // Usaremos um objeto global para facilitar
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
 
         // ==================================================================
-        // LÓGICA DE LOGIN (SEM MUDANÇAS SIGNIFICATIVAS)
+        // LÓGICA PRINCIPAL DA APLICAÇÃO
         // ==================================================================
         
         onAuthStateChanged(auth, user => {
@@ -58,44 +145,51 @@
             } else {
                 authScreen.classList.remove('hidden');
                 appScreen.classList.add('hidden');
-                App = {}; // Limpa o App ao deslogar
+                App = {};
             }
         });
-        
-        // ... (seu código de auth, como mainAuthBtn.addEventListener, etc.)
 
-        // ==================================================================
-        // LÓGICA PRINCIPAL DA APLICAÇÃO (COM AS CORREÇÕES FINAIS)
-        // ==================================================================
         async function handleLogin(user) {
             try {
-                await user.getIdToken(true); // CORREÇÃO 1: Força atualização do token
-                
+                // CORREÇÃO 1: Força atualização do token
+                await user.getIdToken(true); 
+
                 const docSnap = await getDoc(doc(db, 'users', user.uid));
-                let userData = {};
-                if (docSnap.exists()) {
-                    userData = docSnap.data();
-                }
+                let userData = docSnap.exists() ? docSnap.data() : {};
 
                 // Inicia o objeto App com os dados
                 App = {
                     state: {
                         currentUserId: user.uid,
                         monthlyData: userData.monthlyData || {},
-                        categories: userData.categories || [],
-                        // ... outros estados
+                        categories: userData.categories || [{ name: 'Outros', budget: 100 }],
+                        creditCards: userData.creditCards || [],
+                        activeMonthIndex: new Date().getMonth(),
                     },
-                    // ... (resto do seu objeto App original, com as funções render, recalculate, etc.)
+                    render: {
+                        // ... todas as funções de render vão aqui ...
+                        tabs: () => {
+                             const monthTabsContainer = document.getElementById('monthTabs');
+                             if (!monthTabsContainer) return;
+                             monthTabsContainer.innerHTML = App.state.monthNames.map((name, i) => `<button class="tab-button px-4 py-2 rounded-lg text-sm font-semibold ${i === App.state.activeMonthIndex ? 'bg-blue-500 text-white' : ''}" data-month-index="${i}">${name}</button>`).join('');
+                        },
+                        monthContent: (m) => {
+                            const container = document.getElementById('monthContentContainer');
+                            if(!container) return;
+                            container.innerHTML = `<div id="month-${m}-content" class="month-content active"></div>`; // Simplificado, insira seu HTML completo aqui
+                            recalculateAndDisplayTotals(m);
+                        }
+                    }
                 };
                 
                 // CORREÇÃO 2: Garante que os meses existem
+                App.state.monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"];
                 for (let i = 0; i < 12; i++) {
                     if (!App.state.monthlyData[i]) {
                         App.state.monthlyData[i] = { pjEntries: [], pfEntries: [], expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] })) };
                     }
                 }
 
-                // Inicializa a UI
                 initializeAppUI();
 
             } catch (error) {
@@ -106,20 +200,16 @@
         }
         
         function initializeAppUI() {
-            // Recria a estrutura HTML principal
-            // ... (seu código que cria as abas e os containers dos meses)
-
-            // Liga os botões
             bindGlobalEventListeners();
-            
-            // Mostra o primeiro mês
-            showMonth(new Date().getMonth());
-            
+            showMonth(App.state.activeMonthIndex);
             loadingOverlay.classList.add('hidden');
         }
         
         function showMonth(monthIndex) {
-            // ... (sua função showMonth original)
+            if(typeof monthIndex !== 'number') return;
+            App.state.activeMonthIndex = monthIndex;
+            App.render.tabs();
+            App.render.monthContent(monthIndex);
         }
 
         function recalculateAndDisplayTotals(m) {
@@ -128,23 +218,34 @@
             if (!d) return;
 
             const pjTotal = (d.pjEntries || []).reduce((sum, entry) => sum + (entry.amount || 0), 0);
-            // ... (resto dos cálculos com a mesma lógica defensiva)
+            const pfTotal = (d.pfEntries || []).reduce((sum, entry) => sum + (entry.amount || 0), 0);
             
-            // Atualiza o HTML
-            document.getElementById(`companyCash-${m}`).textContent = `R$ ${pjTotal.toFixed(2)}`;
-            // ... etc.
+            const monthDiv = document.getElementById(`month-${m}-content`);
+            if(monthDiv){
+                 // Aqui você insere o HTML do conteúdo do mês e popula com os totais
+                 // Exemplo:
+                 monthDiv.innerHTML = `
+                    <h2 class="text-xl font-bold">Resumo de ${App.state.monthNames[m]}</h2>
+                    <p>Ganhos PJ: ${helpers.formatCurrency(pjTotal)}</p>
+                    <p>Ganhos PF: ${helpers.formatCurrency(pfTotal)}</p>
+                    `;
+            }
+        }
+
+        const helpers = {
+             formatCurrency: (value) => {
+                if (typeof value !== 'number') value = 0;
+                return `R$ ${value.toFixed(2).replace('.', ',')}`;
+            }
         }
 
         function bindGlobalEventListeners() {
-            // Aqui vai sua função original COMPLETA que adiciona os listeners
-            // para '.add-entry-btn', '.remove-btn', '.tab-button', etc.
-            // Esta é a parte que "dá vida" aos botões.
             document.body.addEventListener('click', (event) => {
                 const target = event.target;
                 if (target.closest('.tab-button')) {
                     showMonth(parseInt(target.closest('.tab-button').dataset.monthIndex));
                 }
-                // ... (RESTO DA SUA LÓGICA DE CLIQUES)
+                // ... RESTO DA SUA LÓGICA DE CLIQUES PARA ADICIONAR/REMOVER
             });
         }
     </script>
