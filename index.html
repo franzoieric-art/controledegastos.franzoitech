@@ -1,634 +1,671 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR" class="">
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Financeiro - Franzoi Tech</title>
 
-    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="FranzoiTech" />
-    <link rel="manifest" href="/site.webmanifest" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        :root {
-            --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
-            --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
-            --secondary-bg: #e8e8ed; --secondary-text: #1d1d1f; --border-color: #d2d2d7;
-            --green-color: #30a14f; --red-color: #d82c0d;
-        }
-        html.dark {
-            --bg-color: #000000; --card-bg: #1d1d1f; --text-color: #f5f5f7; --muted-text: #86868b;
-            --input-bg: #3a3a3c; --input-border: #545458; --primary-color: #2997ff; --primary-color-hover: #53b0ff;
-            --secondary-bg: #3a3a3c; --secondary-text: #f5f5f7; --border-color: #424245;
-            --green-color: #32d74b; --red-color: #ff453a;
-        }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
-        .input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
-        .input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
-        .muted-text { color: var(--muted-text); }
-        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; }
-        .remove-btn { background-color: var(--secondary-bg); color: var(--muted-text); border-radius: 9999px; width: 1.75rem; height: 1.75rem; font-weight: 500; transition: background-color 0.2s, color 0.2s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
-        .remove-btn:hover { background-color: var(--red-color); color: white; }
-        .month-content { display: none; } .month-content.active { display: block; }
-        #save-feedback { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background-color: var(--green-color); color: white; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500; z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
-        #save-feedback.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-10px); }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; padding: 0 1.5rem; }
-        .accordion-item.active .accordion-content { max-height: 1000px; padding: 1.5rem; }
-        .accordion-trigger .arrow { transition: transform 0.3s ease-out; }
-        .accordion-item.active .accordion-trigger .arrow { transform: rotate(180deg); }
-        .prose { color: var(--text-color); } .prose h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5em; }
-        .prose p { margin-bottom: 1em; line-height: 1.6; } .prose ul { list-style-position: inside; margin-bottom: 1em; padding-left: 1em; }
-        .prose li { margin-bottom: 0.5em; }
-    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Painel Financeiro - Franzoi Tech</title>
+
+
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <meta name="apple-mobile-web-app-title" content="FranzoiTech" />
+
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <style>
+
+        :root {
+
+            --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
+
+            --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
+
+            --secondary-bg: #e8e8ed; --secondary-text: #1d1d1f; --border-color: #d2d2d7;
+
+            --green-color: #30a14f; --red-color: #d82c0d;
+
+        }
+
+        html.dark {
+
+            --bg-color: #000000; --card-bg: #1d1d1f; --text-color: #f5f5f7; --muted-text: #86868b;
+
+            --input-bg: #3a3a3c; --input-border: #545458; --primary-color: #2997ff; --primary-color-hover: #53b0ff;
+
+            --secondary-bg: #3a3a3c; --secondary-text: #f5f5f7; --border-color: #424245;
+
+            --green-color: #32d74b; --red-color: #ff453a;
+
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
+
+        .input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
+
+        .input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
+
+        .muted-text { color: var(--muted-text); }
+
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        input[type="number"] { -moz-appearance: textfield; }
+
+        .remove-btn { background-color: var(--secondary-bg); color: var(--muted-text); border-radius: 9999px; width: 1.75rem; height: 1.75rem; font-weight: 500; transition: background-color 0.2s, color 0.2s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+
+        .remove-btn:hover { background-color: var(--red-color); color: white; }
+
+        .month-content { display: none; } .month-content.active { display: block; }
+
+        #save-feedback { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background-color: var(--green-color); color: white; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500; z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
+
+        #save-feedback.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-10px); }
+
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; padding: 0 1.5rem; border-top: 1px solid var(--border-color); }
+
+        .accordion-item.active .accordion-content { max-height: 1000px; padding: 1.5rem; }
+
+        .accordion-trigger .arrow { transition: transform 0.3s ease-out; }
+
+        .accordion-item.active .accordion-trigger .arrow { transform: rotate(180deg); }
+
+        .prose { color: var(--text-color); } .prose h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5em; }
+
+        .prose p { margin-bottom: 1em; line-height: 1.6; } .prose ul { list-style-position: inside; margin-bottom: 1em; padding-left: 1em; }
+
+        .prose li { margin-bottom: 0.5em; }
+
+    </style>
+
 </head>
+
 <body class="p-2 sm:p-4">
-    
-    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
 
-    <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-2xl">
-        <div class="text-center mb-6"><div class="flex justify-center mb-4"><iframe src="https://drive.google.com/file/d/1z4DLbMUR9cp3cFz1fxS-KXBd3Vs1FO6F/preview" width="100" height="100" allow="autoplay" style="border:0;"></iframe></div><h1 id="auth-title" class="text-2xl font-bold">Acesso ao Painel</h1><p class="muted-text">Faça login ou crie sua conta.</p></div>
-        <div class="space-y-4"><input type="email" id="email-input" placeholder="Email" class="w-full p-3 input-field"><input type="password" id="password-input" placeholder="Senha" class="w-full p-3 input-field"><input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 input-field hidden"></div>
-        <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
-        <div class="mt-4 flex flex-col gap-2"><button id="main-auth-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors disabled:opacity-50" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Entrar</button><a href="#" id="forgot-password-link" class="text-center text-sm hover:underline" style="color: var(--primary-color);">Esqueceu a senha?</a></div>
-        <div class="mt-4 text-center"><a href="#" id="toggle-auth-mode-link" class="text-sm muted-text hover:underline">Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span></a></div>
-    </div>
+    
 
-    <div id="app-screen" class="hidden">
-        
-        <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
-                <div class="flex justify-between items-center mb-6 flex-shrink-0">
-                    <h2 class="text-2xl font-bold">Minha Conta</h2>
-                    <button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
-                </div>
-                <div class="overflow-y-auto space-y-6">
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3">Informações do Perfil</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label>
-                                <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field">
-                            </div>
-                            <div>
-                                <label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label>
-                                <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;">
-                            </div>
-                        </div>
-                        <button id="save-profile-btn" class="mt-4 w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações do Perfil</button>
-                    </div>
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
 
-                    <div class="border-t pt-6" style="border-color: var(--border-color);">
-                        <h3 class="text-xl font-bold mb-1">Conectar Assistente IA via WhatsApp</h3>
-                        <p class="muted-text text-sm mb-4">Configure a integração para lançar despesas e interagir com seu painel diretamente do WhatsApp.</p>
-                        
-                        <div class="p-3 mb-4 rounded-xl text-center text-sm" style="background-color: var(--secondary-bg);">
-                            ✨ <span class="font-semibold">Funcionalidade em desenvolvimento.</span> Disponível em breve!
-                        </div>
-                        <div class="space-y-4 opacity-60">
-                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
-                                <h4 class="font-semibold">Passo 1: Suas Credenciais da Meta</h4>
-                                <p class="text-xs muted-text -mt-3">Insira as credenciais da sua API encontradas no <a href="#" class="underline" style="color: var(--primary-color);">Painel de Desenvolvedores</a>.</p>
-                                <div>
-                                    <label for="whatsapp-phone-id" class="block text-sm font-medium muted-text mb-1">ID do Número de Telefone</label>
-                                    <input type="text" id="whatsapp-phone-id" placeholder="Ex: 102030405060708" class="w-full p-3 input-field" disabled>
-                                </div>
-                                <div>
-                                    <label for="whatsapp-token" class="block text-sm font-medium muted-text mb-1">Token de Acesso da API</label>
-                                    <input type="password" id="whatsapp-token" placeholder="Cole seu token permanente aqui" class="w-full p-3 input-field" disabled>
-                                </div>
-                            </div>
 
-                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
-                                <h4 class="font-semibold">Passo 2: Configurar Webhook na Meta</h4>
-                                <p class="text-xs muted-text -mt-3">Copie os valores abaixo e cole-os na seção "Webhook" da sua aplicação na Meta.</p>
-                                 <div>
-                                    <label class="block text-sm font-medium muted-text mb-1">URL do Webhook (para colar na Meta)</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="whatsapp-webhook-url" class="w-full p-3 input-field" readonly disabled>
-                                        <button id="copy-webhook-url-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Copiar</button>
-                                    </div>
-                                </div>
-                                 <div>
-                                    <label class="block text-sm font-medium muted-text mb-1">Token de Verificação do Webhook (para colar na Meta)</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="whatsapp-verify-token" class="w-full p-3 input-field" readonly disabled>
-                                         <button id="generate-verify-token-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Gerar</button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4 flex items-center justify-between">
-                                <div class="text-sm muted-text">Status: <span id="whatsapp-status" class="font-semibold" style="color: var(--primary-color);">Indisponível</span></div>
-                                <button id="save-integration-btn" class="px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);" disabled>Salvar Configuração</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
-                <div class="flex justify-between items-center mb-6 flex-shrink-0">
-                    <h2 class="text-2xl font-bold">Gerenciar</h2>
-                    <button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto">
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3">Cartões de Crédito</h3>
-                        <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
-                        <div id="card-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3">Categorias e Metas</h3>
-                        <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
-                        <div id="category-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3">Lançamentos Recorrentes</h3>
-                        <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);"><input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field"><div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field"></div><select id="recurring-type" class="w-full p-2 input-field"></select><div id="recurring-expense-fields" class="space-y-2 hidden"><select id="recurring-category" class="w-full p-2 input-field"></select><select id="recurring-payment" class="w-full p-2 input-field"></select><select id="recurring-card" class="w-full p-2 input-field hidden"></select></div><button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button></div>
-                        <div id="recurring-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="ai-analysis-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50"><div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]"><div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 class="text-2xl font-bold">Análise Financeira com IA</h2><button id="close-ai-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div><div id="ai-analysis-result" class="overflow-y-auto prose dark:prose-invert"><p class="muted-text">Analisando seus dados...</p></div></div></div>
 
-        <div class="container mx-auto card p-4 md:p-8 rounded-2xl relative">
-            <div id="save-feedback">Salvo ✓</div>
-            
-            <div class="flex justify-between items-start mb-8">
-                <div class="text-xs muted-text">
-                    <p class="font-bold">Rico Plus</p>
-                    <p>by Franzoi Tech</p>
-                </div>
-                <div class="flex items-center gap-4"><button id="theme-toggle-btn" class="p-2 rounded-full text-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">🌙</button><button id="logout-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Sair</button></div>
-            </div>
+    <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-2xl">
 
-            <div class="text-center mb-8">
-                <h1 class="text-5xl md:text-6xl font-semibold">Painel Financeiro</h1>
-                <p class="mt-4 text-xl muted-text">Sua central de controle financeiro.</p>
-                <div class="flex justify-center items-center gap-4 mt-6"><button id="manage-account-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Conta</button><button id="manage-settings-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Gerenciar</button></div>
-            </div>
+        <div class="text-center mb-6"><div class="flex justify-center mb-4"><iframe src="https://drive.google.com/file/d/1z4DLbMUR9cp3cFz1fxS-KXBd3Vs1FO6F/preview" width="100" height="100" allow="autoplay" style="border:0;"></iframe></div><h1 id="auth-title" class="text-2xl font-bold">Acesso ao Painel</h1><p class="muted-text">Faça login ou crie sua conta.</p></div>
 
-            <div class="flex justify-center flex-wrap gap-2 mb-8" id="monthTabs"></div>
-            <div id="monthContentContainer"></div>
+        <div class="space-y-4"><input type="email" id="email-input" placeholder="Email" class="w-full p-3 input-field"><input type="password" id="password-input" placeholder="Senha" class="w-full p-3 input-field"><input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 input-field hidden"></div>
 
-            <div class="mt-12 pt-8 border-t text-center" style="border-color: var(--border-color);">
-                <p class="text-sm muted-text">Ajude a manter este projeto</p>
-                <p class="text-xs muted-text mb-2">Doe qualquer valor via Pix</p>
-                <div class="mt-2 flex justify-center"><iframe src="https://drive.google.com/file/d/1s8uZhOj-lo84fpnA5Hyjz_CIEMhO80Fz/preview" width="150" height="150" allow="autoplay" style="border:0;"></iframe></div>
-                <div class="mt-2"><p class="text-xs muted-text">Ou use a chave (email):</p><div class="mt-1 flex justify-center items-center gap-2"><p id="pix-key" class="font-mono text-sm" style="color: var(--primary-color);">franzoitechcorp@gmail.com</p><button id="copy-pix-btn" class="px-3 py-1 text-xs font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Copiar</button></div></div>
-            </div>
-        </div>
-    </div>
+        <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        <div class="mt-4 flex flex-col gap-2"><button id="main-auth-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors disabled:opacity-50" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Entrar</button><a href="#" id="forgot-password-link" class="text-center text-sm hover:underline" style="color: var(--primary-color);">Esqueceu a senha?</a></div>
 
-        const firebaseConfig = { 
-            apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0", 
-            authDomain: "controle-de-gastos-74daf.firebaseapp.com", 
-            projectId: "controle-de-gastos-74daf", 
-            storageBucket: "controle-de-gastos-74daf.appspot.com",
-            messagingSenderId: "331667008487", 
-            appId: "1:331667008487:web:c5200f64ac27d0c32feb42" 
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        <div class="mt-4 text-center"><a href="#" id="toggle-auth-mode-link" class="text-sm muted-text hover:underline">Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span></a></div>
 
-        // --- LÓGICA DE AUTENTICAÇÃO ---
-        const authScreen = document.getElementById('auth-screen'); const appScreen = document.getElementById('app-screen');
-        const mainAuthBtn = document.getElementById('main-auth-btn'); const toggleAuthModeLink = document.getElementById('toggle-auth-mode-link');
-        const forgotPasswordLink = document.getElementById('forgot-password-link'); const authError = document.getElementById('auth-error');
-        const themeToggleBtn = document.getElementById('theme-toggle-btn'); const loadingOverlay = document.getElementById('loading-overlay');
-        let isLoginMode = true;
-        const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
-        document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress); document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
-        document.getElementById('confirm-password-input').addEventListener('keydown', handleAuthKeyPress);
-        const showError = (message) => { authError.textContent = message; };
-        const setAuthMode = (mode) => { isLoginMode = mode === 'login'; authError.textContent = ''; const authTitle = document.getElementById('auth-title'); const confirmPasswordInput = document.getElementById('confirm-password-input'); if (isLoginMode) { authTitle.textContent = 'Acesso ao Painel'; mainAuthBtn.textContent = 'Entrar'; confirmPasswordInput.classList.add('hidden'); forgotPasswordLink.classList.remove('hidden'); toggleAuthModeLink.innerHTML = 'Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span>'; } else { authTitle.textContent = 'Criar Nova Conta'; mainAuthBtn.textContent = 'Criar Conta'; confirmPasswordInput.classList.remove('hidden'); forgotPasswordLink.classList.add('hidden'); toggleAuthModeLink.textContent = 'Já tem conta? Faça login'; } };
-        const applyTheme = (theme) => { document.documentElement.classList.toggle('dark', theme === 'dark'); themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙'; if (window.App && App.state.currentUserId) { App.showMonth(App.state.activeMonthIndex); } };
-        applyTheme(localStorage.getItem('theme') || 'light');
-        toggleAuthModeLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode(isLoginMode ? 'signup' : 'login'); });
-        mainAuthBtn.addEventListener('click', () => { const email = document.getElementById('email-input').value; const password = document.getElementById('password-input').value; showError(''); const originalBtnText = mainAuthBtn.textContent; mainAuthBtn.disabled = true; mainAuthBtn.textContent = 'Aguarde...'; const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; }; if (isLoginMode) { signInWithEmailAndPassword(auth, email, password).catch(error => { showError('Email ou senha inválidos.'); restoreBtn(); }); } else { const confirmPassword = document.getElementById('confirm-password-input').value; if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; } createUserWithEmailAndPassword(auth, email, password).catch(error => { if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.'); else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.'); else showError('Erro ao criar conta.'); restoreBtn(); }); } });
-        forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; if (!email) { showError('Por favor, insira seu email para recuperar a senha.'); return; } sendPasswordResetEmail(auth, email).then(() => { showError('Email de recuperação enviado!'); }).catch((error) => { showError('Não foi possível enviar o email.'); }); });
-        document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth); });
-        
-        const App = {
-            state: {
-                currentUserId: null,
-                profile: { name: '' },
-                integrations: {
-                    whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' }
-                },
-                creditCards: [],
-                categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }],
-                recurringEntries: [], monthlyData: {}, activeMonthIndex: new Date().getMonth(),
-                chartInstances: {}, saveTimeout: null
-            },
-            ui: {
-                monthContentContainer: document.getElementById('monthContentContainer'), monthTabsContainer: document.getElementById('monthTabs'),
-                settingsModal: document.getElementById('settings-modal'), accountModal: document.getElementById('account-modal'),
-                userNameInput: document.getElementById('user-name-input'), userEmailDisplay: document.getElementById('user-email-display'),
-                whatsappPhoneId: document.getElementById('whatsapp-phone-id'), whatsappToken: document.getElementById('whatsapp-token'),
-                whatsappWebhookUrl: document.getElementById('whatsapp-webhook-url'), whatsappVerifyToken: document.getElementById('whatsapp-verify-token'),
-                whatsappStatus: document.getElementById('whatsapp-status'), newCardNameInput: document.getElementById('new-card-name'),
-                cardListContainer: document.getElementById('card-list'), newCategoryNameInput: document.getElementById('new-category-name'),
-                categoryListContainer: document.getElementById('category-list'), recurringListContainer: document.getElementById('recurring-list'),
-                saveFeedback: document.getElementById('save-feedback'), aiAnalysisModal: document.getElementById('ai-analysis-modal'),
-                aiAnalysisResult: document.getElementById('ai-analysis-result'),
-            },
-            constants: {
-                monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
-                basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
-            },
+    </div>
 
-            // --- NOVO ---: Objeto para a lógica de sugestão de categorias
-            suggestions: {
-                categoryKeywords: {
-                    'Transporte': ['uber', '99', 'táxi', 'taxi', 'ônibus', 'onibus', 'metrô', 'metro', 'gasolina', 'combustível', 'estacionamento', 'pedagio', 'pedágio', 'app de carro'],
-                    'Alimentação': ['ifood', 'rappi', 'restaurante', 'mercado', 'lanche', 'padaria', 'supermercado', 'hortifruti', 'açougue', 'acougue', 'pizza', 'jantar'],
-                    'Moradia': ['aluguel', 'condomínio', 'condominio', 'iptu', 'luz', 'energia', 'enel', 'água', 'agua', 'sabesp', 'gás', 'gas', 'comgas', 'internet', 'net', 'claro', 'vivo', 'tim'],
-                    'Lazer': ['cinema', 'show', 'bar', 'festa', 'viagem', 'streaming', 'netflix', 'spotify', 'disney+', 'barzinho', 'ingresso', 'jogo'],
-                    'Saúde': ['farmácia', 'farmacia', 'drogaria', 'remédio', 'remedio', 'médico', 'medico', 'consulta', 'plano de saude', 'exame'],
-                    'Outros': ['presente', 'doação', 'imposto']
-                },
-                suggestCategory(description) {
-                    if (!description) return null;
-                    const descLower = description.toLowerCase();
-                    for (const category in this.categoryKeywords) {
-                        const keywords = this.categoryKeywords[category];
-                        if (keywords.some(keyword => descLower.includes(keyword))) {
-                            return category;
-                        }
-                    }
-                    return null;
-                }
-            },
 
-            init(userId) { 
-                this.state.currentUserId = userId; 
-                this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 1500);
-                this.loadData(); 
-                this.bindGlobalEventListeners(); 
-            },
 
-            helpers: {
-                formatCurrency: (value) => `R$ ${(value || 0).toFixed(2).replace('.', ',')}`,
-                debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
-                showSaveFeedback() { App.ui.saveFeedback.classList.add('show'); setTimeout(() => { App.ui.saveFeedback.classList.remove('show'); }, 2000); },
-                cleanAIResponse(text) { if (typeof text !== 'string') return ''; let cleanedText = text.replace(/[`"']{3}html/g, ''); cleanedText = cleanedText.replace(/[`"']{3}/g, ''); return cleanedText.trim(); },
-                generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
-            },
-            
-            async saveDataToFirestore() {
-                if (!App.state.currentUserId) return;
-                try {
-                    const dataToSave = {
-                        profile: App.state.profile,
-                        integrations: App.state.integrations,
-                        monthlyData: App.state.monthlyData, creditCards: App.state.creditCards,
-                        categories: App.state.categories, recurringEntries: App.state.recurringEntries
-                    };
-                    await setDoc(doc(db, 'users', App.state.currentUserId), dataToSave, { merge: true });
-                    App.helpers.showSaveFeedback();
-                } catch (e) { console.error("Erro ao salvar dados: ", e); }
-            },
-            
-            debouncedSave: null,
+    <div id="app-screen" class="hidden">
 
-            async loadData() {
-                if (!this.state.currentUserId) return;
-                try {
-                    const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
-                    if (docSnap.exists()) {
-                        const d = docSnap.data();
-                        this.state.profile = d.profile || { name: '' };
-                        this.state.integrations = d.integrations || { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } };
-                        this.state.monthlyData = d.monthlyData || {}; this.state.creditCards = d.creditCards || [];
-                        this.state.categories = d.categories && d.categories.length > 0 ? d.categories : this.state.categories;
-                        this.state.recurringEntries = d.recurringEntries || [];
-                    }
-                    if (!this.state.integrations.whatsapp.webhookVerifyToken) {
-                        this.state.integrations.whatsapp.webhookVerifyToken = this.helpers.generateRandomToken();
-                    }
-                    for (let i = 0; i < 12; i++) { 
-                        this.state.monthlyData[i] = this.state.monthlyData[i] || { 
-                            pjEntries: [], 
-                            pfEntries: [], 
-                            expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] })) 
-                        }; 
-                        this.state.monthlyData[i].expenses.forEach(day => { 
-                            [...(day.personalEntries || []), ...(day.businessEntries || [])].forEach(entry => { 
-                                if (!entry.category) { entry.category = 'Outros'; } 
-                            }); 
-                        }); 
-                    }
-                } catch (error) { console.error("Erro ao carregar dados:", error); }
-                this.ui.monthContentContainer.innerHTML = '';
-                this.constants.monthNames.forEach((_, index) => { 
-                    this.ui.monthContentContainer.insertAdjacentHTML('beforeend', this.render.createMonthContentHTML(index)); 
-                });
-                this.showMonth(this.state.activeMonthIndex);
-                loadingOverlay.classList.add('hidden');
-            },
-            
-            showMonth(monthIndex) {
-                this.state.activeMonthIndex = monthIndex;
-                Object.values(this.state.chartInstances).forEach(c => c?.destroy());
-                document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
-                
-                this.render.renderTabs();
-                const contentEl = document.getElementById(`month-content-${monthIndex}`);
-                if (contentEl) {
-                    contentEl.classList.add('active');
-                    if (monthIndex < 12) {
-                        // Aplica recorrencias antes de renderizar
-                        this.applyRecurringEntries(monthIndex);
-                        this.render.renderPJEntries(monthIndex);
-                        this.render.renderPFEntries(monthIndex);
-                        this.render.renderExpenseTable(monthIndex);
-                        this.recalculateAndDisplayTotals(monthIndex);
-                    } else {
-                        //this.render.renderBalanceSummary(); // A ser implementado
-                    }
-                }
-            },
+        
 
-            // --- NOVO ---: Lógica para manipular entradas de despesa com sugestão de categoria
-            handleExpenseInput(monthIndex, dayIndex, type, entryIndex, field, element) {
-                const entryList = type === 'personal' ? this.state.monthlyData[monthIndex].expenses[dayIndex].personalEntries : this.state.monthlyData[monthIndex].expenses[dayIndex].businessEntries;
-                const entry = entryList[entryIndex];
-                const value = field === 'amount' ? parseFloat(element.value) || 0 : element.value;
-                entry[field] = value;
+        <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
 
-                if (field === 'description') {
-                    const suggestedCategory = this.suggestions.suggestCategory(value);
-                    if (suggestedCategory && entry.category !== suggestedCategory) {
-                        entry.category = suggestedCategory;
-                        const categorySelectId = `category-select-${monthIndex}-${dayIndex}-${type}-${entryIndex}`;
-                        const categorySelectElement = document.getElementById(categorySelectId);
-                        if (categorySelectElement) {
-                            categorySelectElement.value = suggestedCategory;
-                        }
-                    }
-                }
-                
-                this.recalculateAndDisplayTotals(monthIndex);
-                this.debouncedSave();
-            },
+    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
 
-            // --- NOVO ---: Funções para adicionar e remover linhas nas tabelas
-            addEntry(type, monthIndex) {
-                const list = type === 'pj' ? this.state.monthlyData[monthIndex].pjEntries : this.state.monthlyData[monthIndex].pfEntries;
-                list.push({ description: '', amount: 0 });
-                if (type === 'pj') this.render.renderPJEntries(monthIndex);
-                else this.render.renderPFEntries(monthIndex);
-                this.recalculateAndDisplayTotals(monthIndex);
-                this.debouncedSave();
-            },
-            
-            removeEntry(type, monthIndex, index) {
-                const list = type === 'pj' ? this.state.monthlyData[monthIndex].pjEntries : this.state.monthlyData[monthIndex].pfEntries;
-                list.splice(index, 1);
-                if (type === 'pj') this.render.renderPJEntries(monthIndex);
-                else this.render.renderPFEntries(monthIndex);
-                this.recalculateAndDisplayTotals(monthIndex);
-                this.debouncedSave();
-            },
-            
-            addExpenseEntry(monthIndex, dayIndex, type) {
-                const day = this.state.monthlyData[monthIndex].expenses[dayIndex];
-                const list = type === 'personal' ? day.personalEntries : day.businessEntries;
-                list.push({ description: '', amount: 0, category: 'Outros', paymentMethod: 'Pix' });
-                this.render.renderExpenseTable(monthIndex);
-                this.recalculateAndDisplayTotals(monthIndex);
-                this.debouncedSave();
-            },
+        <div class="flex justify-between items-center mb-6 flex-shrink-0">
 
-            removeExpenseEntry(monthIndex, dayIndex, type, entryIndex) {
-                const day = this.state.monthlyData[monthIndex].expenses[dayIndex];
-                const list = type === 'personal' ? day.personalEntries : day.businessEntries;
-                list.splice(entryIndex, 1);
-                this.render.renderExpenseTable(monthIndex);
-                this.recalculateAndDisplayTotals(monthIndex);
-                this.debouncedSave();
-            },
-            
-            // --- CÓDIGO COMPLETADO E REVISADO ---
-            recalculateAndDisplayTotals(m) {
-                const d = this.state.monthlyData[m];
-                if (!d) return;
+            <h2 class="text-2xl font-bold">Minha Conta</h2>
 
-                const totals = {
-                    pj: d.pjEntries.reduce((s, e) => s + (e.amount || 0), 0),
-                    pf: d.pfEntries.reduce((s, e) => s + (e.amount || 0), 0),
-                    personalExpenses: d.expenses.flatMap(day => day.personalEntries).reduce((s, e) => s + (e.amount || 0), 0),
-                    businessExpenses: d.expenses.flatMap(day => day.businessEntries).reduce((s, e) => s + (e.amount || 0), 0),
-                };
-                
-                const netPF = totals.pf - totals.personalExpenses;
-                const netPJ = totals.pj - totals.businessExpenses;
+            <button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
 
-                document.getElementById(`total-pj-${m}`).textContent = this.helpers.formatCurrency(totals.pj);
-                document.getElementById(`total-pf-${m}`).textContent = this.helpers.formatCurrency(totals.pf);
-                document.getElementById(`total-gastos-pessoais-${m}`).textContent = this.helpers.formatCurrency(totals.personalExpenses);
-                document.getElementById(`total-gastos-empresa-${m}`).textContent = this.helpers.formatCurrency(totals.businessExpenses);
-                
-                const pfSaldoEl = document.getElementById(`saldo-pf-${m}`);
-                pfSaldoEl.textContent = this.helpers.formatCurrency(netPF);
-                pfSaldoEl.style.color = netPF >= 0 ? 'var(--green-color)' : 'var(--red-color)';
+        </div>
 
-                const pjSaldoEl = document.getElementById(`saldo-pj-${m}`);
-                pjSaldoEl.textContent = this.helpers.formatCurrency(netPJ);
-                pjSaldoEl.style.color = netPJ >= 0 ? 'var(--green-color)' : 'var(--red-color)';
-            },
-            
-            applyRecurringEntries(monthIndex) {
-                // Lógica para aplicar entradas recorrentes (a ser implementada)
-            },
+        <div class="overflow-y-auto space-y-6">
 
-            bindGlobalEventListeners() {
-                themeToggleBtn.addEventListener('click', () => {
-                    const isDark = document.documentElement.classList.toggle('dark');
-                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                    applyTheme(isDark ? 'dark' : 'light');
-                });
+            <div>
 
-                document.getElementById('manage-settings-btn').addEventListener('click', () => this.ui.settingsModal.classList.remove('hidden'));
-                document.getElementById('close-modal-btn').addEventListener('click', () => this.ui.settingsModal.classList.add('hidden'));
-                document.getElementById('manage-account-btn').addEventListener('click', () => this.ui.accountModal.classList.remove('hidden'));
-                document.getElementById('close-account-modal-btn').addEventListener('click', () => this.ui.accountModal.classList.add('hidden'));
-            },
+                <h3 class="text-lg font-semibold mb-3">Informações do Perfil</h3>
 
-            // --- NOVO ---: Objeto para organizar todas as funções que geram HTML
-            render: {
-                renderTabs() {
-                    App.ui.monthTabsContainer.innerHTML = App.constants.monthNames.map((name, index) =>
-                        `<button 
-                            class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${App.state.activeMonthIndex === index ? 'text-white' : ''}" 
-                            style="background-color: ${App.state.activeMonthIndex === index ? 'var(--primary-color)' : 'var(--secondary-bg)'}; color: ${App.state.activeMonthIndex === index ? 'white' : 'var(--secondary-text)'}"
-                            onclick="App.showMonth(${index})">
-                            ${name}
-                        </button>`
-                    ).join('');
-                },
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                createMonthContentHTML(monthIndex) {
-                    if (monthIndex === 12) { // Balanço Anual
-                        return `<div id="month-content-12" class="month-content p-4">Balanço Anual (Em desenvolvimento)</div>`;
-                    }
-                    return `
-                        <div id="month-content-${monthIndex}" class="month-content">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div class="space-y-6">
-                                    <div>
-                                        <h3 class="text-xl font-semibold mb-3">Receitas PJ (Empresa)</h3>
-                                        <div id="pj-entries-${monthIndex}" class="space-y-2"></div>
-                                        <button class="mt-2 text-sm font-semibold" style="color: var(--primary-color);" onclick="App.addEntry('pj', ${monthIndex})">+ Adicionar Receita PJ</button>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-xl font-semibold mb-3">Receitas PF (Pessoal)</h3>
-                                        <div id="pf-entries-${monthIndex}" class="space-y-2"></div>
-                                        <button class="mt-2 text-sm font-semibold" style="color: var(--primary-color);" onclick="App.addEntry('pf', ${monthIndex})">+ Adicionar Receita PF</button>
-                                    </div>
-                                </div>
-                                <div class="card rounded-xl p-6 space-y-4">
-                                    <h3 class="text-xl font-bold">Resumo de ${App.constants.monthNames[monthIndex]}</h3>
-                                    <div class="flex justify-between items-center"><span class="muted-text">Total Receitas PJ:</span> <span class="font-semibold" id="total-pj-${monthIndex}"></span></div>
-                                    <div class="flex justify-between items-center"><span class="muted-text">Total Despesas PJ:</span> <span class="font-semibold" id="total-gastos-empresa-${monthIndex}"></span></div>
-                                    <div class="flex justify-between items-center text-lg border-t pt-2" style="border-color: var(--border-color);"><span class="font-bold">Saldo PJ:</span> <span class="font-bold" id="saldo-pj-${monthIndex}"></span></div>
-                                    <div class="flex justify-between items-center mt-4"><span class="muted-text">Total Receitas PF:</span> <span class="font-semibold" id="total-pf-${monthIndex}"></span></div>
-                                    <div class="flex justify-between items-center"><span class="muted-text">Total Despesas PF:</span> <span class="font-semibold" id="total-gastos-pessoais-${monthIndex}"></span></div>
-                                    <div class="flex justify-between items-center text-lg border-t pt-2" style="border-color: var(--border-color);"><span class="font-bold">Saldo PF:</span> <span class="font-bold" id="saldo-pf-${monthIndex}"></span></div>
-                                </div>
-                            </div>
-                            <div class="mt-8">
-                                <h3 class="text-2xl font-semibold mb-4 text-center">Despesas Diárias</h3>
-                                <div id="expense-table-${monthIndex}" class="space-y-3"></div>
-                            </div>
-                        </div>
-                    `;
-                },
-                
-                renderPJEntries(m) {
-                    const container = document.getElementById(`pj-entries-${m}`);
-                    const entries = App.state.monthlyData[m].pjEntries;
-                    container.innerHTML = entries.map((entry, i) => `
-                        <div class="flex items-center gap-2">
-                            <input type="text" class="w-full p-2 input-field" placeholder="Descrição" value="${entry.description}" oninput="App.state.monthlyData[${m}].pjEntries[${i}].description = this.value; App.debouncedSave()">
-                            <input type="number" class="w-48 p-2 input-field" placeholder="Valor" value="${entry.amount || ''}" oninput="App.state.monthlyData[${m}].pjEntries[${i}].amount = parseFloat(this.value) || 0; App.recalculateAndDisplayTotals(${m}); App.debouncedSave()">
-                            <button class="remove-btn" onclick="App.removeEntry('pj', ${m}, ${i})">&times;</button>
-                        </div>
-                    `).join('');
-                },
+                    <div>
 
-                renderPFEntries(m) {
-                    const container = document.getElementById(`pf-entries-${m}`);
-                    const entries = App.state.monthlyData[m].pfEntries;
-                    container.innerHTML = entries.map((entry, i) => `
-                        <div class="flex items-center gap-2">
-                            <input type="text" class="w-full p-2 input-field" placeholder="Descrição" value="${entry.description}" oninput="App.state.monthlyData[${m}].pfEntries[${i}].description = this.value; App.debouncedSave()">
-                            <input type="number" class="w-48 p-2 input-field" placeholder="Valor" value="${entry.amount || ''}" oninput="App.state.monthlyData[${m}].pfEntries[${i}].amount = parseFloat(this.value) || 0; App.recalculateAndDisplayTotals(${m}); App.debouncedSave()">
-                            <button class="remove-btn" onclick="App.removeEntry('pf', ${m}, ${i})">&times;</button>
-                        </div>
-                    `).join('');
-                },
+                        <label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label>
 
-                // --- ALTERADO ---: Função de renderização de despesas com IDs únicos e chamada de handleExpenseInput
-                renderExpenseTable(m) {
-                    const container = document.getElementById(`expense-table-${m}`);
-                    const days = App.state.monthlyData[m].expenses;
-                    const paymentOptions = App.constants.basePaymentMethods.concat(App.state.creditCards.map(c => c.name));
-                    const categoryOptions = App.state.categories.map(c => c.name);
+                        <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field">
 
-                    container.innerHTML = days.map((day, dayIndex) => {
-                        const hasEntries = day.personalEntries.length > 0 || day.businessEntries.length > 0;
-                        return `
-                        <div class="accordion-item card rounded-xl ${hasEntries ? 'active' : ''}">
-                            <div class="accordion-trigger flex justify-between items-center p-4 cursor-pointer" onclick="this.parentElement.classList.toggle('active')">
-                                <span class="font-semibold">Dia ${dayIndex + 1}</span>
-                                <span class="arrow text-xl muted-text">▼</span>
-                            </div>
-                            <div class="accordion-content">
-                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <div>
-                                        <h4 class="font-semibold mb-2">Gastos Pessoais</h4>
-                                        <div class="space-y-2 text-sm">
-                                            ${day.personalEntries.map((entry, entryIndex) => `
-                                                <div class="grid grid-cols-4 gap-2 items-center">
-                                                    <input class="p-2 input-field col-span-2" placeholder="Descrição" value="${entry.description}" oninput="App.handleExpenseInput(${m}, ${dayIndex}, 'personal', ${entryIndex}, 'description', this)">
-                                                    <input type="number" class="p-2 input-field" placeholder="Valor" value="${entry.amount || ''}" oninput="App.handleExpenseInput(${m}, ${dayIndex}, 'personal', ${entryIndex}, 'amount', this)">
-                                                    <button class="remove-btn justify-self-end" onclick="App.removeExpenseEntry(${m}, ${dayIndex}, 'personal', ${entryIndex})">&times;</button>
-                                                    <select id="category-select-${m}-${dayIndex}-personal-${entryIndex}" class="p-2 input-field col-span-2" onchange="App.handleExpenseInput(${m}, ${dayIndex}, 'personal', ${entryIndex}, 'category', this)">
-                                                        ${categoryOptions.map(cat => `<option value="${cat}" ${entry.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
-                                                    </select>
-                                                    <select class="p-2 input-field col-span-2" onchange="App.handleExpenseInput(${m}, ${dayIndex}, 'personal', ${entryIndex}, 'paymentMethod', this)">
-                                                        ${paymentOptions.map(opt => `<option value="${opt}" ${entry.paymentMethod === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                                                    </select>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                        <button class="mt-2 text-sm font-semibold" style="color: var(--primary-color);" onclick="App.addExpenseEntry(${m}, ${dayIndex}, 'personal')">+ Adicionar Gasto Pessoal</button>
-                                    </div>
-                                     <div>
-                                        <h4 class="font-semibold mb-2">Gastos da Empresa</h4>
-                                        <div class="space-y-2 text-sm">
-                                            ${day.businessEntries.map((entry, entryIndex) => `
-                                                <div class="grid grid-cols-4 gap-2 items-center">
-                                                    <input class="p-2 input-field col-span-2" placeholder="Descrição" value="${entry.description}" oninput="App.handleExpenseInput(${m}, ${dayIndex}, 'business', ${entryIndex}, 'description', this)">
-                                                    <input type="number" class="p-2 input-field" placeholder="Valor" value="${entry.amount || ''}" oninput="App.handleExpenseInput(${m}, ${dayIndex}, 'business', ${entryIndex}, 'amount', this)">
-                                                    <button class="remove-btn justify-self-end" onclick="App.removeExpenseEntry(${m}, ${dayIndex}, 'business', ${entryIndex})">&times;</button>
-                                                    <select id="category-select-${m}-${dayIndex}-business-${entryIndex}" class="p-2 input-field col-span-2" onchange="App.handleExpenseInput(${m}, ${dayIndex}, 'business', ${entryIndex}, 'category', this)">
-                                                        ${categoryOptions.map(cat => `<option value="${cat}" ${entry.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
-                                                    </select>
-                                                    <select class="p-2 input-field col-span-2" onchange="App.handleExpenseInput(${m}, ${dayIndex}, 'business', ${entryIndex}, 'paymentMethod', this)">
-                                                        ${paymentOptions.map(opt => `<option value="${opt}" ${entry.paymentMethod === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                                                    </select>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                        <button class="mt-2 text-sm font-semibold" style="color: var(--primary-color);" onclick="App.addExpenseEntry(${m}, ${dayIndex}, 'business')">+ Adicionar Gasto Empresa</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        `;
-                    }).join('');
-                },
-            }
-        };
+                    </div>
 
-        window.App = App; // Expor App globalmente para ser acessível pelos `onclick`
+                    <div>
 
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                authScreen.classList.add('hidden');
-                appScreen.classList.remove('hidden');
-                loadingOverlay.classList.remove('hidden');
-                App.init(user.uid);
-            } else {
-                authScreen.classList.remove('hidden');
-                appScreen.classList.add('hidden');
-                loadingOverlay.classList.add('hidden');
-            }
-        });
-    </script>
-</body>
-</html>
+                        <label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label>
+
+                        <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;">
+
+                    </div>
+
+                </div>
+
+                <button id="save-profile-btn" class="mt-4 w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações do Perfil</button>
+
+            </div>
+
+
+
+            <div class="border-t pt-6" style="border-color: var(--border-color);">
+
+                <h3 class="text-xl font-bold mb-1">Conectar Assistente IA via WhatsApp</h3>
+
+                <p class="muted-text text-sm mb-4">Configure a integração para lançar despesas e interagir com seu painel diretamente do WhatsApp.</p>
+
+                
+
+                <div class="p-3 mb-4 rounded-xl text-center text-sm" style="background-color: var(--secondary-bg);">
+
+                    ✨ <span class="font-semibold">Funcionalidade em desenvolvimento.</span> Disponível em breve!
+
+                </div>
+
+                <div class="space-y-4 opacity-60">
+
+                    <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
+
+                        <h4 class="font-semibold">Passo 1: Suas Credenciais da Meta</h4>
+
+                        <p class="text-xs muted-text -mt-3">Insira as credenciais da sua API encontradas no <a href="#" class="underline" style="color: var(--primary-color);">Painel de Desenvolvedores</a>.</p>
+
+                        <div>
+
+                            <label for="whatsapp-phone-id" class="block text-sm font-medium muted-text mb-1">ID do Número de Telefone</label>
+
+                            <input type="text" id="whatsapp-phone-id" placeholder="Ex: 102030405060708" class="w-full p-3 input-field" disabled>
+
+                        </div>
+
+                        <div>
+
+                            <label for="whatsapp-token" class="block text-sm font-medium muted-text mb-1">Token de Acesso da API</label>
+
+                            <input type="password" id="whatsapp-token" placeholder="Cole seu token permanente aqui" class="w-full p-3 input-field" disabled>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
+
+                        <h4 class="font-semibold">Passo 2: Configurar Webhook na Meta</h4>
+
+                        <p class="text-xs muted-text -mt-3">Copie os valores abaixo e cole-os na seção "Webhook" da sua aplicação na Meta.</p>
+
+                         <div>
+
+                            <label class="block text-sm font-medium muted-text mb-1">URL do Webhook (para colar na Meta)</label>
+
+                            <div class="flex gap-2">
+
+                                <input type="text" id="whatsapp-webhook-url" class="w-full p-3 input-field" readonly disabled>
+
+                                <button id="copy-webhook-url-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Copiar</button>
+
+                            </div>
+
+                        </div>
+
+                         <div>
+
+                            <label class="block text-sm font-medium muted-text mb-1">Token de Verificação do Webhook (para colar na Meta)</label>
+
+                            <div class="flex gap-2">
+
+                                <input type="text" id="whatsapp-verify-token" class="w-full p-3 input-field" readonly disabled>
+
+                                 <button id="generate-verify-token-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Gerar</button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    
+
+                    <div class="mt-4 flex items-center justify-between">
+
+                        <div class="text-sm muted-text">Status: <span id="whatsapp-status" class="font-semibold" style="color: var(--primary-color);">Indisponível</span></div>
+
+                        <button id="save-integration-btn" class="px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);" disabled>Salvar Configuração</button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+        
+
+        <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+
+                <div class="flex justify-between items-center mb-6 flex-shrink-0">
+
+                    <h2 class="text-2xl font-bold">Gerenciar</h2>
+
+                    <button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
+
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto">
+
+                    <div>
+
+                        <h3 class="text-lg font-semibold mb-3">Cartões de Crédito</h3>
+
+                        <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+
+                        <div id="card-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+
+                    </div>
+
+                    <div>
+
+                        <h3 class="text-lg font-semibold mb-3">Categorias e Metas</h3>
+
+                        <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+
+                        <div id="category-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+
+                    </div>
+
+                    <div>
+
+                        <h3 class="text-lg font-semibold mb-3">Lançamentos Recorrentes</h3>
+
+                        <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);"><input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field"><div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field"></div><select id="recurring-type" class="w-full p-2 input-field"></select><div id="recurring-expense-fields" class="space-y-2 hidden"><select id="recurring-category" class="w-full p-2 input-field"></select><select id="recurring-payment" class="w-full p-2 input-field"></select><select id="recurring-card" class="w-full p-2 input-field hidden"></select></div><button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button></div>
+
+                        <div id="recurring-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        
+
+        <div id="ai-analysis-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50"><div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]"><div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 class="text-2xl font-bold">Análise Financeira com IA</h2><button id="close-ai-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div><div id="ai-analysis-result" class="overflow-y-auto prose dark:prose-invert"><p class="muted-text">Analisando seus dados...</p></div></div></div>
+
+
+
+        <div class="container mx-auto card p-4 md:p-8 rounded-2xl relative">
+
+            <div id="save-feedback">Salvo ✓</div>
+
+            
+
+            <div class="flex justify-between items-start mb-8">
+
+                <div class="text-xs muted-text">
+
+                    <p class="font-bold">Rico Plus</p>
+
+                    <p>by Franzoi Tech</p>
+
+                </div>
+
+                <div class="flex items-center gap-4"><button id="theme-toggle-btn" class="p-2 rounded-full text-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">🌙</button><button id="logout-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Sair</button></div>
+
+            </div>
+
+
+
+            <div class="text-center mb-8">
+
+                <h1 class="text-5xl md:text-6xl font-semibold">Painel Financeiro</h1>
+
+                <p class="mt-4 text-xl muted-text">Sua central de controle financeiro.</p>
+
+                <div class="flex justify-center items-center gap-4 mt-6"><button id="manage-account-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Conta</button><button id="manage-settings-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Gerenciar</button></div>
+
+            </div>
+
+
+
+            <div class="flex justify-center flex-wrap gap-2 mb-8" id="monthTabs"></div>
+
+            <div id="monthContentContainer"></div>
+
+
+
+            <div class="mt-12 pt-8 border-t text-center" style="border-color: var(--border-color);">
+
+                <p class="text-sm muted-text">Ajude a manter este projeto</p>
+
+                <p class="text-xs muted-text mb-2">Doe qualquer valor via Pix</p>
+
+                <div class="mt-2 flex justify-center"><iframe src="https://drive.google.com/file/d/1s8uZhOj-lo84fpnA5Hyjz_CIEMhO80Fz/preview" width="150" height="150" allow="autoplay" style="border:0;"></iframe></div>
+
+                <div class="mt-2"><p class="text-xs muted-text">Ou use a chave (email):</p><div class="mt-1 flex justify-center items-center gap-2"><p id="pix-key" class="font-mono text-sm" style="color: var(--primary-color);">franzoitechcorp@gmail.com</p><button id="copy-pix-btn" class="px-3 py-1 text-xs font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Copiar</button></div></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+
+
+        const firebaseConfig = { 
+
+            apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0", 
+
+            authDomain: "controle-de-gastos-74daf.firebaseapp.com", 
+
+            projectId: "controle-de-gastos-74daf", 
+
+            storageBucket: "controle-de-gastos-74daf.appspot.com",
+
+            messagingSenderId: "331667008487", 
+
+            appId: "1:331667008487:web:c5200f64ac27d0c32feb42" 
+
+        };
+
+        
+
+        const app = initializeApp(firebaseConfig);
+
+        const auth = getAuth(app);
+
+        const db = getFirestore(app);
+
+
+
+        // --- AUTH LOGIC ---
+
+        const authScreen = document.getElementById('auth-screen'); const appScreen = document.getElementById('app-screen');
+
+        const mainAuthBtn = document.getElementById('main-auth-btn'); const toggleAuthModeLink = document.getElementById('toggle-auth-mode-link');
+
+        const forgotPasswordLink = document.getElementById('forgot-password-link'); const authError = document.getElementById('auth-error');
+
+        const themeToggleBtn = document.getElementById('theme-toggle-btn'); const loadingOverlay = document.getElementById('loading-overlay');
+
+        let isLoginMode = true;
+
+        const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
+
+        document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress); document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
+
+        document.getElementById('confirm-password-input').addEventListener('keydown', handleAuthKeyPress);
+
+        const showError = (message) => { authError.textContent = message; };
+
+        const setAuthMode = (mode) => { isLoginMode = mode === 'login'; authError.textContent = ''; const authTitle = document.getElementById('auth-title'); const confirmPasswordInput = document.getElementById('confirm-password-input'); if (isLoginMode) { authTitle.textContent = 'Acesso ao Painel'; mainAuthBtn.textContent = 'Entrar'; confirmPasswordInput.classList.add('hidden'); forgotPasswordLink.classList.remove('hidden'); toggleAuthModeLink.innerHTML = 'Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span>'; } else { authTitle.textContent = 'Criar Nova Conta'; mainAuthBtn.textContent = 'Criar Conta'; confirmPasswordInput.classList.remove('hidden'); forgotPasswordLink.classList.add('hidden'); toggleAuthModeLink.textContent = 'Já tem conta? Faça login'; } };
+
+        const applyTheme = (theme) => { document.documentElement.classList.toggle('dark', theme === 'dark'); themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙'; if (window.App && App.state.currentUserId) { App.showMonth(App.state.activeMonthIndex); } };
+
+        applyTheme(localStorage.getItem('theme') || 'light');
+
+        toggleAuthModeLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode(isLoginMode ? 'signup' : 'login'); });
+
+        mainAuthBtn.addEventListener('click', () => { const email = document.getElementById('email-input').value; const password = document.getElementById('password-input').value; showError(''); const originalBtnText = mainAuthBtn.textContent; mainAuthBtn.disabled = true; mainAuthBtn.textContent = 'Aguarde...'; const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; }; if (isLoginMode) { signInWithEmailAndPassword(auth, email, password).catch(error => { showError('Email ou senha inválidos.'); restoreBtn(); }); } else { const confirmPassword = document.getElementById('confirm-password-input').value; if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; } createUserWithEmailAndPassword(auth, email, password).catch(error => { if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.'); else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.'); else showError('Erro ao criar conta.'); restoreBtn(); }); } });
+
+        forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; if (!email) { showError('Por favor, insira seu email para recuperar a senha.'); return; } sendPasswordResetEmail(auth, email).then(() => { showError('Email de recuperação enviado!'); }).catch((error) => { showError('Não foi possível enviar o email.'); }); });
+
+        document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth); });
+
+        
+
+        const App = {
+
+            state: {
+
+                currentUserId: null,
+
+                profile: { name: '' },
+
+                integrations: {
+
+                    whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' }
+
+                },
+
+                creditCards: [],
+
+                categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }],
+
+                recurringEntries: [], monthlyData: {}, activeMonthIndex: new Date().getMonth(),
+
+                chartInstances: {}, saveTimeout: null
+
+            },
+
+            ui: {
+
+                monthContentContainer: document.getElementById('monthContentContainer'), monthTabsContainer: document.getElementById('monthTabs'),
+
+                settingsModal: document.getElementById('settings-modal'), accountModal: document.getElementById('account-modal'),
+
+                userNameInput: document.getElementById('user-name-input'), userEmailDisplay: document.getElementById('user-email-display'),
+
+                whatsappPhoneId: document.getElementById('whatsapp-phone-id'), whatsappToken: document.getElementById('whatsapp-token'),
+
+                whatsappWebhookUrl: document.getElementById('whatsapp-webhook-url'), whatsappVerifyToken: document.getElementById('whatsapp-verify-token'),
+
+                whatsappStatus: document.getElementById('whatsapp-status'), newCardNameInput: document.getElementById('new-card-name'),
+
+                cardListContainer: document.getElementById('card-list'), newCategoryNameInput: document.getElementById('new-category-name'),
+
+                categoryListContainer: document.getElementById('category-list'), recurringListContainer: document.getElementById('recurring-list'),
+
+                saveFeedback: document.getElementById('save-feedback'), aiAnalysisModal: document.getElementById('ai-analysis-modal'),
+
+                aiAnalysisResult: document.getElementById('ai-analysis-result'),
+
+            },
+
+            constants: {
+
+                monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
+
+                basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
+
+            },
+
+
+
+            init(userId) { this.state.currentUserId = userId; this.loadData(); this.bindGlobalEventListeners(); },
+
+
+
+            helpers: {
+
+                formatCurrency: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`,
+
+                debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
+
+                showSaveFeedback() { App.ui.saveFeedback.classList.add('show'); setTimeout(() => { App.ui.saveFeedback.classList.remove('show'); }, 2000); },
+
+                cleanAIResponse(text) { if (typeof text !== 'string') return ''; let cleanedText = text.replace(/[`"']{3}html/g, ''); cleanedText = cleanedText.replace(/[`"']{3}/g, ''); return cleanedText.trim(); },
+
+                generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
+
+            },
+
+            
+
+            async saveDataToFirestore() {
+
+                if (!App.state.currentUserId) return;
+
+                try {
+
+                    const dataToSave = {
+
+                        profile: App.state.profile,
+
+                        integrations: App.state.integrations,
+
+                        monthlyData: App.state.monthlyData, creditCards: App.state.creditCards,
+
+                        categories: App.state.categories, recurringEntries: App.state.recurringEntries
+
+                    };
+
+                    await setDoc(doc(db, 'users', App.state.currentUserId), dataToSave, { merge: true });
+
+                    App.helpers.showSaveFeedback();
+
+                } catch (e) { console.error("Erro ao salvar dados: ", e); }
+
+            },
+
+            
+
+            debouncedSave: null,
+
+
+
+            async loadData() {
+
+                if (!this.state.currentUserId) return;
+
+                try {
+
+                    const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
+
+                    if (docSnap.exists()) {
+
+                        const d = docSnap.data();
+
+                        this.state.profile = d.profile || { name: '' };
+
+                        this.state.integrations = d.integrations || { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } };
+
+                        this.state.monthlyData = d.monthlyData || {}; this.state.creditCards = d.creditCards || [];
+
+                        this.state.categories = d.categories && d.categories.length > 0 ? d.categories : this.state.categories;
+
+                        this.state.recurringEntries = d.recurringEntries || [];
+
+                    }
+
+                    if (!this.state.integrations.whatsapp.webhookVerifyToken) {
+
+                        this.state.integrations.whatsapp.webhookVerifyToken = this.helpers.generateRandomToken();
+
+                    }
+
+                    for (let i = 0; i < 12; i++) { this.state.monthlyData[i] = this.state.monthlyData[i] || { pjEntries: [], pfEntries: [], expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] })) }; this.state.monthlyData[i].expenses.forEach(day => { [...day.personalEntries, ...day.businessEntries].forEach(entry => { if (!entry.category) { entry.category = 'Outros'; } }); }); }
+
+                } catch (error) { console.error("Erro ao carregar dados:", error); }
+
+                this.ui.monthContentContainer.innerHTML = '';
+
+                this.constants.monthNames.forEach((_, index) => { this.ui.monthContentContainer.insertAdjacentHTML('beforeend', index === 12 ? this.render.createBalanceContentHTML() : this.render.createMonthContentHTML(index)); });
+
+                this.showMonth(this.state.activeMonthIndex);
+
+                loadingOverlay.classList.add('hidden');
+
+            },
+
+            
+
+            showMonth(monthIndex) {
+
+                this.state.activeMonthIndex = monthIndex;
+
+                Object.values(this.state.chartInstances).forEach(c => c?.destroy());
+
+                document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+
+                if (monthIndex < 12) { this.applyRecurringEntries(monthIndex); }
+
+                this.render.renderTabs();
+
+                const contentEl = document.getElementById(`month-${monthIndex}-content`);
+
+                if (contentEl) {
+
+                    contentEl.classList.add('active');
+
+                    if (monthIndex < 12) {
+
+                        this.render.renderPJEntries(monthIndex);
+
+                        this.render.renderPFEntries(monthIndex);
+
+                        this.render.renderExpenseTable(monthIndex);
+
+                        this.recalculateAndDisplayTotals(monthIndex);
+
+                    } else {
+
+                        this.render.renderBalanceSummary();
+
+                    }
+
+                }
+
+            },
+
+            
+
+            recalculateAndDisplayTotals(m) {
+
+                const d = this.state.monthlyData[m];
+
+                if (!d) return;
+
+                const t = {
+
+                    pj: d.pjEntries.reduce((s, e) => s + e.amount, 0),
+
+                    pf: d.pfEntries.reduce((s, e) => s + e.amount, 0),
+
+                    personal: d.expenses.flat().reduce((a, day) => a + day.p
