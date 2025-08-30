@@ -651,6 +651,31 @@
         // Oculta o overlay de carregamento, mesmo se houver erro
         loadingOverlay.classList.add('hidden');
     }
+},
+
+async callVercelFunction(prompt) {
+    const VERCEL_API_URL = "https://controledegastos1-0.vercel.app/api/analyze";
+
+    try {
+        const response = await fetch(VERCEL_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: prompt })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Erro na API (${response.status}): ${errorData.error || response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.analysis;
+    } catch (error) {
+        console.error("Erro na chamada da API:", error);
+        throw error;
+    }
 }
             
             render: {
