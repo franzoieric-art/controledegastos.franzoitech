@@ -72,298 +72,297 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0",
-            authDomain: "controle-de-gastos-74daf.firebaseapp.com",
-            projectId: "controle-de-gastos-74daf",
-            storageBucket: "controle-de-gastos-74daf.appspot.com",
-            messagingSenderId: "331667008487",
-            appId: "1:331667008487:web:c5200f64ac27d0c32feb42"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
 
-        // --- Lógica de Autenticação ---
-        const authScreen = document.getElementById('auth-screen');
-        const appScreen = document.getElementById('app-screen');
-        const mainAuthBtn = document.getElementById('main-auth-btn');
-        const toggleAuthModeLink = document.getElementById('toggle-auth-mode-link');
-        const forgotPasswordLink = document.getElementById('forgot-password-link');
-        const authError = document.getElementById('auth-error');
-        const themeToggleBtn = document.getElementById('theme-toggle-btn');
-        const loadingOverlay = document.getElementById('loading-overlay');
-        let isLoginMode = true;
-        const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
-        document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress);
-        document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
-        document.getElementById('confirm-password-input').addEventListener('keydown', handleAuthKeyPress);
-        const showError = (message) => { authError.textContent = message; };
-        const setAuthMode = (mode) => { isLoginMode = mode === 'login'; authError.textContent = ''; const authTitle = document.getElementById('auth-title'); const confirmPasswordInput = document.getElementById('confirm-password-input'); if (isLoginMode) { authTitle.textContent = 'Acesso ao Painel'; mainAuthBtn.textContent = 'Entrar'; confirmPasswordInput.classList.add('hidden'); forgotPasswordLink.classList.remove('hidden'); toggleAuthModeLink.innerHTML = 'Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span>'; } else { authTitle.textContent = 'Criar Nova Conta'; mainAuthBtn.textContent = 'Criar Conta'; confirmPasswordInput.classList.remove('hidden'); forgotPasswordLink.classList.add('hidden'); toggleAuthModeLink.textContent = 'Já tem conta? Faça login'; } };
-        const applyTheme = (theme) => { document.documentElement.classList.toggle('dark', theme === 'dark'); themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙'; if (window.App && App.state.currentUserId) { App.showMonth(App.state.activeMonthIndex); } };
-        applyTheme(localStorage.getItem('theme') || 'light');
-        toggleAuthModeLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode(isLoginMode ? 'signup' : 'login'); });
-        mainAuthBtn.addEventListener('click', () => { const email = document.getElementById('email-input').value; const password = document.getElementById('password-input').value; showError(''); const originalBtnText = mainAuthBtn.textContent; mainAuthBtn.disabled = true; mainAuthBtn.textContent = 'Aguarde...'; const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; }; if (isLoginMode) { signInWithEmailAndPassword(auth, email, password).catch(error => { showError('Email ou senha inválidos.'); restoreBtn(); }); } else { const confirmPassword = document.getElementById('confirm-password-input').value; if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; } createUserWithEmailAndPassword(auth, email, password).catch(error => { if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.'); else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.'); else showError('Erro ao criar conta.'); restoreBtn(); }); } });
-        forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; if (!email) { showError('Por favor, insira seu email para recuperar a senha.'); return; } sendPasswordResetEmail(auth, email).then(() => { showError('Email de recuperação enviado!'); }).catch((error) => { showError('Não foi possível enviar o email.'); }); });
-        document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth); });
+const firebaseConfig = {
+    apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0",
+    authDomain: "controle-de-gastos-74daf.firebaseapp.com",
+    projectId: "controle-de-gastos-74daf",
+    storageBucket: "controle-de-gastos-74daf.appspot.com",
+    messagingSenderId: "331667008487",
+    appId: "1:331667008487:web:c5200f64ac27d0c32feb42"
+};
 
-        const App = {
-            state: {
-                currentUserId: null,
-                profile: { name: '' },
-                creditCards: [],
-                categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }],
-                recurringEntries: [],
-                monthlyData: {},
-                activeMonthIndex: new Date().getMonth(),
-                chartInstances: {},
-                saveTimeout: null
-            },
-            ui: {
-                monthContentContainer: document.getElementById('monthContentContainer'),
-                monthTabsContainer: document.getElementById('monthTabs'),
-            },
-            constants: {
-                monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
-                basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
-            },
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-            suggestions: {
-                keywords: { 
-                    'Transporte': ['uber', '99', 'táxi', 'taxi', 'ônibus', 'onibus', 'metrô', 'metro', 'gasolina', 'combustível', 'estacionamento', 'pedagio', 'pedágio'],
-                    'Alimentação': ['ifood', 'rappi', 'restaurante', 'mercado', 'lanche', 'padaria', 'supermercado', 'hortifruti', 'açougue', 'acougue', 'pizza'],
-                    'Moradia': ['aluguel', 'condomínio', 'condominio', 'iptu', 'luz', 'energia', 'água', 'agua', 'gás', 'gas', 'internet']
-                },
-                getCategory(description) {
-                    if (!description) return null;
-                    const descLower = description.toLowerCase();
-                    for (const category in this.keywords) {
-                        if (this.keywords[category].some(k => descLower.includes(k))) return category;
-                    }
-                    return null;
-                }
-            },
+// --- Lógica de Autenticação ---
+const authScreen = document.getElementById('auth-screen');
+const appScreen = document.getElementById('app-screen');
+const mainAuthBtn = document.getElementById('main-auth-btn');
+const toggleAuthModeLink = document.getElementById('toggle-auth-mode-link');
+const forgotPasswordLink = document.getElementById('forgot-password-link');
+const authError = document.getElementById('auth-error');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const loadingOverlay = document.getElementById('loading-overlay');
+let isLoginMode = true;
+const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
+document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress);
+document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
+document.getElementById('confirm-password-input').addEventListener('keydown', handleAuthKeyPress);
+const showError = (message) => { authError.textContent = message; };
+const setAuthMode = (mode) => { isLoginMode = mode === 'login'; authError.textContent = ''; const authTitle = document.getElementById('auth-title'); const confirmPasswordInput = document.getElementById('confirm-password-input'); if (isLoginMode) { authTitle.textContent = 'Acesso ao Painel'; mainAuthBtn.textContent = 'Entrar'; confirmPasswordInput.classList.add('hidden'); forgotPasswordLink.classList.remove('hidden'); toggleAuthModeLink.innerHTML = 'Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span>'; } else { authTitle.textContent = 'Criar Nova Conta'; mainAuthBtn.textContent = 'Criar Conta'; confirmPasswordInput.classList.remove('hidden'); forgotPasswordLink.classList.add('hidden'); toggleAuthModeLink.textContent = 'Já tem conta? Faça login'; } };
+const applyTheme = (theme) => { document.documentElement.classList.toggle('dark', theme === 'dark'); themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙'; if (window.App && App.state.currentUserId) { App.showMonth(App.state.activeMonthIndex); } };
+applyTheme(localStorage.getItem('theme') || 'light');
+toggleAuthModeLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode(isLoginMode ? 'signup' : 'login'); });
+mainAuthBtn.addEventListener('click', () => { const email = document.getElementById('email-input').value; const password = document.getElementById('password-input').value; showError(''); const originalBtnText = mainAuthBtn.textContent; mainAuthBtn.disabled = true; mainAuthBtn.textContent = 'Aguarde...'; const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; }; if (isLoginMode) { signInWithEmailAndPassword(auth, email, password).catch(error => { showError('Email ou senha inválidos.'); restoreBtn(); }); } else { const confirmPassword = document.getElementById('confirm-password-input').value; if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; } createUserWithEmailAndPassword(auth, email, password).catch(error => { if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.'); else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.'); else showError('Erro ao criar conta.'); restoreBtn(); }); } });
+forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; if (!email) { showError('Por favor, insira seu email para recuperar a senha.'); return; } sendPasswordResetEmail(auth, email).then(() => { showError('Email de recuperação enviado!'); }).catch((error) => { showError('Não foi possível enviar o email.'); }); });
+document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth); });
 
-            init(userId) {
-                this.state.currentUserId = userId;
-                this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 1500);
-                this.loadData();
-                this.bindGlobalEventListeners();
-            },
+const App = {
+    state: {
+        currentUserId: null,
+        profile: { name: '' },
+        integrations: { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } },
+        creditCards: [],
+        categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }],
+        recurringEntries: [],
+        monthlyData: {},
+        activeMonthIndex: new Date().getMonth(),
+        chartInstances: {},
+        saveTimeout: null
+    },
+    ui: {
+        monthContentContainer: document.getElementById('monthContentContainer'),
+        monthTabsContainer: document.getElementById('monthTabs'),
+        // Adicione outros seletores de UI aqui conforme necessário
+    },
+    constants: {
+        monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
+        basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
+    },
+    
+    // MÓDULO DE SUGESTÃO ADICIONADO
+    suggestions: {
+        keywords: { 
+            'Transporte': ['uber', '99', 'táxi', 'taxi', 'ônibus', 'onibus', 'metrô', 'metro', 'gasolina', 'combustível', 'estacionamento', 'pedagio', 'pedágio'],
+            'Alimentação': ['ifood', 'rappi', 'restaurante', 'mercado', 'lanche', 'padaria', 'supermercado', 'hortifruti', 'açougue', 'acougue', 'pizza'],
+            'Moradia': ['aluguel', 'condomínio', 'condominio', 'iptu', 'luz', 'energia', 'água', 'agua', 'gás', 'gas', 'internet']
+        },
+        getCategory(description) {
+            if (!description) return null;
+            const descLower = description.toLowerCase();
+            for (const category in this.keywords) {
+                if (this.keywords[category].some(k => descLower.includes(k))) return category;
+            }
+            return null;
+        }
+    },
 
-            helpers: {
-                formatCurrency: (value) => `R$ ${(value || 0).toFixed(2).replace('.', ',')}`,
-                debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
-                showSaveFeedback() { document.getElementById('save-feedback').classList.add('show'); setTimeout(() => { document.getElementById('save-feedback').classList.remove('show'); }, 2000); },
-                generateRandomToken: () => Date.now().toString(36) + Math.random().toString(36).substr(2),
-            },
-            
-            async saveDataToFirestore() {
-                if (!this.state.currentUserId) return;
-                const dataToSave = { ...this.state };
-                delete dataToSave.chartInstances; // Não salvar instâncias de Chart.js
-                try {
-                    await setDoc(doc(db, 'users', this.state.currentUserId), dataToSave, { merge: true });
-                    this.helpers.showSaveFeedback();
-                } catch (e) { console.error("Erro ao salvar dados: ", e); }
-            },
-            
-            debouncedSave: null,
+    init(userId) {
+        this.state.currentUserId = userId;
+        this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 1500);
+        this.loadData();
+        this.bindGlobalEventListeners();
+    },
 
-            async loadData() {
-                if (!this.state.currentUserId) return;
-                loadingOverlay.style.display = 'flex';
-                try {
-                    const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
-                    if (docSnap.exists()) {
-                        const d = docSnap.data();
-                        // Mescla os dados salvos com o estado inicial
-                        Object.assign(this.state, d);
-                        this.state.activeMonthIndex = new Date().getMonth(); // Sempre começa no mês atual
-                    }
-                    // Garante que a estrutura de dados para todos os meses exista
-                    for (let i = 0; i < 12; i++) {
-                        this.state.monthlyData[i] = this.state.monthlyData[i] || {
-                            pjEntries: [], pfEntries: [],
-                            expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] }))
-                        };
-                         this.state.monthlyData[i].expenses.forEach(day => {
-                            ['personalEntries', 'businessEntries'].forEach(type => {
-                                day[type] = (day[type] || []).map(entry => ({ ...entry, id: entry.id || this.helpers.generateRandomToken() }));
-                            });
-                        });
-                    }
-                } catch (error) { console.error("Erro ao carregar dados:", error); }
-                
-                this.ui.monthContentContainer.innerHTML = '';
-                this.constants.monthNames.forEach((_, index) => { 
-                    this.ui.monthContentContainer.insertAdjacentHTML('beforeend', this.render.createMonthContentHTML(index)); 
+    helpers: {
+        formatCurrency: (value) => `R$ ${(value || 0).toFixed(2).replace('.', ',')}`,
+        debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
+        showSaveFeedback() { document.getElementById('save-feedback').classList.add('show'); setTimeout(() => { document.getElementById('save-feedback').classList.remove('show'); }, 2000); },
+        generateRandomToken: () => Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
+    },
+
+    debouncedSave: null,
+    
+    async saveDataToFirestore() {
+        if (!this.state.currentUserId) return;
+        const dataToSave = { ...this.state };
+        delete dataToSave.chartInstances;
+        try {
+            await setDoc(doc(db, 'users', this.state.currentUserId), dataToSave, { merge: true });
+        } catch (e) { console.error("Erro ao salvar dados: ", e); }
+    },
+    
+    async loadData() {
+        if (!this.state.currentUserId) return;
+        loadingOverlay.style.display = 'flex';
+        try {
+            const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
+            if (docSnap.exists()) {
+                const d = docSnap.data();
+                Object.assign(this.state, d);
+                this.state.activeMonthIndex = new Date().getMonth();
+            }
+            for (let i = 0; i < 12; i++) {
+                this.state.monthlyData[i] = this.state.monthlyData[i] || {
+                    pjEntries: [], pfEntries: [],
+                    expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] }))
+                };
+                 this.state.monthlyData[i].expenses.forEach(day => {
+                    ['personalEntries', 'businessEntries'].forEach(type => {
+                        day[type] = (day[type] || []).map(entry => ({ ...entry, id: entry.id || this.helpers.generateRandomToken() }));
+                    });
                 });
+            }
+        } catch (error) { console.error("Erro ao carregar dados:", error); }
+        
+        this.ui.monthContentContainer.innerHTML = '';
+        this.constants.monthNames.forEach((_, index) => { 
+            this.ui.monthContentContainer.insertAdjacentHTML('beforeend', this.render.createMonthContentHTML(index)); 
+        });
+        
+        this.showMonth(this.state.activeMonthIndex);
+        loadingOverlay.style.display = 'none';
+    },
+    
+    showMonth(monthIndex) {
+        this.state.activeMonthIndex = monthIndex;
+        document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+        
+        this.render.renderTabs(); 
+
+        const contentEl = document.getElementById(`month-content-${monthIndex}`);
+        if (contentEl) {
+            contentEl.classList.add('active');
+            if (monthIndex < 12) {
+                // Suas funções de renderização originais
+                this.render.renderPJEntries(monthIndex);
+                this.render.renderPFEntries(monthIndex);
+                this.render.renderExpenseTable(monthIndex);
+            }
+        }
+    },
+    
+    bindGlobalEventListeners() {
+        // Seu listener de input original, agora com a lógica de IA
+        document.body.addEventListener('input', (event) => {
+            const t = event.target;
+            if (t.matches('.entry-input')) {
+                const el = t.closest('.flex');
+                const btn = el.querySelector('.remove-btn');
+                if (!btn) return;
+
+                const { monthIndex, type, day, category, entryId } = btn.dataset;
+                const month = parseInt(monthIndex);
+                const id = entryId;
+
+                let entry;
+                if (type === 'pj') { entry = this.state.monthlyData[month].pjEntries.find(e => e.id == id); } 
+                else if (type === 'pf') { entry = this.state.monthlyData[month].pfEntries.find(e => e.id == id); } 
+                else { entry = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id == id); }
                 
-                this.showMonth(this.state.activeMonthIndex);
-                loadingOverlay.style.display = 'none';
-            },
-            
-            showMonth(monthIndex) {
-                this.state.activeMonthIndex = monthIndex;
-                document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
-                
-                this.render.renderTabs(); 
+                if (entry) {
+                    const field = t.dataset.field;
+                    entry[field] = t.type === 'number' ? parseFloat(t.value) || 0 : t.value;
 
-                const contentEl = document.getElementById(`month-content-${monthIndex}`);
-                if (contentEl) {
-                    contentEl.classList.add('active');
-                    if (monthIndex < 12) {
-                        // Funções que desenham o conteúdo
-                        this.render.renderPJEntries(monthIndex);
-                        this.render.renderPFEntries(monthIndex);
-                        this.render.renderExpenseTable(monthIndex);
-                        // this.recalculateAndDisplayTotals(monthIndex); // Desativado por enquanto
-                    } else {
-                        // this.render.renderBalanceSummary();
-                    }
-                }
-            },
-            
-            bindGlobalEventListeners() {
-                document.body.addEventListener('input', (event) => {
-                    const t = event.target;
-                    if (t.matches('.entry-input')) {
-                        const el = t.closest('.entry-row');
-                        const btn = el.querySelector('.remove-btn');
-                        if (!btn) return;
-
-                        const { monthIndex, type, day, category, entryId } = btn.dataset;
-                        const month = parseInt(monthIndex);
-                        const id = entryId;
-
-                        let entry;
-                        if (type === 'pj') { entry = this.state.monthlyData[month].pjEntries.find(e => e.id === id); } 
-                        else if (type === 'pf') { entry = this.state.monthlyData[month].pfEntries.find(e => e.id === id); } 
-                        else { entry = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id === id); }
-                        
-                        if (entry) {
-                            const field = t.dataset.field;
-                            entry[field] = t.type === 'number' ? parseFloat(t.value) || 0 : t.value;
-
-                            if (type === 'expense' && field === 'description') {
-                                const suggestedCategory = this.suggestions.getCategory(t.value);
-                                if (suggestedCategory && entry.category !== suggestedCategory) {
-                                    entry.category = suggestedCategory;
-                                    this.render.renderExpenseTable(month); 
-                                }
-                            }
-                            this.debouncedSave();
+                    // --- LÓGICA DE SUGESTÃO INTEGRADA AQUI ---
+                    if (type === 'expense' && field === 'description') {
+                        const suggestedCategory = this.suggestions.getCategory(t.value);
+                        if (suggestedCategory && entry.category !== suggestedCategory) {
+                            entry.category = suggestedCategory;
+                            this.render.renderExpenseTable(month);
                         }
                     }
-                });
-            },
-            
-            render: {
-                renderTabs() {
-                    App.ui.monthTabsContainer.innerHTML = App.constants.monthNames.map((name, i) => 
-                        `<button data-month-index="${i}" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${App.state.activeMonthIndex === i ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}">${name}</button>`
-                    ).join('');
-                },
-                createMonthContentHTML(monthIndex) {
-                    return `<div id="month-content-${monthIndex}" class="month-content p-4">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <h3 class="text-lg font-semibold mb-2">Ganhos PJ</h3>
-                                        <div id="pj-entries-container-${monthIndex}" class="space-y-2"></div>
-                                        <button class="add-entry-btn mt-2 w-full text-sm py-2 bg-gray-200 dark:bg-gray-700 rounded-md" data-type="pj" data-month-index="${monthIndex}">+ Ganho PJ</button>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-lg font-semibold mb-2">Ganhos PF</h3>
-                                        <div id="pf-entries-container-${monthIndex}" class="space-y-2"></div>
-                                        <button class="add-entry-btn mt-2 w-full text-sm py-2 bg-gray-200 dark:bg-gray-700 rounded-md" data-type="pf" data-month-index="${monthIndex}">+ Ganho PF</button>
-                                    </div>
-                                </div>
-                                <hr class="my-6 border-gray-300 dark:border-gray-600">
-                                <h3 class="text-lg font-semibold mb-2">Despesas Diárias</h3>
-                                <div id="expense-accordion-container-${monthIndex}" class="space-y-2"></div>
-                           </div>`;
-                },
-                createEntryElement(config) { 
-                    const { monthIndex, dayIndex, category, entry, type } = config;
-                    const d = document.createElement('div');
-                    d.className = 'entry-row flex items-center gap-2';
                     
-                    let categorySelect = '';
-                    if (type === 'expense') {
-                        categorySelect = `<select class="entry-input p-2 input-field text-sm" data-field="category">${App.state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
-                    }
-
-                    d.innerHTML = `
-                        <input type="text" value="${entry.description || ''}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description">
-                        <input type="number" value="${entry.amount || ''}" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">
-                        ${categorySelect}
-                        <button class="remove-btn" data-type="${type}" data-month-index="${monthIndex}" data-day="${dayIndex}" data-category="${category}" data-entry-id="${entry.id}">×</button>
-                    `;
-                    return d;
-                },
-                renderPJEntries(m) {
-                    const container = document.getElementById(`pj-entries-container-${m}`);
-                    if (!container) return;
-                    container.innerHTML = '';
-                    this.state.monthlyData[m].pjEntries.forEach(e => container.appendChild(this.createEntryElement({ monthIndex: m, entry: e, type: 'pj' })));
-                },
-                renderPFEntries(m) {
-                    const container = document.getElementById(`pf-entries-container-${m}`);
-                    if (!container) return;
-                    container.innerHTML = '';
-                    this.state.monthlyData[m].pfEntries.forEach(e => container.appendChild(this.createEntryElement({ monthIndex: m, entry: e, type: 'pf' })));
-                },
-                renderExpenseTable(m) {
-                    const container = document.getElementById(`expense-accordion-container-${m}`);
-                    if (!container) return;
-                    container.innerHTML = '';
-                    for (let day = 0; day < 31; day++) {
-                        const dayData = this.state.monthlyData[m].expenses[day];
-                        if (!dayData || (dayData.personalEntries.length === 0 && dayData.businessEntries.length === 0)) continue;
-
-                        const item = document.createElement('div');
-                        item.className = 'accordion-item card rounded-lg';
-                        item.innerHTML = `<div class="accordion-trigger p-2 cursor-pointer bg-gray-100 dark:bg-gray-800"><span class="font-semibold">Dia ${day + 1}</span></div>
-                                        <div class="accordion-content p-2 space-y-2">
-                                            <h4 class="text-sm font-semibold">Gastos Pessoais</h4>
-                                            <div id="personal-entries-${m}-${day}" class="space-y-2"></div>
-                                            <button class="add-entry-btn w-full text-xs py-1 bg-gray-200 dark:bg-gray-700 rounded-md" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="personal">+ Gasto Pessoal</button>
-                                            <h4 class="text-sm font-semibold mt-2">Gastos da Empresa</h4>
-                                            <div id="business-entries-${m}-${day}" class="space-y-2"></div>
-                                            <button class="add-entry-btn w-full text-xs py-1 bg-gray-200 dark:bg-gray-700 rounded-md" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="business">+ Gasto Empresa</button>
-                                        </div>`;
-                        container.appendChild(item);
-
-                        const personalContainer = item.querySelector(`#personal-entries-${m}-${day}`);
-                        dayData.personalEntries.forEach(e => personalContainer.appendChild(this.createEntryElement({ monthIndex: m, dayIndex: day, category: 'personal', entry: e, type: 'expense' })));
-                        
-                        const businessContainer = item.querySelector(`#business-entries-${m}-${day}`);
-                        dayData.businessEntries.forEach(e => businessContainer.appendChild(this.createEntryElement({ monthIndex: m, dayIndex: day, category: 'business', entry: e, type: 'expense' })));
-                    }
+                    if (field === 'paymentMethod') { this.showMonth(month); } 
+                    this.debouncedSave();
                 }
             }
-        };
-        
-        window.App = App;
-        
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                authScreen.classList.add('hidden');
-                appScreen.classList.remove('hidden');
-                App.init(user.uid);
-            } else {
-                App.state.currentUserId = null;
-                setAuthMode('login');
-                authScreen.classList.remove('hidden');
-                appScreen.classList.add('hidden');
-            }
         });
+        // Aqui você pode adicionar seus outros listeners de 'click' e 'change' do seu código original
+    },
+    
+    render: {
+        renderTabs() { // FUNÇÃO CORRIGIDA
+            this.ui.monthTabsContainer.innerHTML = this.constants.monthNames.map((name, i) => 
+                `<button data-month-index="${i}" class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${this.state.activeMonthIndex === i ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700'}">${name}</button>`
+            ).join('');
+        },
+        createMonthContentHTML(monthIndex) {
+            // Seu HTML original para a estrutura do mês
+            return `<div id="month-content-${monthIndex}" class="month-content p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2">Ganhos PJ</h3>
+                                <div id="pj-entries-container-${monthIndex}" class="space-y-2"></div>
+                                <button class="add-entry-btn mt-2 w-full text-sm py-2 bg-gray-200 dark:bg-gray-700 rounded-md" data-type="pj" data-month-index="${monthIndex}">+ Ganho PJ</button>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2">Ganhos PF</h3>
+                                <div id="pf-entries-container-${monthIndex}" class="space-y-2"></div>
+                                <button class="add-entry-btn mt-2 w-full text-sm py-2 bg-gray-200 dark:bg-gray-700 rounded-md" data-type="pf" data-month-index="${monthIndex}">+ Ganho PF</button>
+                            </div>
+                        </div>
+                        <hr class="my-6 border-gray-300 dark:border-gray-600">
+                        <h3 class="text-lg font-semibold mb-2">Despesas Diárias</h3>
+                        <div id="expense-accordion-container-${monthIndex}" class="space-y-2"></div>
+                   </div>`;
+        },
+        createEntryElement(config) { 
+            const { monthIndex, dayIndex, category, entry, type } = config;
+            const d = document.createElement('div');
+            d.classList.add('flex', 'items-center', 'gap-2');
+            
+            let categorySelect = '';
+            if (type === 'expense') {
+                categorySelect = `<select class="entry-input p-2 input-field text-sm" data-field="category">${App.state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
+            }
+
+            // Removido o botão '✨'
+            d.innerHTML = `
+                <input type="text" value="${entry.description || ''}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description">
+                <input type="number" value="${entry.amount || ''}" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">
+                ${categorySelect}
+                <button class="remove-btn" data-type="${type}" data-month-index="${monthIndex}" data-day="${dayIndex}" data-category="${category}" data-entry-id="${entry.id}">×</button>
+            `;
+            return d;
+        },
+        renderPJEntries(m) {
+            const container = document.getElementById(`pj-entries-container-${m}`);
+            if (!container) return;
+            container.innerHTML = '';
+            this.state.monthlyData[m].pjEntries.forEach(e => container.appendChild(this.render.createEntryElement({ monthIndex: m, entry: e, type: 'pj' })));
+        },
+        renderPFEntries(m) {
+            const container = document.getElementById(`pf-entries-container-${m}`);
+            if (!container) return;
+            container.innerHTML = '';
+            this.state.monthlyData[m].pfEntries.forEach(e => container.appendChild(this.render.createEntryElement({ monthIndex: m, entry: e, type: 'pf' })));
+        },
+        renderExpenseTable(m) {
+            const container = document.getElementById(`expense-accordion-container-${m}`);
+            if (!container) return;
+            container.innerHTML = '';
+            // Lógica para renderizar os dias e as despesas dentro deles
+            for (let day = 0; day < 31; day++) {
+                const dayData = this.state.monthlyData[m].expenses[day];
+                if (!dayData || (dayData.personalEntries.length === 0 && dayData.businessEntries.length === 0)) continue;
+
+                const item = document.createElement('div');
+                item.className = 'card rounded-lg mb-2';
+                item.innerHTML = `<div class="p-2 cursor-pointer bg-gray-100 dark:bg-gray-800"><span class="font-semibold">Dia ${day + 1}</span></div>
+                                <div class="p-2 space-y-2">
+                                    <h4 class="text-sm font-semibold">Gastos Pessoais</h4>
+                                    <div id="personal-entries-${m}-${day}" class="space-y-2"></div>
+                                    <button class="add-entry-btn w-full text-xs py-1 bg-gray-200 dark:bg-gray-700 rounded-md" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="personal">+ Gasto Pessoal</button>
+                                </div>`;
+                container.appendChild(item);
+
+                const personalContainer = item.querySelector(`#personal-entries-${m}-${day}`);
+                dayData.personalEntries.forEach(e => personalContainer.appendChild(this.render.createEntryElement({ monthIndex: m, dayIndex: day, category: 'personal', entry: e, type: 'expense' })));
+            }
+        }
+    }
+};
+
+window.App = App;
+
+onAuthStateChanged(auth, user => {
+    if (user) {
+        authScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
+        App.init(user.uid);
+    } else {
+        App.state.currentUserId = null;
+        setAuthMode('login');
+        authScreen.classList.remove('hidden');
+        appScreen.classList.add('hidden');
+    }
+});
     </script>
 </body>
 </html>
