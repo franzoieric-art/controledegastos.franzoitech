@@ -368,7 +368,7 @@
                     if (r.id && !appliedRecurringIds.has(r.id)) {
                         const dayIndex = r.dayOfMonth - 1;
                         if (dayIndex < 0 || dayIndex > 30) return;
-                        const newEntry = { id: Date.now() + Math.random(), description: r.description, amount: r.amount, isRecurring: true, recurringId: r.id };
+                        const newEntry = { id: Date.now() + Math.random(), description: r.description || 'Lançamento recorrente', amount: r.amount, isRecurring: true, recurringId: r.id };
                         if (r.type === "Ganho PF") { month.pfEntries.push(newEntry); wasModified = true;
                         } else if (r.type === "Ganho PJ") { month.pjEntries.push(newEntry); wasModified = true;
                         } else if (r.type === "Gasto Pessoal") { Object.assign(newEntry, { category: r.category, paymentMethod: r.paymentMethod, card: r.card }); month.expenses[dayIndex].personalEntries.push(newEntry); wasModified = true;
