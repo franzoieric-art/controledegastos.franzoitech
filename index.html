@@ -308,24 +308,36 @@
             },
             
             showMonth(monthIndex) {
-                this.state.activeMonthIndex = monthIndex;
-                Object.values(this.state.chartInstances).forEach(c => c?.destroy());
-                document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
-                if (monthIndex < 12) { this.applyRecurringEntries(monthIndex); }
-                this.render.renderTabs();
-                const contentEl = document.getElementById(`month-${monthIndex}-content`);
-                if (contentEl) {
-                    contentEl.classList.add('active');
-                    if (monthIndex < 12) {
-                        this.render.renderPJEntries(monthIndex);
-                        this.render.renderPFEntries(monthIndex);
-                        this.render.renderExpenseTable(monthIndex);
-                        this.recalculateAndDisplayTotals(monthIndex);
-                    } else {
-                        this.render.renderBalanceSummary();
-                    }
+            // Se o usuário clicar na aba que já está ativa, não faz nada.
+            if (this.state.activeMonthIndex === monthIndex) return;
+
+            // ---- INÍCIO DA SOLUÇÃO ----
+            // Verifica se existe um salvamento pendente (agendado pelo debounce)
+            if (this.state.saveTimeout) {
+                clearTimeout(this.state.saveTimeout); // Cancela o salvamento agendado...
+                this.saveDataToFirestore();             // ...e executa o salvamento imediatamente.
+                this.state.saveTimeout = null;          // Limpa a referência do timeout
+            }
+            // ---- FIM DA SOLUÇÃO ----
+
+            this.state.activeMonthIndex = monthIndex;
+            Object.values(this.state.chartInstances).forEach(c => c?.destroy());
+            document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+            if (monthIndex < 12) { this.applyRecurringEntries(monthIndex); }
+            this.render.renderTabs();
+            const contentEl = document.getElementById(`month-${monthIndex}-content`);
+            if (contentEl) {
+                contentEl.classList.add('active');
+                if (monthIndex < 12) {
+                    this.render.renderPJEntries(monthIndex);
+                    this.render.renderPFEntries(monthIndex);
+                    this.render.renderExpenseTable(monthIndex);
+                    this.recalculateAndDisplayTotals(monthIndex);
+                } else {
+                    this.render.renderBalanceSummary();
                 }
-            },
+            }
+        },
             
             recalculateAndDisplayTotals(m) {
                 const d = this.state.monthlyData[m];
