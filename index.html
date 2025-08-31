@@ -308,17 +308,15 @@
             },
             
             showMonth(monthIndex) {
-            // Se o usuário clicar na aba que já está ativa, não faz nada.
-            if (this.state.activeMonthIndex === monthIndex) return;
-
-            // ---- INÍCIO DA SOLUÇÃO ----
-            // Verifica se existe um salvamento pendente (agendado pelo debounce)
-            if (this.state.saveTimeout) {
-                clearTimeout(this.state.saveTimeout); // Cancela o salvamento agendado...
-                this.saveDataToFirestore();             // ...e executa o salvamento imediatamente.
-                this.state.saveTimeout = null;          // Limpa a referência do timeout
+            // ---- INÍCIO DA CORREÇÃO ----
+            // A lógica de salvamento forçado, sem o "return" que causava o bug.
+            // Esta parte agora só executa se o mês for diferente do atual, evitando re-salvamentos desnecessários.
+            if (this.state.activeMonthIndex !== monthIndex && this.state.saveTimeout) {
+                clearTimeout(this.state.saveTimeout); 
+                this.saveDataToFirestore();             
+                this.state.saveTimeout = null;          
             }
-            // ---- FIM DA SOLUÇÃO ----
+            // ---- FIM DA CORREÇÃO ----
 
             this.state.activeMonthIndex = monthIndex;
             Object.values(this.state.chartInstances).forEach(c => c?.destroy());
