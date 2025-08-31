@@ -257,6 +257,31 @@
                 monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
                 basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
             },
+// =================================================================
+// >>> COLE O NOVO BLOCO DE SUGESTÕES EXATAMENTE AQUI <<<
+// =================================================================
+suggestions: {
+    categoryKeywords: {
+        'Transporte': ['uber', '99', 'táxi', 'taxi', 'ônibus', 'onibus', 'metrô', 'metro', 'gasolina', 'combustível', 'estacionamento', 'pedagio', 'pedágio'],
+        'Alimentação': ['ifood', 'rappi', 'restaurante', 'mercado', 'lanche', 'padaria', 'supermercado', 'hortifruti', 'açougue', 'acougue', 'pizza'],
+        'Moradia': ['aluguel', 'condomínio', 'condominio', 'iptu', 'luz', 'energia', 'água', 'agua', 'gás', 'gas', 'internet'],
+        'Lazer': ['cinema', 'show', 'bar', 'festa', 'viagem', 'streaming', 'netflix', 'spotify', 'disney+', 'barzinho', 'ingresso'],
+        'Saúde': ['farmácia', 'farmacia', 'remédio', 'remedio', 'médico', 'medico', 'consulta', 'plano de saude', 'exame'],
+        'Outros': ['presente', 'doação', 'imposto']
+    },
+
+    suggestCategory(description) {
+        if (!description) return null;
+        const descLower = description.toLowerCase();
+        for (const category in this.categoryKeywords) {
+            const keywords = this.categoryKeywords[category];
+            if (keywords.some(keyword => descLower.includes(keyword))) {
+                return category;
+            }
+        }
+        return null;
+    }
+},
 
             init(userId) { this.state.currentUserId = userId; this.loadData(); this.bindGlobalEventListeners(); },
 
