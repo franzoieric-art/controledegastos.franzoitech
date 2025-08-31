@@ -86,249 +86,254 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        // >>> SUBSTITUA TODO O CONTEÚDO DO SEU <script type="module"> POR ISTO <<<
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0",
+    authDomain: "controle-de-gastos-74daf.firebaseapp.com",
+    projectId: "controle-de-gastos-74daf",
+    storageBucket: "controle-de-gastos-74daf.firebasestorage.app",
+    messagingSenderId: "331667008487"
+    appId: "1:331667008487:web:c5200f64ac27d0c32feb42",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// --- Lógica de Autenticação ---
+const authScreen = document.getElementById('auth-screen');
+const appScreen = document.getElementById('app-screen');
+const mainAuthBtn = document.getElementById('main-auth-btn');
+const toggleAuthModeLink = document.getElementById('toggle-auth-mode-link');
+const forgotPasswordLink = document.getElementById('forgot-password-link');
+const authError = document.getElementById('auth-error');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const loadingOverlay = document.getElementById('loading-overlay');
+let isLoginMode = true;
+const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
+document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress);
+document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
+document.getElementById('confirm-password-input').addEventListener('keydown', handleAuthKeyPress);
+const showError = (message) => { authError.textContent = message; };
+const setAuthMode = (mode) => { isLoginMode = mode === 'login'; authError.textContent = ''; const authTitle = document.getElementById('auth-title'); const confirmPasswordInput = document.getElementById('confirm-password-input'); if (isLoginMode) { authTitle.textContent = 'Acesso ao Painel'; mainAuthBtn.textContent = 'Entrar'; confirmPasswordInput.classList.add('hidden'); forgotPasswordLink.classList.remove('hidden'); toggleAuthModeLink.innerHTML = 'Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span>'; } else { authTitle.textContent = 'Criar Nova Conta'; mainAuthBtn.textContent = 'Criar Conta'; confirmPasswordInput.classList.remove('hidden'); forgotPasswordLink.classList.add('hidden'); toggleAuthModeLink.textContent = 'Já tem conta? Faça login'; } };
+const applyTheme = (theme) => { document.documentElement.classList.toggle('dark', theme === 'dark'); themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙'; if (window.App && App.state.currentUserId) { App.showMonth(App.state.activeMonthIndex); } };
+applyTheme(localStorage.getItem('theme') || 'light');
+toggleAuthModeLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode(isLoginMode ? 'signup' : 'login'); });
+mainAuthBtn.addEventListener('click', () => { const email = document.getElementById('email-input').value; const password = document.getElementById('password-input').value; showError(''); const originalBtnText = mainAuthBtn.textContent; mainAuthBtn.disabled = true; mainAuthBtn.textContent = 'Aguarde...'; const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; }; if (isLoginMode) { signInWithEmailAndPassword(auth, email, password).catch(error => { showError('Email ou senha inválidos.'); restoreBtn(); }); } else { const confirmPassword = document.getElementById('confirm-password-input').value; if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; } createUserWithEmailAndPassword(auth, email, password).catch(error => { if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.'); else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.'); else showError('Erro ao criar conta.'); restoreBtn(); }); } });
+forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; if (!email) { showError('Por favor, insira seu email para recuperar a senha.'); return; } sendPasswordResetEmail(auth, email).then(() => { showError('Email de recuperação enviado!'); }).catch((error) => { showError('Não foi possível enviar o email.'); }); });
+document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth); });
+
+const App = {
+    state: {
+        currentUserId: null,
+        profile: { name: '' },
+        integrations: { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } },
+        creditCards: [],
+        categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }],
+        recurringEntries: [],
+        monthlyData: {},
+        activeMonthIndex: new Date().getMonth(),
+        chartInstances: {},
+        saveTimeout: null
+    },
+    ui: {
+        monthContentContainer: document.getElementById('monthContentContainer'),
+        monthTabsContainer: document.getElementById('monthTabs'),
+        // Adicione outros seletores de UI aqui se precisar
+    },
+    constants: {
+        monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
+        basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
+    },
+
+    // --- MÓDULO DE SUGESTÃO ADICIONADO ---
+    suggestions: {
+        keywords: { 
+            'Transporte': ['uber', '99', 'táxi', 'taxi', 'ônibus', 'onibus', 'metrô', 'metro', 'gasolina', 'combustível', 'estacionamento', 'pedagio', 'pedágio'],
+            'Alimentação': ['ifood', 'rappi', 'restaurante', 'mercado', 'lanche', 'padaria', 'supermercado', 'hortifruti', 'açougue', 'acougue', 'pizza'],
+            'Moradia': ['aluguel', 'condomínio', 'condominio', 'iptu', 'luz', 'energia', 'água', 'agua', 'gás', 'gas', 'internet']
+        },
+        getCategory(description) {
+            if (!description) return null;
+            const descLower = description.toLowerCase();
+            for (const category in this.keywords) {
+                if (this.keywords[category].some(k => descLower.includes(k))) return category;
+            }
+            return null;
+        }
+    },
+
+    init(userId) {
+        this.state.currentUserId = userId;
+        this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 1500);
+        this.loadData();
+        this.bindGlobalEventListeners();
+    },
+
+    helpers: {
+        formatCurrency: (value) => `R$ ${(value || 0).toFixed(2).replace('.', ',')}`,
+        debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
+        showSaveFeedback() { document.getElementById('save-feedback').classList.add('show'); setTimeout(() => { document.getElementById('save-feedback').classList.remove('show'); }, 2000); },
+        generateRandomToken: () => Date.now() + Math.random().toString(36).substr(2, 9),
+    },
+
+    async saveDataToFirestore() { /* SEU CÓDIGO ORIGINAL AQUI */ },
+    async loadData() {
+        if (!this.state.currentUserId) return;
+        try {
+            const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
+            if (docSnap.exists()) {
+                const d = docSnap.data();
+                this.state.profile = d.profile || { name: '' };
+                this.state.integrations = d.integrations || { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } };
+                this.state.monthlyData = d.monthlyData || {}; this.state.creditCards = d.creditCards || [];
+                this.state.categories = d.categories && d.categories.length > 0 ? d.categories : this.state.categories;
+                this.state.recurringEntries = d.recurringEntries || [];
+            }
+            for (let i = 0; i < 12; i++) {
+                this.state.monthlyData[i] = this.state.monthlyData[i] || {
+                    pjEntries: [], pfEntries: [],
+                    expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] }))
+                };
+                this.state.monthlyData[i].expenses.forEach(day => {
+                    ['personalEntries', 'businessEntries'].forEach(type => {
+                        day[type] = (day[type] || []).map(entry => ({ ...entry, id: entry.id || this.helpers.generateRandomToken() }));
+                    });
+                });
+            }
+        } catch (error) { console.error("Erro ao carregar dados:", error); }
+        this.ui.monthContentContainer.innerHTML = '';
+        this.constants.monthNames.forEach((_, index) => { this.ui.monthContentContainer.insertAdjacentHTML('beforeend', index === 12 ? this.render.createBalanceContentHTML() : this.render.createMonthContentHTML(index)); });
+        this.showMonth(this.state.activeMonthIndex);
+        loadingOverlay.classList.add('hidden');
+    },
+
+    showMonth(monthIndex) {
+        this.state.activeMonthIndex = monthIndex;
+        document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
         
-        // =================================================================
-        // PASSO ÚNICO: PREENCHA SUAS CHAVES DO FIREBASE AQUI
-        // =================================================================
-        const firebaseConfig = { 
-            apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0",
-            authDomain: "controle-de-gastos-74daf.firebaseapp.com",
-            projectId: "controle-de-gastos-74daf",
-            storageBucket: "controle-de-gastos-74daf.firebasestorage.app",
-            messagingSenderId: "331667008487",
-            appId: "1:331667008487:web:c5200f64ac27d0c32feb42",
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // A função renderTabs precisa ser chamada ANTES de ativar o conteúdo
+        this.render.renderTabs(); 
 
-        // --- Lógica de Autenticação (igual ao seu original) ---
-        const authScreen = document.getElementById('auth-screen'); const appScreen = document.getElementById('app-screen');
-        const mainAuthBtn = document.getElementById('main-auth-btn'); const toggleAuthModeLink = document.getElementById('toggle-auth-mode-link');
-        const forgotPasswordLink = document.getElementById('forgot-password-link'); const authError = document.getElementById('auth-error');
-        const themeToggleBtn = document.getElementById('theme-toggle-btn'); const loadingOverlay = document.getElementById('loading-overlay');
-        let isLoginMode = true;
-        const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
-        document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress); document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
-        document.getElementById('confirm-password-input').addEventListener('keydown', handleAuthKeyPress);
-        const showError = (message) => { authError.textContent = message; };
-        const setAuthMode = (mode) => { isLoginMode = mode === 'login'; authError.textContent = ''; const authTitle = document.getElementById('auth-title'); const confirmPasswordInput = document.getElementById('confirm-password-input'); if (isLoginMode) { authTitle.textContent = 'Acesso ao Painel'; mainAuthBtn.textContent = 'Entrar'; confirmPasswordInput.classList.add('hidden'); forgotPasswordLink.classList.remove('hidden'); toggleAuthModeLink.innerHTML = 'Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span>'; } else { authTitle.textContent = 'Criar Nova Conta'; mainAuthBtn.textContent = 'Criar Conta'; confirmPasswordInput.classList.remove('hidden'); forgotPasswordLink.classList.add('hidden'); toggleAuthModeLink.textContent = 'Já tem conta? Faça login'; } };
-        const applyTheme = (theme) => { document.documentElement.classList.toggle('dark', theme === 'dark'); themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙'; if (window.App && App.state.currentUserId) { App.showMonth(App.state.activeMonthIndex); } };
-        applyTheme(localStorage.getItem('theme') || 'light');
-        toggleAuthModeLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode(isLoginMode ? 'signup' : 'login'); });
-        mainAuthBtn.addEventListener('click', () => { const email = document.getElementById('email-input').value; const password = document.getElementById('password-input').value; showError(''); const originalBtnText = mainAuthBtn.textContent; mainAuthBtn.disabled = true; mainAuthBtn.textContent = 'Aguarde...'; const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; }; if (isLoginMode) { signInWithEmailAndPassword(auth, email, password).catch(error => { showError('Email ou senha inválidos.'); restoreBtn(); }); } else { const confirmPassword = document.getElementById('confirm-password-input').value; if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; } createUserWithEmailAndPassword(auth, email, password).catch(error => { if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.'); else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.'); else showError('Erro ao criar conta.'); restoreBtn(); }); } });
-        forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); const email = document.getElementById('email-input').value; if (!email) { showError('Por favor, insira seu email para recuperar a senha.'); return; } sendPasswordResetEmail(auth, email).then(() => { showError('Email de recuperação enviado!'); }).catch((error) => { showError('Não foi possível enviar o email.'); }); });
-        document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth); });
-        
-        const App = {
-            state: {
-                currentUserId: null,
-                profile: { name: '' },
-                integrations: {
-                    whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' }
-                },
-                creditCards: [],
-                categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }],
-                recurringEntries: [],
-                monthlyData: {},
-                activeMonthIndex: new Date().getMonth(),
-                chartInstances: {},
-                saveTimeout: null
-            },
-            ui: {
-                monthContentContainer: document.getElementById('monthContentContainer'),
-                monthTabsContainer: document.getElementById('monthTabs'),
-                settingsModal: document.getElementById('settings-modal'),
-                accountModal: document.getElementById('account-modal'),
-                userNameInput: document.getElementById('user-name-input'),
-                userEmailDisplay: document.getElementById('user-email-display'),
-            },
-            constants: {
-                monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
-                basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
-            },
-            
-            // --- NOVO MÓDULO DE SUGESTÃO ---
-            suggestions: {
-                keywords: { 
-                    'Transporte': ['uber', '99', 'táxi', 'taxi', 'ônibus', 'onibus', 'metrô', 'metro', 'gasolina', 'combustível', 'estacionamento', 'pedagio', 'pedágio'],
-                    'Alimentação': ['ifood', 'rappi', 'restaurante', 'mercado', 'lanche', 'padaria', 'supermercado', 'hortifruti', 'açougue', 'acougue', 'pizza'],
-                    'Moradia': ['aluguel', 'condomínio', 'condominio', 'iptu', 'luz', 'energia', 'água', 'agua', 'gás', 'gas', 'internet']
-                },
-                getCategory(description) {
-                    if (!description) return null;
-                    const descLower = description.toLowerCase();
-                    for (const category in this.keywords) {
-                        if (this.keywords[category].some(k => descLower.includes(k))) return category;
-                    }
-                    return null;
-                }
-            },
+        const contentEl = document.getElementById(`month-content-${monthIndex}`);
+        if (contentEl) {
+            contentEl.classList.add('active');
+            if (monthIndex < 12) {
+                this.applyRecurringEntries(monthIndex);
+                this.render.renderPJEntries(monthIndex);
+                this.render.renderPFEntries(monthIndex);
+                this.render.renderExpenseTable(monthIndex);
+                this.recalculateAndDisplayTotals(monthIndex);
+            } else {
+                // this.render.renderBalanceSummary();
+            }
+        }
+    },
 
-            init(userId) {
-                this.state.currentUserId = userId;
-                this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 1500);
-                this.loadData();
-                this.bindGlobalEventListeners();
-            },
+    bindGlobalEventListeners() {
+        // Seu bindGlobalEventListeners original com a lógica de input
+        document.body.addEventListener('input', (event) => {
+            const t = event.target;
+            if (t.matches('.entry-input')) {
+                const el = t.closest('.flex');
+                const btn = el.querySelector('.remove-btn');
+                if (!btn) return;
 
-            helpers: {
-                formatCurrency: (value) => `R$ ${(value || 0).toFixed(2).replace('.', ',')}`,
-                debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
-                showSaveFeedback() { document.getElementById('save-feedback').classList.add('show'); setTimeout(() => { document.getElementById('save-feedback').classList.remove('show'); }, 2000); },
-                generateRandomToken: () => [...Array(16)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''),
-            },
-            
-            async saveDataToFirestore() {
-                if (!this.state.currentUserId) return;
-                try {
-                    const dataToSave = {
-                        profile: this.state.profile, integrations: this.state.integrations, monthlyData: this.state.monthlyData,
-                        creditCards: this.state.creditCards, categories: this.state.categories, recurringEntries: this.state.recurringEntries
-                    };
-                    await setDoc(doc(db, 'users', this.state.currentUserId), dataToSave, { merge: true });
-                    this.helpers.showSaveFeedback();
-                } catch (e) { console.error("Erro ao salvar dados: ", e); }
-            },
-            
-            debouncedSave: null,
+                const { monthIndex, type, day, category, entryId } = btn.dataset;
+                const month = parseInt(monthIndex);
+                const id = entryId; // ID agora é um token/string
 
-            async loadData() {
-                if (!this.state.currentUserId) return;
-                try {
-                    const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
-                    if (docSnap.exists()) {
-                        const d = docSnap.data();
-                        this.state.profile = d.profile || { name: '' };
-                        this.state.integrations = d.integrations || { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } };
-                        this.state.monthlyData = d.monthlyData || {}; this.state.creditCards = d.creditCards || [];
-                        this.state.categories = d.categories && d.categories.length > 0 ? d.categories : this.state.categories;
-                        this.state.recurringEntries = d.recurringEntries || [];
-                    }
-                    for (let i = 0; i < 12; i++) {
-                        this.state.monthlyData[i] = this.state.monthlyData[i] || {
-                            pjEntries: [], pfEntries: [],
-                            expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] }))
-                        };
-                         this.state.monthlyData[i].expenses.forEach(day => {
-                            ['personalEntries', 'businessEntries'].forEach(type => {
-                                day[type] = (day[type] || []).map(entry => ({ ...entry, id: entry.id || this.helpers.generateRandomToken() }));
-                            });
-                        });
-                    }
-                } catch (error) { console.error("Erro ao carregar dados:", error); }
-                this.ui.monthContentContainer.innerHTML = '';
-                this.constants.monthNames.forEach((_, index) => { this.ui.monthContentContainer.insertAdjacentHTML('beforeend', index === 12 ? this.render.createBalanceContentHTML() : this.render.createMonthContentHTML(index)); });
-                this.showMonth(this.state.activeMonthIndex);
-                loadingOverlay.classList.add('hidden');
-            },
-            
-            showMonth(monthIndex) {
-                this.state.activeMonthIndex = monthIndex;
-                Object.values(this.state.chartInstances).forEach(c => c?.destroy());
-                document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
-                if (monthIndex < 12) { this.applyRecurringEntries(monthIndex); }
-                this.render.renderTabs();
-                const contentEl = document.getElementById(`month-content-${monthIndex}`);
-                if (contentEl) {
-                    contentEl.classList.add('active');
-                    if (monthIndex < 12) {
-                        this.render.renderPJEntries(monthIndex);
-                        this.render.renderPFEntries(monthIndex);
-                        this.render.renderExpenseTable(monthIndex);
-                        this.recalculateAndDisplayTotals(monthIndex);
-                    } else {
-                        // this.render.renderBalanceSummary();
-                    }
-                }
-            },
-            
-            recalculateAndDisplayTotals(m) { /* ... Seu código original aqui ... */ },
-            applyRecurringEntries(monthIndex) { /* ... Seu código original aqui ... */ },
-            exportMonthToCSV(monthIndex) { /* ... Seu código original aqui ... */ },
-            exportMonthToPDF(monthIndex) { /* ... Seu código original aqui ... */ },
-            
-            bindGlobalEventListeners() {
-                this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
-                themeToggleBtn.addEventListener('click', () => { const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); });
-                document.getElementById('manage-settings-btn').addEventListener('click', () => { this.render.renderSettingsModal(); });
-                // ... outros listeners
+                let entry;
+                if (type === 'pj') { entry = this.state.monthlyData[month].pjEntries.find(e => e.id == id); } 
+                else if (type === 'pf') { entry = this.state.monthlyData[month].pfEntries.find(e => e.id == id); } 
+                else { entry = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id == id); }
                 
-                // Listener principal para input e clicks
-                document.body.addEventListener('input', (event) => {
-                    const t = event.target;
-                    if (t.matches('.entry-input')) {
-                        const el = t.closest('.flex');
-                        const btn = el.querySelector('.remove-btn');
-                        if (!btn) return;
+                if (entry) {
+                    const field = t.dataset.field;
+                    entry[field] = t.type === 'number' ? parseFloat(t.value) || 0 : t.value;
 
-                        const { monthIndex, type, day, category, entryId } = btn.dataset;
-                        const month = parseInt(monthIndex);
-                        const id = parseFloat(entryId); // CUIDADO: IDs podem não ser números!
-                        let entry;
-
-                        if (type === 'pj') { entry = this.state.monthlyData[month].pjEntries.find(e => e.id === id); } 
-                        else if (type === 'pf') { entry = this.state.monthlyData[month].pfEntries.find(e => e.id === id); } 
-                        else { entry = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id === id); }
-                        
-                        if (entry) {
-                            const field = t.dataset.field;
-                            if (field === 'amount') { entry.amount = parseFloat(t.value) || 0; } 
-                            else { entry[field] = t.value; }
-
-                            // --- ALTERAÇÃO PRINCIPAL AQUI ---
-                            if (type === 'expense' && field === 'description') {
-                                const suggestedCategory = this.suggestions.getCategory(t.value);
-                                if (suggestedCategory && entry.category !== suggestedCategory) {
-                                    entry.category = suggestedCategory;
-                                    this.render.renderExpenseTable(month); // Re-renderiza a tabela
-                                }
-                            }
-                            
-                            if (field === 'paymentMethod') { this.showMonth(month); } 
-                            else { this.recalculateAndDisplayTotals(month); }
-                            this.debouncedSave();
+                    // --- LÓGICA DE SUGESTÃO INJETADA AQUI ---
+                    if (type === 'expense' && field === 'description') {
+                        const suggestedCategory = this.suggestions.getCategory(t.value);
+                        if (suggestedCategory && entry.category !== suggestedCategory) {
+                            entry.category = suggestedCategory;
+                            this.render.renderExpenseTable(month); // Re-renderiza a tabela para atualizar
                         }
                     }
-                    // ...outros listeners de input
-                });
-                 // ...outros listeners de click
-            },
-            
-            ai: { /* ... Seu código original ai aqui ... */ },
-            
-            render: {
-                createMonthContentHTML: (monthIndex) => `...`,
-                createBalanceContentHTML: () => `...`,
-                // --- ALTERAÇÃO AQUI ---
-                createEntryElement: (config) => { 
-                    const { monthIndex, dayIndex, category, entry, type } = config;
-                    const d = document.createElement('div');
-                    d.classList.add('flex', 'items-center', 'gap-2', 'w-full', 'flex-wrap');
-                    let r = '', p = '', c = '', s = '';
                     
-                    if (type === 'expense') {
-                        r = `<button class="remove-btn" data-type="expense" data-month-index="${monthIndex}" data-day="${dayIndex}" data-category="${category}" data-entry-id="${entry.id}">×</button>`;
-                        p = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="paymentMethod">${App.constants.basePaymentMethods.map(m => `<option value="${m}" ${entry.paymentMethod === m ? 'selected' : ''}>${m}</option>`).join('')}</select>`;
-                        if (entry.paymentMethod === 'Crédito') c = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="card">${App.state.creditCards.map(c => `<option value="${c}" ${entry.card === c ? 'selected' : ''}>${c}</option>`).join('')}</select>`;
-                        s = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="category">${App.state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
-                    } else {
-                        r = `<button class="remove-btn" data-type="${type}" data-month-index="${monthIndex}" data-entry-id="${entry.id}">×</button>`;
-                    }
-                    // Removido o botão '✨' (aiBtn)
-                    d.innerHTML = `<input type="text" value="${entry.description}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description"><input type="number" value="${entry.amount}" min="0" step="0.01" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">${s}${p}<span class="card-selector-container">${c}</span>${r}`;
-                    return d;
-                },
-                // ... resto do seu objeto render original
+                    if (field === 'paymentMethod') { this.showMonth(month); } 
+                    else { this.recalculateAndDisplayTotals(month); }
+                    this.debouncedSave();
+                }
             }
-        };
+            // ... outros listeners de input
+        });
+        // ... seus outros listeners de click, change, etc.
+    },
+    
+    // Suas outras funções originais (recalculate, applyRecurring, etc.) devem estar aqui
+    recalculateAndDisplayTotals(m) { /* ... Seu código original ... */ },
+    applyRecurringEntries(m) { /* ... Seu código original ... */ },
+
+    render: {
+        // --- FUNÇÃO RENDER TABS ADICIONADA DE VOLTA ---
+        renderTabs: () => {
+            const baseClasses = "px-4 py-2 rounded-xl text-sm font-semibold transition-colors";
+            const activeClasses = "text-white shadow-sm";
+            const inactiveClasses = "hover:bg-black/5 dark:hover:bg-white/5";
+            App.ui.monthTabsContainer.innerHTML = App.constants.monthNames.map((m, i) => `<button class="tab-button ${baseClasses} ${i === App.state.activeMonthIndex ? activeClasses : inactiveClasses}" style="${i === App.state.activeMonthIndex ? 'background-color: var(--primary-color);' : 'background-color: var(--secondary-bg); color: var(--secondary-text);'}" data-month-index="${i}">${m}</button>`).join('');
+        },
+
+        // --- ALTERAÇÃO NO CREATE ENTRY ELEMENT ---
+        createEntryElement: (config) => { 
+            const { monthIndex, dayIndex, category, entry, type } = config;
+            const d = document.createElement('div');
+            d.classList.add('flex', 'items-center', 'gap-2', 'w-full', 'flex-wrap');
+            let r = '', p = '', c = '', s = '';
+            
+            if (type === 'expense') {
+                r = `<button class="remove-btn" data-type="expense" data-month-index="${monthIndex}" data-day="${dayIndex}" data-category="${category}" data-entry-id="${entry.id}">×</button>`;
+                p = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="paymentMethod">${App.constants.basePaymentMethods.map(m => `<option value="${m}" ${entry.paymentMethod === m ? 'selected' : ''}>${m}</option>`).join('')}</select>`;
+                if (entry.paymentMethod === 'Crédito') c = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="card">${App.state.creditCards.map(c => `<option value="${c}" ${entry.card === c ? 'selected' : ''}>${c}</option>`).join('')}</select>`;
+                s = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="category">${App.state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
+            } else {
+                r = `<button class="remove-btn" data-type="${type}" data-month-index="${monthIndex}" data-entry-id="${entry.id}">×</button>`;
+            }
+            // Removido o botão '✨' (aiBtn) pois a sugestão agora é automática
+            d.innerHTML = `<input type="text" value="${entry.description || ''}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description"><input type="number" value="${entry.amount || ''}" min="0" step="0.01" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">${s}${p}<span class="card-selector-container">${c}</span>${r}`;
+            return d;
+        },
         
-        window.App = App;
-        onAuthStateChanged(auth, user => { if (user) { authScreen.classList.add('hidden'); appScreen.classList.remove('hidden'); loadingOverlay.classList.remove('hidden'); App.init(user.uid); } else { App.state.currentUserId = null; setAuthMode('login'); authScreen.classList.remove('hidden'); appScreen.classList.add('hidden'); } });
+        // O resto do seu objeto RENDER original
+        createMonthContentHTML: (monthIndex) => `...`,
+        renderPJEntries: (m) => { /* ... */ },
+        renderPFEntries: (m) => { /* ... */ },
+        renderExpenseTable: (m) => { /* ... */ },
+        // etc.
+    }
+};
+
+window.App = App;
+
+onAuthStateChanged(auth, user => {
+    if (user) {
+        authScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
+        loadingOverlay.classList.remove('hidden');
+        App.init(user.uid);
+    } else {
+        App.state.currentUserId = null;
+        setAuthMode('login');
+        authScreen.classList.remove('hidden');
+        appScreen.classList.add('hidden');
+        loadingOverlay.classList.add('hidden');
+    }
+});
     </script>
 </body>
 </html>
