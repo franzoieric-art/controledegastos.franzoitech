@@ -264,7 +264,29 @@
                 formatCurrency: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`,
                 debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
                 showSaveFeedback() { App.ui.saveFeedback.classList.add('show'); setTimeout(() => { App.ui.saveFeedback.classList.remove('show'); }, 2000); },
-                cleanAIResponse(text) { if (typeof text !== 'string') return ''; let cleanedText = text.replace(/[`"']{3}html/g, ''); cleanedText = cleanedText.replace(/[`"']{3}/g, ''); return cleanedText.trim(); },
+                cleanAIResponse(text) {
+            if (typeof text !== 'string') return '';
+
+            // 1. Remove os blocos de código markdown (como antes)
+            let cleanedText = text.replace(/```html|```/g, '');
+
+            // 2. Encontra o início do conteúdo HTML relevante (a primeira tag "<")
+            const firstTagIndex = cleanedText.indexOf('<');
+            if (firstTagIndex > -1) {
+                cleanedText = cleanedText.substring(firstTagIndex);
+            }
+
+            // 3. Encontra o início de palavras-chave de "ruído" e remove tudo a partir dali.
+            const noiseKeywords = ["Observações:", "Como usar:", "Cálculo dos Totais:", "Formatação HTML:", "Personalização das Sugestões:"];
+            for (const keyword of noiseKeywords) {
+                const noiseIndex = cleanedText.indexOf(keyword);
+                if (noiseIndex > 50) {
+                    cleanedText = cleanedText.substring(0, noiseIndex);
+                }
+            }
+
+            return cleanedText.trim();
+        },
                 generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
             },
             
@@ -644,7 +666,20 @@
                         const monthData = App.state.monthlyData[monthIndex];
                         if (!monthData) throw new Error("Dados do mês não encontrados.");
 
-                        const prompt = `Analise os dados financeiros do seguinte mês: ${JSON.stringify(monthData)}. Forneça um resumo dos ganhos e gastos, aponte a maior categoria de despesa e dê 3 sugestões práticas e personalizadas para melhorar a saúde financeira no próximo mês. Formate a resposta em HTML simples usando tags como <h3> e <ul>.`;
+                        const prompt = `
+    Você é um assistente que gera relatórios financeiros em HTML.
+    Sua única função é retornar o código HTML do relatório.
+    NÃO inclua explicações, observações, introduções ou qualquer texto fora do código HTML.
+    NÃO use blocos de código como \`\`\`html.
+    Sua resposta deve começar DIRETAMENTE com a primeira tag HTML (ex: <h3>) e terminar com a última.
+
+    Analise os seguintes dados financeiros: ${JSON.stringify(monthData)}.
+
+    Gere o relatório contendo:
+    1. Um resumo dos ganhos e gastos.
+    2. A maior categoria de despesa pessoal.
+    3. Três sugestões práticas e personalizadas para melhorar a saúde financeira.
+`;
 
                         const analysisResult = await this.callVercelFunction(prompt);
 
