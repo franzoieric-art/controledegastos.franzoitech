@@ -8,10 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Cool Slate -->
-    <!-- Application Structure Plan: The application transforms the linear text guide into an interactive cheatsheet. It uses a sticky top navigation bar for quick jumps between the three core sections: Essentials, Workflow, and Troubleshooting. Each command is presented as an interactive card within a grid layout. This structure was chosen to make the information highly scannable and immediately useful, as users can copy commands directly to their clipboard. This is more user-friendly than a simple text document for a technical reference guide. -->
-    <!-- Visualization & Content Choices: Report Info: Git commands and descriptions. Goal: Inform and provide a quick reference. Presentation Method: Interactive cards with styled code blocks and descriptions. Interaction: A 'Copy' button for each command that copies the command text to the user's clipboard, providing instant utility. Justification: This transforms passive information into an active tool, which is ideal for a developer cheatsheet. Library/Method: HTML/Tailwind for structure and styling, Vanilla JS for copy-to-clipboard functionality. No charts are needed as there is no quantitative data. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -38,6 +34,7 @@
                         <a href="#essenciais" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Essenciais</a>
                         <a href="#fluxo" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Fluxo de Trabalho</a>
                         <a href="#dicas" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dicas e Soluções</a>
+                        <a href="#ia-assistant" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Assistente IA</a>
                     </div>
                 </div>
             </div>
@@ -50,7 +47,7 @@
             <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500">Uma referência interativa para os comandos mais úteis do Git no seu dia a dia.</p>
         </div>
 
-        <section id="essenciais" class="mb-16">
+        <section id="essenciais" class="mb-16 scroll-mt-20">
             <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-indigo-500 pb-2 mb-8">1. Comandos Essenciais para Iniciar um Projeto</h2>
              <p class="text-lg text-slate-600 mb-8">Esta seção cobre os primeiros passos indispensáveis para transformar uma pasta local em um repositório Git e enviar seu projeto para o GitHub. São os comandos fundamentais que formam a base para todo o controle de versão.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -92,7 +89,7 @@
             </div>
         </section>
 
-        <section id="fluxo" class="mb-16">
+        <section id="fluxo" class="mb-16 scroll-mt-20">
             <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-teal-500 pb-2 mb-8">2. Comandos para Fluxo de Trabalho e Branches</h2>
              <p class="text-lg text-slate-600 mb-8">Depois que seu projeto está configurado, estes comandos se tornam parte da sua rotina. Eles permitem que você gerencie diferentes linhas de desenvolvimento (branches), sincronize com o repositório remoto e lide com alterações de forma segura e organizada.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -141,7 +138,7 @@
             </div>
         </section>
 
-        <section id="dicas">
+        <section id="dicas" class="scroll-mt-20">
             <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-amber-500 pb-2 mb-8">3. Dicas e Soluções de Problemas</h2>
             <p class="text-lg text-slate-600 mb-8">Todo desenvolvedor encontra pequenos desafios ao usar o Git. Esta seção oferece soluções para problemas comuns e dicas para otimizar seu ambiente de trabalho, como ignorar arquivos desnecessários e gerenciar múltiplos projetos de forma eficiente no VS Code.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -171,7 +168,39 @@ node_modules/
                 </div>
             </div>
         </section>
-
+        
+        <section id="ia-assistant" class="mt-16 scroll-mt-20">
+            <div class="bg-white rounded-lg shadow-lg p-8 border-t-4 border-indigo-500">
+                <div class="flex items-start sm:items-center mb-4">
+                    <div class="flex-shrink-0">
+                         <svg class="h-10 w-10 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V7.5a2.25 2.25 0 00-2.25-2.25H7.5A2.25 2.25 0 005.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Ainda com dúvidas?</h2>
+                        <p class="text-lg text-slate-600 mt-1">Pergunte ao nosso assistente de IA sobre Git e GitHub.</p>
+                    </div>
+                </div>
+               
+                <div class="space-y-4 mt-6">
+                    <div>
+                        <label for="ai-question" class="sr-only">Sua pergunta</label>
+                        <input type="text" id="ai-question" placeholder="Ex: Como eu desfaço o último commit?" class="w-full px-4 py-3 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-200">
+                    </div>
+                    <button id="ask-ai-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors flex items-center justify-center disabled:bg-indigo-400 disabled:cursor-not-allowed">
+                        <span id="ai-btn-text">Perguntar à IA</span>
+                        <svg id="ai-spinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                    <div id="ai-response-container" class="mt-4 p-5 bg-slate-100 rounded-md border border-slate-200 min-h-[50px] text-slate-700 leading-relaxed hidden">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
     </main>
 
     <footer class="bg-white mt-16 border-t">
@@ -182,6 +211,7 @@ node_modules/
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Lógica existente para copiar comandos ---
             const copyButtons = document.querySelectorAll('.copy-btn');
             
             copyButtons.forEach(button => {
@@ -190,12 +220,7 @@ node_modules/
                     const commandTextElement = commandCard.querySelector('.command-text');
                     const textToCopy = commandTextElement.innerText;
 
-                    const textArea = document.createElement('textarea');
-                    textArea.value = textToCopy;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
+                    navigator.clipboard.writeText(textToCopy).then(() => {
                         const originalText = button.innerText;
                         button.innerText = 'Copiado!';
                         button.classList.add('bg-green-500');
@@ -210,14 +235,13 @@ node_modules/
                                 button.classList.add('bg-teal-500');
                             }
                         }, 2000);
-
-                    } catch (err) {
+                    }).catch(err => {
                         console.error('Falha ao copiar texto: ', err);
-                    }
-                    document.body.removeChild(textArea);
+                    });
                 });
             });
 
+            // --- Lógica existente para navegação suave ---
             const navLinks = document.querySelectorAll('nav a');
             navLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
@@ -231,6 +255,66 @@ node_modules/
                         });
                     }
                 });
+            });
+
+            // --- NOVA LÓGICA PARA O ASSISTENTE IA ---
+            const aiQuestionInput = document.getElementById('ai-question');
+            const askAiBtn = document.getElementById('ask-ai-btn');
+            const aiResponseContainer = document.getElementById('ai-response-container');
+            const aiBtnText = document.getElementById('ai-btn-text');
+            const aiSpinner = document.getElementById('ai-spinner');
+
+            const handleAIQuery = () => {
+                const question = aiQuestionInput.value.trim();
+                if (!question) {
+                    aiResponseContainer.innerHTML = '<p class="text-red-600 font-medium">Por favor, digite uma pergunta.</p>';
+                    aiResponseContainer.classList.remove('hidden');
+                    return;
+                }
+
+                // Exibe estado de carregamento
+                aiBtnText.innerText = 'Pensando...';
+                aiSpinner.classList.remove('hidden');
+                askAiBtn.disabled = true;
+                aiResponseContainer.classList.remove('hidden');
+                aiResponseContainer.innerHTML = '<p class="text-slate-500">Analisando sua pergunta...</p>';
+
+                // Simula uma resposta da IA após um pequeno delay
+                setTimeout(() => {
+                    let answer = '';
+                    
+                    if (question.toLowerCase().includes('desfazer') && question.toLowerCase().includes('commit')) {
+                        answer = `
+                            <p class="font-semibold mb-2">Ótima pergunta! Para desfazer o último commit, você tem algumas opções:</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li><strong>Se você ainda não enviou (push) o commit:</strong> use <code class="bg-slate-200 text-pink-600 px-1 rounded font-mono text-sm">git reset --soft HEAD~1</code>. Ele desfaz o commit mas mantém suas alterações na área de "stage" para você poder editá-las.</li>
+                                <li><strong>Se você já enviou o commit:</strong> o ideal é usar <code class="bg-slate-200 text-pink-600 px-1 rounded font-mono text-sm">git revert HEAD</code>. Isso cria um *novo* commit que desfaz as alterações do anterior, mantendo o histórico seguro para todos.</li>
+                            </ul>`;
+                    } else if (question.toLowerCase().includes('histórico') || question.toLowerCase().includes('log')) {
+                         answer = `
+                            <p class="font-semibold mb-2">Para visualizar o histórico de commits, o comando principal é:</p>
+                             <pre class="bg-slate-200 rounded p-2 my-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono">git log</code></pre>
+                            <p>Ele mostra a lista de commits em ordem cronológica. Você pode usar variações como <code class="bg-slate-200 text-pink-600 px-1 rounded font-mono text-sm">git log --oneline --graph</code> para uma visualização mais compacta e gráfica.</p>
+                            `;
+                    } else {
+                        answer = '<p>Esta é uma demonstração. Numa aplicação real, a IA processaria sua pergunta e responderia aqui. Tente perguntar sobre "desfazer o último commit" ou "como ver o histórico".</p>';
+                    }
+                    
+                    aiResponseContainer.innerHTML = answer;
+                    
+                    // Reseta o estado do botão
+                    aiBtnText.innerText = 'Perguntar à IA';
+                    aiSpinner.classList.add('hidden');
+                    askAiBtn.disabled = false;
+                    aiQuestionInput.value = '';
+                }, 1500); // Delay de 1.5 segundos
+            };
+
+            askAiBtn.addEventListener('click', handleAIQuery);
+            aiQuestionInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    handleAIQuery();
+                }
             });
         });
     </script>
