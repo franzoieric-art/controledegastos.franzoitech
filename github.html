@@ -210,53 +210,83 @@ node_modules/
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Lógica existente para copiar comandos ---
-            const copyButtons = document.querySelectorAll('.copy-btn');
-            
-            copyButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const commandCard = button.closest('.command-card');
-                    const commandTextElement = commandCard.querySelector('.command-text');
-                    const textToCopy = commandTextElement.innerText;
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Lógica existente para copiar comandos ---
+        // (Vou omitir o código dos outros botões para sermos breves, não precisa mexer nele)
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        copyButtons.forEach(button => { /* ... seu código de copiar ... */ });
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => { /* ... seu código de navegação ... */ });
 
-                    navigator.clipboard.writeText(textToCopy).then(() => {
-                        const originalText = button.innerText;
-                        button.innerText = 'Copiado!';
-                        button.classList.add('bg-green-500');
-                        button.classList.remove('bg-indigo-500', 'bg-teal-500');
-                        
-                        setTimeout(() => {
-                            button.innerText = originalText;
-                            button.classList.remove('bg-green-500');
-                            if (button.closest('section').id === 'essenciais') {
-                                button.classList.add('bg-indigo-500');
-                            } else {
-                                button.classList.add('bg-teal-500');
-                            }
-                        }, 2000);
-                    }).catch(err => {
-                        console.error('Falha ao copiar texto: ', err);
-                    });
-                });
-            });
 
-            // --- Lógica existente para navegação suave ---
-            const navLinks = document.querySelectorAll('nav a');
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const targetId = link.getAttribute('href');
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
+        // --- LÓGICA DE DEPURAÇÃO PARA O ASSISTENTE IA ---
+        console.log("Script da IA iniciado.");
+
+        const aiQuestionInput = document.getElementById('ai-question');
+        const askAiBtn = document.getElementById('ask-ai-btn');
+        const aiResponseContainer = document.getElementById('ai-response-container');
+        const aiBtnText = document.getElementById('ai-btn-text');
+        const aiSpinner = document.getElementById('ai-spinner');
+
+        // LOG 1: Vamos verificar se os elementos foram encontrados no HTML
+        console.log("Elementos encontrados:", { askAiBtn, aiQuestionInput });
+
+        const handleAIQuery = async () => {
+            // LOG 3: Vamos verificar se a função é chamada ao clicar
+            console.log("Função handleAIQuery foi EXECUTADA!");
+
+            const question = aiQuestionInput.value.trim();
+            if (!question) {
+                aiResponseContainer.innerHTML = '<p class="text-red-600 font-medium">Por favor, digite uma pergunta.</p>';
+                aiResponseContainer.classList.remove('hidden');
+                return;
+            }
+
+            aiBtnText.innerText = 'Pensando...';
+            aiSpinner.classList.remove('hidden');
+            askAiBtn.disabled = true;
+            aiResponseContainer.classList.remove('hidden');
+            aiResponseContainer.innerHTML = '<p class="text-slate-500">Conectando com a IA...</p>';
+
+            try {
+                const response = await fetch('/api/ask-ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: question }),
                 });
-            });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Houve um problema ao contatar a IA.');
+                }
+
+                const data = await response.json();
+                aiResponseContainer.innerHTML = data.answer;
+            } catch (error) {
+                aiResponseContainer.innerHTML = `<p class="text-red-600 font-medium">Erro: ${error.message}</p>`;
+            } finally {
+                aiBtnText.innerText = 'Perguntar à IA';
+                aiSpinner.classList.add('hidden');
+                askAiBtn.disabled = false;
+                aiQuestionInput.value = '';
+            }
+        };
+
+        // Verificação para garantir que o botão existe antes de adicionar o "ouvinte"
+        if (askAiBtn) {
+            askAiBtn.addEventListener('click', handleAIQuery);
+            // LOG 2: Vamos confirmar que o "ouvinte de clique" foi adicionado
+            console.log("Ouvinte de clique ADICIONADO com sucesso ao botão.");
+        } else {
+            console.error("ERRO CRÍTICO: O botão com id 'ask-ai-btn' não foi encontrado no HTML!");
+        }
+
+        aiQuestionInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                handleAIQuery();
+            }
         });
-    </script>
+    });
+</script>
 </body>
 </html>
