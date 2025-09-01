@@ -338,29 +338,65 @@
             
             // INÍCIO DA ALTERAÇÃO 5: FUNÇÃO DE UPLOAD
             async handleAvatarUpload(event) {
-                const file = event.target.files[0];
-                if (!file || !this.state.currentUserId) return;
+    console.clear(); // Limpa o console para uma nova tentativa
+    console.log("--- INICIANDO PROCESSO DE UPLOAD ---");
+    
+    // PASSO 1: VERIFICAR SE O EVENTO FOI ACIONADO
+    const file = event.target.files[0];
+    if (!file) {
+        console.log("Passo 1: Falhou. Nenhum arquivo selecionado.");
+        return;
+    }
+    console.log("Passo 1: Sucesso. Arquivo selecionado:", file.name);
 
-                const avatarImg = document.getElementById('user-avatar');
-                const originalSrc = avatarImg.src;
-                avatarImg.style.opacity = '0.5'; // Feedback de carregamento
+    // PASSO 2: VERIFICAR SE O USUÁRIO ESTÁ LOGADO
+    if (!this.state.currentUserId) {
+        console.log("Passo 2: Falhou. User ID está ausente (null ou undefined).");
+        return;
+    }
+    console.log("Passo 2: Sucesso. User ID encontrado:", this.state.currentUserId);
 
-                try {
-                    const storageRef = ref(storage, `avatars/${this.state.currentUserId}`);
-                    await uploadBytes(storageRef, file);
-                    const downloadURL = await getDownloadURL(storageRef);
+    const avatarImg = document.getElementById('user-avatar');
+    const originalSrc = avatarImg.src;
+    avatarImg.style.opacity = '0.5';
 
-                    this.state.profile.avatarUrl = downloadURL;
-                    avatarImg.src = downloadURL;
-                    await this.saveDataToFirestore();
+    try {
+        // PASSO 3: CRIAR REFERÊNCIA NO STORAGE
+        const storagePath = `avatars/${this.state.currentUserId}`;
+        const storageRef = ref(storage, storagePath);
+        console.log("Passo 3: Sucesso. Criando referência para o caminho:", storagePath);
 
-                } catch (error) {
-                    console.error("Erro ao fazer upload do avatar:", error);
-                    avatarImg.src = originalSrc; // Restaura em caso de erro
-                } finally {
-                    avatarImg.style.opacity = '1';
-                }
-            },
+        // PASSO 4: FAZER UPLOAD DO ARQUIVO
+        console.log("Passo 4: Enviando arquivo para o Firebase Storage...");
+        await uploadBytes(storageRef, file);
+        console.log("Passo 4: Sucesso. Arquivo enviado!");
+
+        // PASSO 5: OBTER A URL DE DOWNLOAD
+        console.log("Passo 5: Obtendo a URL de download do arquivo...");
+        const downloadURL = await getDownloadURL(storageRef);
+        console.log("Passo 5: Sucesso. URL recebida:", downloadURL);
+
+        // PASSO 6: ATUALIZAR ESTADO E IMAGEM NA TELA
+        console.log("Passo 6: Atualizando estado local e a imagem na tela...");
+        this.state.profile.avatarUrl = downloadURL;
+        avatarImg.src = downloadURL;
+        console.log("Passo 6: Sucesso. Imagem na tela foi atualizada.");
+
+        // PASSO 7: SALVAR NO FIRESTORE
+        console.log("Passo 7: Salvando a nova URL no Firestore...");
+        await this.saveDataToFirestore();
+        console.log("Passo 7: Sucesso. Dados salvos no Firestore.");
+        console.log("--- PROCESSO DE UPLOAD CONCLUÍDO COM SUCESSO! ---");
+
+    } catch (error) {
+        console.error("--- ERRO CRÍTICO NO PROCESSO DE UPLOAD ---");
+        console.error("O processo parou em algum lugar entre o Passo 3 e o 7. Veja o erro abaixo:");
+        console.error(error);
+        avatarImg.src = originalSrc; // Restaura em caso de erro
+    } finally {
+        avatarImg.style.opacity = '1';
+    }
+},
             // FIM DA ALTERAÇÃO 5
 
             async saveDataToFirestore() {
