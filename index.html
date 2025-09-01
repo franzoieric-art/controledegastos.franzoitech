@@ -53,7 +53,8 @@
         /* CSS para o Tooltip Customizado */
         .tooltip-container {
             position: relative;
-            display: inline-block;
+            display: inline-flex; /* Alterado para alinhar com o botão */
+            align-items: center;
         }
 
         .tooltip-text {
@@ -632,9 +633,22 @@
                     if (t.matches('.toggle-days-list-btn')) { const monthIndex = t.dataset.monthIndex; const wrapper = document.getElementById(`expense-section-wrapper-${monthIndex}`); if (wrapper) { const isHidden = wrapper.classList.toggle('hidden'); t.textContent = isHidden ? 'Mostrar Lançamentos Diários ▼' : 'Ocultar Lançamentos Diários ▲'; } }
                     if (t.closest('.accordion-trigger')) { const trigger = t.closest('.accordion-trigger'); const parentItem = trigger.parentElement; const allItems = parentItem.parentElement.querySelectorAll('.accordion-item'); if (parentItem.classList.contains('active')) { parentItem.classList.remove('active'); } else { allItems.forEach(item => item.classList.remove('active')); parentItem.classList.add('active'); } }
                     if (t.closest('.ai-analysis-btn')) this.ai.getFinancialAnalysis(parseInt(t.closest('.ai-analysis-btn').dataset.monthIndex));
-                    if (t.closest('.suggest-category-btn')) { const btn = t.closest('.suggest-category-btn'); const el = btn.closest('.flex'); const entryId = el.querySelector('.remove-btn').dataset.entryId; const descriptionInput = el.querySelector('[data-field="description"]'); if (descriptionInput.value) { this.ai.getCategorySuggestion(descriptionInput.value, entryId, btn); } }
+                    
+                    if (t.closest('.suggest-category-btn')) {
+                        const btn = t.closest('.suggest-category-btn');
+                        // Usamos a nova classe para achar o container pai correto
+                        const el = btn.closest('.expense-entry-row');
+                        if (el) { // Adicionamos uma verificação para segurança
+                            const entryId = el.querySelector('.remove-btn').dataset.entryId;
+                            const descriptionInput = el.querySelector('[data-field="description"]');
+                            if (descriptionInput && descriptionInput.value) {
+                                this.ai.getCategorySuggestion(descriptionInput.value, entryId, btn);
+                            }
+                        }
+                    }
+
                     if (t.matches('.add-entry-btn')) { const { monthIndex, type, day, category } = t.dataset; const month = parseInt(monthIndex); const entries = (type === 'pj') ? this.state.monthlyData[month].pjEntries : (type === 'pf') ? this.state.monthlyData[month].pfEntries : this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`]; if (type === 'pj' || type === 'pf') { const newEntry = { id: Date.now(), description: '', amount: 0 }; entries.push(newEntry); document.getElementById(`${type}-entries-container-${month}`).appendChild(this.render.createEntryElement({ monthIndex: month, entry: newEntry, type: type })); } else if (type === 'expense') { const n = { id: Date.now(), description: '', amount: 0, paymentMethod: 'Pix', card: this.state.creditCards.length > 0 ? this.state.creditCards[0] : '', category: this.state.categories[0].name }; entries.push(n); document.getElementById(`${category}-entries-${month}-${day}`).appendChild(this.render.createEntryElement({ monthIndex: month, dayIndex: parseInt(day), category, entry: n, type: 'expense' })); } this.recalculateAndDisplayTotals(month); this.saveDataToFirestore(); }
-                    if (t.matches('.remove-btn')) { const { monthIndex, type, day, category, entryId } = t.dataset; const month = parseInt(monthIndex); const id = parseFloat(entryId); if (type === 'pj') { this.state.monthlyData[month].pjEntries = this.state.monthlyData[month].pjEntries.filter(e => e.id !== id); } else if (type === 'pf') { this.state.monthlyData[month].pfEntries = this.state.monthlyData[month].pfEntries.filter(e => e.id !== id); } else { this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`] = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].filter(e => e.id !== id); } t.closest('.flex').remove(); this.recalculateAndDisplayTotals(month); this.saveDataToFirestore(); }
+                    if (t.matches('.remove-btn')) { const { monthIndex, type, day, category, entryId } = t.dataset; const month = parseInt(monthIndex); const id = parseFloat(entryId); if (type === 'pj') { this.state.monthlyData[month].pjEntries = this.state.monthlyData[month].pjEntries.filter(e => e.id !== id); } else if (type === 'pf') { this.state.monthlyData[month].pfEntries = this.state.monthlyData[month].pfEntries.filter(e => e.id !== id); } else { this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`] = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].filter(e => e.id !== id); } t.closest('.expense-entry-row').remove(); this.recalculateAndDisplayTotals(month); this.saveDataToFirestore(); }
                     if (t.matches('.remove-card-btn')) { const cardNameToRemove = t.dataset.cardName; for (let i = 0; i < 12; i++) { this.state.monthlyData[i].expenses.forEach(day => { [...day.personalEntries, ...day.businessEntries].forEach(entry => { if (entry.card === cardNameToRemove) entry.card = 'Cartão Removido'; }); }); } this.state.creditCards = this.state.creditCards.filter(c => c !== cardNameToRemove); this.render.renderCardList(); this.saveDataToFirestore(); }
                     if (t.matches('.remove-category-btn')) { const categoryNameToRemove = t.dataset.categoryName; for (let i = 0; i < 12; i++) { this.state.monthlyData[i].expenses.forEach(day => { day.personalEntries.forEach(entry => { if (entry.category === categoryNameToRemove) entry.category = 'Outros'; }); }); } this.state.categories = this.state.categories.filter(c => c.name !== categoryNameToRemove); this.render.renderCategoryList(); this.saveDataToFirestore(); }
                     if (t.matches('.remove-recurring-btn')) { const index = parseInt(t.dataset.index); this.state.recurringEntries.splice(index, 1); this.render.renderRecurringList(); this.saveDataToFirestore(); }
@@ -643,7 +657,7 @@
                 document.body.addEventListener('input', (event) => {
                     const t = event.target;
                     if (t.matches('.entry-input')) {
-                        const el = t.closest('.flex');
+                        const el = t.closest('.expense-entry-row');
                         const btn = el.querySelector('.remove-btn');
                         if (!btn) return;
                         const { monthIndex, type, day, category, entryId } = btn.dataset;
@@ -749,7 +763,7 @@
                         // Limpa a resposta da IA para garantir que temos apenas o nome da categoria
                         suggestedCategory = suggestedCategory.trim().replace(/["'.]/g, '');
 
-                        const entryElement = button.closest('.flex');
+                        const entryElement = button.closest('.expense-entry-row');
                         const selectElement = entryElement.querySelector('[data-field="category"]');
 
                         // Verifica se a categoria sugerida pela IA existe na lista do usuário
@@ -801,7 +815,7 @@
                 createEntryElement: (config) => {
                     const { monthIndex, dayIndex, category, entry, type } = config;
                     const d = document.createElement('div');
-                    d.classList.add('flex', 'items-center', 'gap-2', 'w-full', 'flex-wrap');
+                    d.classList.add('flex', 'items-center', 'gap-2', 'w-full', 'flex-wrap', 'expense-entry-row');
 
                     let r = '', p = '', c = '', s = '', aiBtn = '';
 
@@ -813,23 +827,18 @@
                             c = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="card">${App.state.creditCards.map(c => `<option value="${c}" ${entry.card === c ? 'selected' : ''}>${c}</option>`).join('')}</select>`;
                         }
 
-                        // --- INÍCIO DA MUDANÇA ---
-                        const categorySelect = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto rounded-r-none border-r-0" data-field="category">${App.state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
+                        s = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="category">${App.state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
                         
-                        // O botão agora está dentro de um container com o texto do tooltip
                         aiBtn = `<div class="tooltip-container">
-                                    <button class="suggest-category-btn p-2 rounded-l-none rounded-r-xl border border-l-0" style="background-color: var(--secondary-bg); color: var(--secondary-text); border-color: var(--input-border); margin-left: -1px;">✨</button>
+                                    <button class="suggest-category-btn flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-xl" style="background-color: var(--secondary-bg); color: var(--secondary-text);">✨</button>
                                     <span class="tooltip-text">Sugerir categoria com IA</span>
                                  </div>`;
                         
-                        s = `<div class="flex items-center">${categorySelect}${aiBtn}</div>`;
-                        // --- FIM DA MUDANÇA ---
-
                     } else {
                         r = `<button class="remove-btn" data-type="${type}" data-month-index="${monthIndex}" data-entry-id="${entry.id}">×</button>`;
                     }
                     
-                    d.innerHTML = `<input type="text" value="${entry.description}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description"><input type="number" value="${entry.amount}" min="0" step="0.01" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">${s}${p}<span class="card-selector-container">${c}</span>${r}`;
+                    d.innerHTML = `<input type="text" value="${entry.description}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description"><input type="number" value="${entry.amount}" min="0" step="0.01" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">${s}${aiBtn}${p}<span class="card-selector-container">${c}</span>${r}`;
                     
                     return d;
                 },
