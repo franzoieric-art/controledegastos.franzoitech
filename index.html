@@ -90,7 +90,7 @@
     <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
 
     <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-2xl">
-        <div class="text-center mb-6"><div class="flex justify-center mb-4"><iframe src="https://drive.google.com/file/d/1z4DLbMUR9cp3cFz1fxS-KXBd3Vs1FO6F/preview" width="100" height="100" allow="autoplay" style="border:0;"></iframe></div><h1 id="auth-title" class="text-2xl font-bold">Acesso ao Painel</h1><p class="muted-text">Faça login ou crie sua conta.</p></div>
+        <div class="text-center mb-6"><div class="flex justify-center mb-4"><iframe src="https://www.franzoitech.com/images/logo.png" width="100" height="100" allow="autoplay" style="border:0;"></iframe></div><h1 id="auth-title" class="text-2xl font-bold">Acesso ao Painel</h1><p class="muted-text">Faça login ou crie sua conta.</p></div>
         <div class="space-y-4"><input type="email" id="email-input" placeholder="Email" class="w-full p-3 input-field"><input type="password" id="password-input" placeholder="Senha" class="w-full p-3 input-field"><input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 input-field hidden"></div>
         <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
         <div class="mt-4 flex flex-col gap-2"><button id="main-auth-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors disabled:opacity-50" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Entrar</button><a href="#" id="forgot-password-link" class="text-center text-sm hover:underline" style="color: var(--primary-color);">Esqueceu a senha?</a></div>
@@ -222,7 +222,9 @@
             <div class="mt-12 pt-8 border-t text-center" style="border-color: var(--border-color);">
                 <p class="text-sm muted-text">Ajude a manter este projeto</p>
                 <p class="text-xs muted-text mb-2">Doe qualquer valor via Pix</p>
-                <div class="mt-2 flex justify-center"><iframe src="https://drive.google.com/file/d/1s8uZhOj-lo84fpnA5Hyjz_CIEMhO80Fz/preview" width="150" height="150" allow="autoplay" style="border:0;"></iframe></div>
+                <div class="mt-2 flex justify-center"><iframe src="http://franzoitech.com/images/pix%20qrcode.jpeg
+                    
+                    /preview" width="150" height="150" allow="autoplay" style="border:0;"></iframe></div>
                 <div class="mt-2"><p class="text-xs muted-text">Ou use a chave (email):</p><div class="mt-1 flex justify-center items-center gap-2"><p id="pix-key" class="font-mono text-sm" style="color: var(--primary-color);">franzoitechcorp@gmail.com</p><button id="copy-pix-btn" class="px-3 py-1 text-xs font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Copiar</button></div></div>
             </div>
         </div>
