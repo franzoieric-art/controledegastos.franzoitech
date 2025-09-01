@@ -335,8 +335,8 @@
             // Esta parte agora só executa se o mês for diferente do atual, evitando re-salvamentos desnecessários.
             if (this.state.activeMonthIndex !== monthIndex && this.state.saveTimeout) {
                 clearTimeout(this.state.saveTimeout); 
-                this.saveDataToFirestore();             
-                this.state.saveTimeout = null;          
+                this.saveDataToFirestore();                   
+                this.state.saveTimeout = null;           
             }
             // ---- FIM DA CORREÇÃO ----
 
@@ -694,6 +694,51 @@
 
                 async getCategorySuggestion(description, entryId, button) {
                     console.log(`Buscando sugestão de categoria para: ${description}`);
+                    const originalContent = button.innerHTML;
+                    button.innerHTML = '...'; // Animação de "carregando"
+                    button.disabled = true;
+
+                    try {
+                        // Pega a lista de categorias que o usuário já criou
+                        const availableCategories = App.state.categories.map(c => c.name).join(', ');
+
+                        // Cria um prompt específico para a IA focar apenas em categorizar
+                        const prompt = `
+                            Analise a despesa: "${description}".
+                            Qual das seguintes categorias melhor se encaixa? Categorias disponíveis: [${availableCategories}].
+                            Responda APENAS com o nome exato de uma das categorias da lista. Sem frases, apenas a categoria.
+                        `;
+
+                        // Chama a mesma função que já funciona para a análise do mês
+                        let suggestedCategory = await this.callVercelFunction(prompt);
+                        
+                        // Limpa a resposta da IA para garantir que temos apenas o nome da categoria
+                        suggestedCategory = suggestedCategory.trim().replace(/["'.]/g, '');
+
+                        const entryElement = button.closest('.flex');
+                        const selectElement = entryElement.querySelector('[data-field="category"]');
+
+                        // Verifica se a categoria sugerida pela IA existe na lista do usuário
+                        const categoryExists = App.state.categories.find(c => c.name.toLowerCase() === suggestedCategory.toLowerCase());
+
+                        if (selectElement && categoryExists) {
+                            // Atualiza o valor da caixa de seleção
+                            selectElement.value = categoryExists.name;
+
+                            // Dispara o evento 'input' para que o sistema salve a alteração automaticamente
+                            const event = new Event('input', { bubbles: true });
+                            selectElement.dispatchEvent(event);
+                        } else {
+                            console.warn(`Categoria sugerida "${suggestedCategory}" não é válida ou não foi encontrada.`);
+                        }
+
+                    } catch (error) {
+                        console.error("Erro ao obter sugestão de categoria:", error);
+                    } finally {
+                        // Restaura o botão ao seu estado original
+                        button.innerHTML = originalContent;
+                        button.disabled = false;
+                    }
                 },
 
                 async callVercelFunction(prompt) {
