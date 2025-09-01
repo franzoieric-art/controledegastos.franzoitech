@@ -201,6 +201,19 @@
         <div class="container mx-auto card p-4 md:p-8 rounded-2xl relative">
             <div id="save-feedback">Salvo ✓</div>
             
+            <div id="user-header" class="flex items-center gap-4 mb-8 pb-8 border-b" style="border-color: var(--border-color);">
+                <label for="avatar-upload-input" class="cursor-pointer group relative">
+                    <img id="user-avatar" src="images/default-avatar.svg" class="w-16 h-16 rounded-full object-cover border-2 transition-all group-hover:opacity-80" style="border-color: var(--border-color);">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </div>
+                </label>
+                <input type="file" id="avatar-upload-input" class="hidden" accept="image/png, image/jpeg">
+                <div>
+                    <h2 id="greeting-text" class="text-2xl font-semibold" style="color: var(--text-color);">Carregando...</h2>
+                    <p id="time-greeting" class="text-lg" style="color: var(--muted-text);">Tenha um ótimo dia!</p>
+                </div>
+            </div>
             <div class="flex justify-between items-start mb-8">
                 <div class="text-xs muted-text">
                     <p class="font-bold">Rico Plus</p>
@@ -231,6 +244,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        // INÍCIO DA ALTERAÇÃO 2: IMPORTAÇÃO DO STORAGE
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+        // FIM DA ALTERAÇÃO 2
 
         const firebaseConfig = { 
             apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0", 
@@ -244,6 +260,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        // INÍCIO DA ALTERAÇÃO 3: INICIALIZAÇÃO DO STORAGE
+        const storage = getStorage(app);
+        // FIM DA ALTERAÇÃO 3
 
         // --- AUTH LOGIC ---
         const authScreen = document.getElementById('auth-screen'); const appScreen = document.getElementById('app-screen');
@@ -266,7 +285,7 @@
         const App = {
             state: {
                 currentUserId: null,
-                profile: { name: '' },
+                profile: { name: '', avatarUrl: '' }, // Adicionado avatarUrl
                 integrations: {
                     whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' }
                 },
@@ -317,6 +336,33 @@
                 generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
             },
             
+            // INÍCIO DA ALTERAÇÃO 5: FUNÇÃO DE UPLOAD
+            async handleAvatarUpload(event) {
+                const file = event.target.files[0];
+                if (!file || !this.state.currentUserId) return;
+
+                const avatarImg = document.getElementById('user-avatar');
+                const originalSrc = avatarImg.src;
+                avatarImg.style.opacity = '0.5'; // Feedback de carregamento
+
+                try {
+                    const storageRef = ref(storage, `avatars/${this.state.currentUserId}`);
+                    await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(storageRef);
+
+                    this.state.profile.avatarUrl = downloadURL;
+                    avatarImg.src = downloadURL;
+                    await this.saveDataToFirestore();
+
+                } catch (error) {
+                    console.error("Erro ao fazer upload do avatar:", error);
+                    avatarImg.src = originalSrc; // Restaura em caso de erro
+                } finally {
+                    avatarImg.style.opacity = '1';
+                }
+            },
+            // FIM DA ALTERAÇÃO 5
+
             async saveDataToFirestore() {
                 if (!App.state.currentUserId) return;
                 try {
@@ -339,7 +385,7 @@
                     const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
                     if (docSnap.exists()) {
                         const d = docSnap.data();
-                        this.state.profile = d.profile || { name: '' };
+                        this.state.profile = d.profile || { name: '', avatarUrl: '' }; // Garantir avatarUrl
                         this.state.integrations = d.integrations || { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } };
                         this.state.monthlyData = d.monthlyData || {}; this.state.creditCards = d.creditCards || [];
                         this.state.categories = d.categories && d.categories.length > 0 ? d.categories : this.state.categories;
@@ -354,13 +400,17 @@
                 this.constants.monthNames.forEach((_, index) => { this.ui.monthContentContainer.insertAdjacentHTML('beforeend', index === 12 ? this.render.createBalanceContentHTML() : this.render.createMonthContentHTML(index)); });
                 this.showMonth(this.state.activeMonthIndex);
                 loadingOverlay.classList.add('hidden');
+                
+                // INÍCIO DA ALTERAÇÃO 6: CHAMADA DA FUNÇÃO DO CABEÇALHO
+                this.render.updateHeader();
+                // FIM DA ALTERAÇÃO 6
             },
             
             showMonth(monthIndex) {
                 if (this.state.activeMonthIndex !== monthIndex && this.state.saveTimeout) {
                     clearTimeout(this.state.saveTimeout); 
                     this.saveDataToFirestore();                   
-                    this.state.saveTimeout = null;           
+                    this.state.saveTimeout = null;          
                 }
                 this.state.activeMonthIndex = monthIndex;
                 Object.values(this.state.chartInstances).forEach(c => c?.destroy());
@@ -544,6 +594,11 @@
             
             bindGlobalEventListeners() {
                 this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
+
+                // INÍCIO DA ALTERAÇÃO 7: EVENT LISTENER DO UPLOAD
+                document.getElementById('avatar-upload-input').addEventListener('change', this.handleAvatarUpload.bind(this));
+                // FIM DA ALTERAÇÃO 7
+
                 themeToggleBtn.addEventListener('click', () => { const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); });
                 
                 document.getElementById('manage-settings-btn').addEventListener('click', () => { this.render.renderSettingsModal(); });
@@ -555,6 +610,7 @@
                     App.saveDataToFirestore();
                     App.ui.accountModal.classList.add('hidden');
                     App.helpers.showSaveFeedback();
+                    App.render.updateHeader(); // Atualiza o cabeçalho após salvar o nome
                 });
                 document.getElementById('save-integration-btn').addEventListener('click', () => {
                     const wa = App.state.integrations.whatsapp;
@@ -746,6 +802,26 @@
             },
             
             render: {
+                // INÍCIO DA ALTERAÇÃO 4: FUNÇÃO DE RENDERIZAÇÃO DO CABEÇALHO
+                updateHeader() {
+                    const name = App.state.profile.name?.split(' ')[0] || 'Visitante';
+                    document.getElementById('greeting-text').textContent = `Olá, ${name}`;
+
+                    const hour = new Date().getHours();
+                    let greeting = 'Tenha um ótimo dia!';
+                    if (hour >= 5 && hour < 12) {
+                        greeting = 'Bom dia!';
+                    } else if (hour >= 12 && hour < 18) {
+                        greeting = 'Boa tarde!';
+                    } else {
+                        greeting = 'Boa noite!';
+                    }
+                    document.getElementById('time-greeting').textContent = greeting;
+
+                    const avatarUrl = App.state.profile.avatarUrl || 'images/default-avatar.svg';
+                    document.getElementById('user-avatar').src = avatarUrl;
+                },
+                // FIM DA ALTERAÇÃO 4
                 createMonthContentHTML: (monthIndex) => `<div id="month-${monthIndex}-content" class="month-content"><div class="flex justify-end gap-2 mb-4"><button class="export-csv-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar CSV</button><button class="export-pdf-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar PDF</button></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"><div class="lg:col-span-1 p-5 rounded-2xl card border-t-4 border-yellow-400"><h2 class="text-xl font-semibold mb-4">Ganhos PJ</h2><div id="pj-entries-container-${monthIndex}" class="flex flex-col gap-3 mb-3"></div><button class="add-entry-btn mt-2 w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}" data-type="pj">+ Adicionar Ganho PJ</button></div><div class="lg:col-span-1 p-5 rounded-2xl card border-t-4 border-green-400"><h2 class="text-xl font-semibold mb-4">Ganhos PF</h2><div id="pf-entries-container-${monthIndex}" class="flex flex-col gap-3 mb-3"></div><button class="add-entry-btn mt-2 w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}" data-type="pf">+ Adicionar Ganho PF</button></div><div class="lg:col-span-1 grid gap-6"><div><div class="p-5 rounded-2xl card border-t-4 border-blue-400 space-y-4"><div class="space-y-1"><label class="block text-sm font-medium muted-text">Caixa da empresa:</label><p id="companyCash-${monthIndex}" class="text-2xl font-semibold">R$ 0,00</p></div><div class="space-y-1"><label class="block text-sm font-medium muted-text">Caixa pessoal:</label><p id="personalCash-${monthIndex}" class="text-2xl font-semibold">R$ 0,00</p></div></div></div><div><div class="flex justify-end mb-2"><button class="toggle-summary-btn text-sm font-medium hover:underline" style="color: var(--primary-color);" data-month-index="${monthIndex}">Ocultar Resumo ▼</button></div><div id="summary-card-${monthIndex}" class="p-5 rounded-2xl card border-t-4 border-purple-400"><h2 class="text-xl font-semibold mb-4">Resumo do Mês</h2><div class="space-y-2 text-sm"><div class="flex justify-between items-center"><span>Gasto Pessoal:</span><span id="totalPersonalExpenses-${monthIndex}" class="font-semibold" style="color: var(--red-color);">R$ 0,00</span></div><div class="flex justify-between items-center"><span>Gasto Empresa:</span><span id="totalBusinessExpenses-${monthIndex}" class="font-semibold" style="color: var(--red-color);">R$ 0,00</span></div><div class="flex justify-between items-center pt-2 border-t" style="border-color: var(--border-color);"><span>Saldo Pessoal:</span><span id="remainingPersonal-${monthIndex}" class="font-semibold">R$ 0,00</span></div><div class="flex justify-between items-center"><span>Saldo Empresa:</span><span id="remainingBusiness-${monthIndex}" class="font-semibold">R$ 0,00</span></div><div class="flex justify-between items-center border-t pt-2 mt-2" style="border-color: var(--border-color);"><span class="font-semibold">Saldo Total:</span><span id="remainingTotal-${monthIndex}" class="text-xl font-bold">R$ 0,00</span></div></div><div id="budget-alerts-${monthIndex}" class="mt-3 text-xs"></div></div></div></div></div><div class="text-center mb-4"><button class="ai-analysis-btn px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')" data-month-index="${monthIndex}">Analisar Mês com IA ✨</button></div><div class="flex justify-center mb-4"><button class="toggle-days-list-btn text-sm font-medium hover:underline" style="color: var(--primary-color);" data-month-index="${monthIndex}">Mostrar Lançamentos Diários ▼</button></div><div id="expense-section-wrapper-${monthIndex}" class="hidden"><div id="expense-accordion-container-${monthIndex}" class="space-y-2 mb-8"></div></div><div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-8"><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Balanço do Mês</h2><div class="relative mx-auto" style="max-width: 300px; height: 300px;"><canvas id="budgetPieChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Gastos por Pagamento</h2><div class="relative mx-auto" style="max-width: 300px; height: 300px;"><canvas id="paymentMethodChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Metas de Gastos (Pessoal)</h2><div class="relative mx-auto" style="height: 300px;"><canvas id="budgetGoalsChart-${monthIndex}"></canvas></div></div></div></div>`,
                 createBalanceContentHTML: () => `<div id="month-12-content" class="month-content"><h2 class="text-3xl font-bold text-center mb-8">Balanço Anual</h2><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-center"><div class="card border-t-4 border-yellow-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PJ</span><span id="totalAnnualPJ" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-green-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PF</span><span id="totalAnnualPF" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-red-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Gastos Totais</span><span id="totalAnnualExpenses" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-blue-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Saldo Final</span><span id="annualBalance" class="text-2xl font-bold">R$ 0,00</span><p id="annualPerformance" class="text-lg font-semibold mt-1"></p></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card p-6 rounded-2xl lg:col-span-2"><h3 class="text-xl font-semibold text-center mb-4">Desempenho Mensal</h3><div class="relative mx-auto" style="height: 400px;"><canvas id="monthlyPerformanceBarChart"></canvas></div></div><div class="card p-6 rounded-2xl"><h3 class="text-xl font-semibold text-center mb-4">Maiores Gastos do Ano (Top 5)</h3><div id="top-spends-container" class="text-sm space-y-2 max-h-96 overflow-y-auto p-2"></div></div></div></div>`,
                 createEntryElement: (config) => {
@@ -761,9 +837,9 @@
                         }
                         s = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="category">${App.state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
                         aiBtn = `<div class="tooltip-container">
-                                    <button class="suggest-category-btn flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-xl" style="background-color: var(--secondary-bg); color: var(--secondary-text);">✨</button>
-                                    <span class="tooltip-text">Sugerir categoria com IA</span>
-                                 </div>`;
+                                        <button class="suggest-category-btn flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-xl" style="background-color: var(--secondary-bg); color: var(--secondary-text);">✨</button>
+                                        <span class="tooltip-text">Sugerir categoria com IA</span>
+                                     </div>`;
                     } else {
                         r = `<button class="remove-btn" data-type="${type}" data-month-index="${monthIndex}" data-entry-id="${entry.id}">×</button>`;
                     }
