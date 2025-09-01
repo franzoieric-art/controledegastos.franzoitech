@@ -257,66 +257,65 @@ node_modules/
                 });
             });
 
-            // --- NOVA LÓGICA PARA O ASSISTENTE IA ---
-            const aiQuestionInput = document.getElementById('ai-question');
-            const askAiBtn = document.getElementById('ask-ai-btn');
-            const aiResponseContainer = document.getElementById('ai-response-container');
-            const aiBtnText = document.getElementById('ai-btn-text');
-            const aiSpinner = document.getElementById('ai-spinner');
+            // (Dentro da tag <script> no final do seu HTML)
 
-            const handleAIQuery = () => {
-                const question = aiQuestionInput.value.trim();
-                if (!question) {
-                    aiResponseContainer.innerHTML = '<p class="text-red-600 font-medium">Por favor, digite uma pergunta.</p>';
-                    aiResponseContainer.classList.remove('hidden');
-                    return;
-                }
+// --- NOVA LÓGICA PARA O ASSISTENTE IA (VERSÃO CONECTADA) ---
+const aiQuestionInput = document.getElementById('ai-question');
+const askAiBtn = document.getElementById('ask-ai-btn');
+const aiResponseContainer = document.getElementById('ai-response-container');
+const aiBtnText = document.getElementById('ai-btn-text');
+const aiSpinner = document.getElementById('ai-spinner');
 
-                // Exibe estado de carregamento
-                aiBtnText.innerText = 'Pensando...';
-                aiSpinner.classList.remove('hidden');
-                askAiBtn.disabled = true;
-                aiResponseContainer.classList.remove('hidden');
-                aiResponseContainer.innerHTML = '<p class="text-slate-500">Analisando sua pergunta...</p>';
+const handleAIQuery = async () => {
+    const question = aiQuestionInput.value.trim();
+    if (!question) {
+        aiResponseContainer.innerHTML = '<p class="text-red-600 font-medium">Por favor, digite uma pergunta.</p>';
+        aiResponseContainer.classList.remove('hidden');
+        return;
+    }
 
-                // Simula uma resposta da IA após um pequeno delay
-                setTimeout(() => {
-                    let answer = '';
-                    
-                    if (question.toLowerCase().includes('desfazer') && question.toLowerCase().includes('commit')) {
-                        answer = `
-                            <p class="font-semibold mb-2">Ótima pergunta! Para desfazer o último commit, você tem algumas opções:</p>
-                            <ul class="list-disc list-inside space-y-2">
-                                <li><strong>Se você ainda não enviou (push) o commit:</strong> use <code class="bg-slate-200 text-pink-600 px-1 rounded font-mono text-sm">git reset --soft HEAD~1</code>. Ele desfaz o commit mas mantém suas alterações na área de "stage" para você poder editá-las.</li>
-                                <li><strong>Se você já enviou o commit:</strong> o ideal é usar <code class="bg-slate-200 text-pink-600 px-1 rounded font-mono text-sm">git revert HEAD</code>. Isso cria um *novo* commit que desfaz as alterações do anterior, mantendo o histórico seguro para todos.</li>
-                            </ul>`;
-                    } else if (question.toLowerCase().includes('histórico') || question.toLowerCase().includes('log')) {
-                         answer = `
-                            <p class="font-semibold mb-2">Para visualizar o histórico de commits, o comando principal é:</p>
-                             <pre class="bg-slate-200 rounded p-2 my-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono">git log</code></pre>
-                            <p>Ele mostra a lista de commits em ordem cronológica. Você pode usar variações como <code class="bg-slate-200 text-pink-600 px-1 rounded font-mono text-sm">git log --oneline --graph</code> para uma visualização mais compacta e gráfica.</p>
-                            `;
-                    } else {
-                        answer = '<p>Esta é uma demonstração. Numa aplicação real, a IA processaria sua pergunta e responderia aqui. Tente perguntar sobre "desfazer o último commit" ou "como ver o histórico".</p>';
-                    }
-                    
-                    aiResponseContainer.innerHTML = answer;
-                    
-                    // Reseta o estado do botão
-                    aiBtnText.innerText = 'Perguntar à IA';
-                    aiSpinner.classList.add('hidden');
-                    askAiBtn.disabled = false;
-                    aiQuestionInput.value = '';
-                }, 1500); // Delay de 1.5 segundos
-            };
+    // Exibe estado de carregamento
+    aiBtnText.innerText = 'Pensando...';
+    aiSpinner.classList.remove('hidden');
+    askAiBtn.disabled = true;
+    aiResponseContainer.classList.remove('hidden');
+    aiResponseContainer.innerHTML = '<p class="text-slate-500">Conectando com a IA...</p>';
 
-            askAiBtn.addEventListener('click', handleAIQuery);
-            aiQuestionInput.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    handleAIQuery();
-                }
-            });
+    try {
+        // Envia a pergunta para o nosso back-end
+        const response = await fetch('http://localhost:3000/ask-ai', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: question }),
         });
+
+        if (!response.ok) {
+            throw new Error('Houve um problema ao contatar a IA.');
+        }
+
+        const data = await response.json();
+        // O back-end nos devolve a resposta da IA para exibirmos
+        aiResponseContainer.innerHTML = data.answer;
+
+    } catch (error) {
+        aiResponseContainer.innerHTML = `<p class="text-red-600 font-medium">Erro: ${error.message}</p>`;
+    } finally {
+        // Reseta o estado do botão
+        aiBtnText.innerText = 'Perguntar à IA';
+        aiSpinner.classList.add('hidden');
+        askAiBtn.disabled = false;
+        aiQuestionInput.value = '';
+    }
+};
+
+askAiBtn.addEventListener('click', handleAIQuery);
+aiQuestionInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        handleAIQuery();
+    }
+});
     </script>
 </body>
 </html>
