@@ -53,7 +53,7 @@
         /* CSS para o Tooltip Customizado */
         .tooltip-container {
             position: relative;
-            display: inline-flex; /* Alterado para alinhar com o botão */
+            display: inline-flex; 
             align-items: center;
         }
 
@@ -67,16 +67,15 @@
             padding: 8px;
             position: absolute;
             z-index: 10;
-            bottom: 125%; /* Posiciona acima do botão */
+            bottom: 125%; 
             left: 50%;
-            margin-left: -80px; /* Metade da largura para centralizar */
+            margin-left: -80px; 
             opacity: 0;
             transition: opacity 0.2s;
             font-size: 0.8rem;
-            pointer-events: none; /* Evita que o tooltip atrapalhe o clique */
+            pointer-events: none;
         }
 
-        /* Mostra o tooltip no hover (desktop) ou no clique/toque (mobile) */
         .tooltip-container:hover .tooltip-text,
         .tooltip-container:active .tooltip-text,
         .tooltip-container:focus .tooltip-text {
@@ -90,7 +89,7 @@
     <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
 
     <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-2xl">
-        <div class="text-center mb-6"><div class="flex justify-center mb-4"><iframe src="https://www.franzoitech.com/images/logo.png" width="100" height="100" allow="autoplay" style="border:0;"></iframe></div><h1 id="auth-title" class="text-2xl font-bold">Acesso ao Painel</h1><p class="muted-text">Faça login ou crie sua conta.</p></div>
+        <div class="text-center mb-6"><div class="flex justify-center mb-4"><img src="images/logo.png" alt="Logo Franzoi Tech" width="100" height="100"></div><h1 id="auth-title" class="text-2xl font-bold">Acesso ao Painel</h1><p class="muted-text">Faça login ou crie sua conta.</p></div>
         <div class="space-y-4"><input type="email" id="email-input" placeholder="Email" class="w-full p-3 input-field"><input type="password" id="password-input" placeholder="Senha" class="w-full p-3 input-field"><input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 input-field hidden"></div>
         <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
         <div class="mt-4 flex flex-col gap-2"><button id="main-auth-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors disabled:opacity-50" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Entrar</button><a href="#" id="forgot-password-link" class="text-center text-sm hover:underline" style="color: var(--primary-color);">Esqueceu a senha?</a></div>
@@ -100,76 +99,76 @@
     <div id="app-screen" class="hidden">
         
         <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
-        <div class="flex justify-between items-center mb-6 flex-shrink-0">
-            <h2 class="text-2xl font-bold">Minha Conta</h2>
-            <button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
-        </div>
-        <div class="overflow-y-auto space-y-6">
-            <div>
-                <h3 class="text-lg font-semibold mb-3">Informações do Perfil</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label>
-                        <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field">
-                    </div>
-                    <div>
-                        <label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label>
-                        <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;">
-                    </div>
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                    <h2 class="text-2xl font-bold">Minha Conta</h2>
+                    <button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
                 </div>
-                <button id="save-profile-btn" class="mt-4 w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações do Perfil</button>
-            </div>
-
-            <div class="border-t pt-6" style="border-color: var(--border-color);">
-                <h3 class="text-xl font-bold mb-1">Conectar Assistente IA via WhatsApp</h3>
-                <p class="muted-text text-sm mb-4">Configure a integração para lançar despesas e interagir com seu painel diretamente do WhatsApp.</p>
-                
-                <div class="p-3 mb-4 rounded-xl text-center text-sm" style="background-color: var(--secondary-bg);">
-                    ✨ <span class="font-semibold">Funcionalidade em desenvolvimento.</span> Disponível em breve!
-                </div>
-                <div class="space-y-4 opacity-60">
-                    <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
-                        <h4 class="font-semibold">Passo 1: Suas Credenciais da Meta</h4>
-                        <p class="text-xs muted-text -mt-3">Insira as credenciais da sua API encontradas no <a href="#" class="underline" style="color: var(--primary-color);">Painel de Desenvolvedores</a>.</p>
-                        <div>
-                            <label for="whatsapp-phone-id" class="block text-sm font-medium muted-text mb-1">ID do Número de Telefone</label>
-                            <input type="text" id="whatsapp-phone-id" placeholder="Ex: 102030405060708" class="w-full p-3 input-field" disabled>
-                        </div>
-                        <div>
-                            <label for="whatsapp-token" class="block text-sm font-medium muted-text mb-1">Token de Acesso da API</label>
-                            <input type="password" id="whatsapp-token" placeholder="Cole seu token permanente aqui" class="w-full p-3 input-field" disabled>
-                        </div>
-                    </div>
-
-                    <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
-                        <h4 class="font-semibold">Passo 2: Configurar Webhook na Meta</h4>
-                        <p class="text-xs muted-text -mt-3">Copie os valores abaixo e cole-os na seção "Webhook" da sua aplicação na Meta.</p>
-                         <div>
-                            <label class="block text-sm font-medium muted-text mb-1">URL do Webhook (para colar na Meta)</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="whatsapp-webhook-url" class="w-full p-3 input-field" readonly disabled>
-                                <button id="copy-webhook-url-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Copiar</button>
+                <div class="overflow-y-auto space-y-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Informações do Perfil</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label>
+                                <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field">
+                            </div>
+                            <div>
+                                <label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label>
+                                <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;">
                             </div>
                         </div>
-                         <div>
-                            <label class="block text-sm font-medium muted-text mb-1">Token de Verificação do Webhook (para colar na Meta)</label>
-                            <div class="flex gap-2">
-                                <input type="text" id="whatsapp-verify-token" class="w-full p-3 input-field" readonly disabled>
-                                 <button id="generate-verify-token-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Gerar</button>
+                        <button id="save-profile-btn" class="mt-4 w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações do Perfil</button>
+                    </div>
+
+                    <div class="border-t pt-6" style="border-color: var(--border-color);">
+                        <h3 class="text-xl font-bold mb-1">Conectar Assistente IA via WhatsApp</h3>
+                        <p class="muted-text text-sm mb-4">Configure a integração para lançar despesas e interagir com seu painel diretamente do WhatsApp.</p>
+                        
+                        <div class="p-3 mb-4 rounded-xl text-center text-sm" style="background-color: var(--secondary-bg);">
+                            ✨ <span class="font-semibold">Funcionalidade em desenvolvimento.</span> Disponível em breve!
+                        </div>
+                        <div class="space-y-4 opacity-60">
+                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
+                                <h4 class="font-semibold">Passo 1: Suas Credenciais da Meta</h4>
+                                <p class="text-xs muted-text -mt-3">Insira as credenciais da sua API encontradas no <a href="#" class="underline" style="color: var(--primary-color);">Painel de Desenvolvedores</a>.</p>
+                                <div>
+                                    <label for="whatsapp-phone-id" class="block text-sm font-medium muted-text mb-1">ID do Número de Telefone</label>
+                                    <input type="text" id="whatsapp-phone-id" placeholder="Ex: 102030405060708" class="w-full p-3 input-field" disabled>
+                                </div>
+                                <div>
+                                    <label for="whatsapp-token" class="block text-sm font-medium muted-text mb-1">Token de Acesso da API</label>
+                                    <input type="password" id="whatsapp-token" placeholder="Cole seu token permanente aqui" class="w-full p-3 input-field" disabled>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
+                                <h4 class="font-semibold">Passo 2: Configurar Webhook na Meta</h4>
+                                <p class="text-xs muted-text -mt-3">Copie os valores abaixo e cole-os na seção "Webhook" da sua aplicação na Meta.</p>
+                                 <div>
+                                    <label class="block text-sm font-medium muted-text mb-1">URL do Webhook (para colar na Meta)</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="whatsapp-webhook-url" class="w-full p-3 input-field" readonly disabled>
+                                        <button id="copy-webhook-url-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Copiar</button>
+                                    </div>
+                                </div>
+                                 <div>
+                                    <label class="block text-sm font-medium muted-text mb-1">Token de Verificação do Webhook (para colar na Meta)</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="whatsapp-verify-token" class="w-full p-3 input-field" readonly disabled>
+                                         <button id="generate-verify-token-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Gerar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="text-sm muted-text">Status: <span id="whatsapp-status" class="font-semibold" style="color: var(--primary-color);">Indisponível</span></div>
+                                <button id="save-integration-btn" class="px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);" disabled>Salvar Configuração</button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="mt-4 flex items-center justify-between">
-                        <div class="text-sm muted-text">Status: <span id="whatsapp-status" class="font-semibold" style="color: var(--primary-color);">Indisponível</span></div>
-                        <button id="save-integration-btn" class="px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);" disabled>Salvar Configuração</button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
         
         <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
@@ -222,9 +221,7 @@
             <div class="mt-12 pt-8 border-t text-center" style="border-color: var(--border-color);">
                 <p class="text-sm muted-text">Ajude a manter este projeto</p>
                 <p class="text-xs muted-text mb-2">Doe qualquer valor via Pix</p>
-                <div class="mt-2 flex justify-center"><iframe src="http://franzoitech.com/images/pix%20qrcode.jpeg
-                    
-                    /preview" width="150" height="150" allow="autoplay" style="border:0;"></iframe></div>
+                <div class="mt-2 flex justify-center"><img src="images/pix qrcode.jpeg" alt="QR Code PIX para doação" width="150" height="150"></div>
                 <div class="mt-2"><p class="text-xs muted-text">Ou use a chave (email):</p><div class="mt-1 flex justify-center items-center gap-2"><p id="pix-key" class="font-mono text-sm" style="color: var(--primary-color);">franzoitechcorp@gmail.com</p><button id="copy-pix-btn" class="px-3 py-1 text-xs font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Copiar</button></div></div>
             </div>
         </div>
@@ -302,28 +299,21 @@
                 debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
                 showSaveFeedback() { App.ui.saveFeedback.classList.add('show'); setTimeout(() => { App.ui.saveFeedback.classList.remove('show'); }, 2000); },
                 cleanAIResponse(text) {
-            if (typeof text !== 'string') return '';
-
-            // 1. Remove os blocos de código markdown (como antes)
-            let cleanedText = text.replace(/```html|```/g, '');
-
-            // 2. Encontra o início do conteúdo HTML relevante (a primeira tag "<")
-            const firstTagIndex = cleanedText.indexOf('<');
-            if (firstTagIndex > -1) {
-                cleanedText = cleanedText.substring(firstTagIndex);
-            }
-
-            // 3. Encontra o início de palavras-chave de "ruído" e remove tudo a partir dali.
-            const noiseKeywords = ["Observações:", "Como usar:", "Cálculo dos Totais:", "Formatação HTML:", "Personalização das Sugestões:"];
-            for (const keyword of noiseKeywords) {
-                const noiseIndex = cleanedText.indexOf(keyword);
-                if (noiseIndex > 50) {
-                    cleanedText = cleanedText.substring(0, noiseIndex);
-                }
-            }
-
-            return cleanedText.trim();
-        },
+                    if (typeof text !== 'string') return '';
+                    let cleanedText = text.replace(/```html|```/g, '');
+                    const firstTagIndex = cleanedText.indexOf('<');
+                    if (firstTagIndex > -1) {
+                        cleanedText = cleanedText.substring(firstTagIndex);
+                    }
+                    const noiseKeywords = ["Observações:", "Como usar:", "Cálculo dos Totais:", "Formatação HTML:", "Personalização das Sugestões:"];
+                    for (const keyword of noiseKeywords) {
+                        const noiseIndex = cleanedText.indexOf(keyword);
+                        if (noiseIndex > 50) {
+                            cleanedText = cleanedText.substring(0, noiseIndex);
+                        }
+                    }
+                    return cleanedText.trim();
+                },
                 generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
             },
             
@@ -367,34 +357,29 @@
             },
             
             showMonth(monthIndex) {
-            // ---- INÍCIO DA CORREÇÃO ----
-            // A lógica de salvamento forçado, sem o "return" que causava o bug.
-            // Esta parte agora só executa se o mês for diferente do atual, evitando re-salvamentos desnecessários.
-            if (this.state.activeMonthIndex !== monthIndex && this.state.saveTimeout) {
-                clearTimeout(this.state.saveTimeout); 
-                this.saveDataToFirestore();                   
-                this.state.saveTimeout = null;           
-            }
-            // ---- FIM DA CORREÇÃO ----
-
-            this.state.activeMonthIndex = monthIndex;
-            Object.values(this.state.chartInstances).forEach(c => c?.destroy());
-            document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
-            if (monthIndex < 12) { this.applyRecurringEntries(monthIndex); }
-            this.render.renderTabs();
-            const contentEl = document.getElementById(`month-${monthIndex}-content`);
-            if (contentEl) {
-                contentEl.classList.add('active');
-                if (monthIndex < 12) {
-                    this.render.renderPJEntries(monthIndex);
-                    this.render.renderPFEntries(monthIndex);
-                    this.render.renderExpenseTable(monthIndex);
-                    this.recalculateAndDisplayTotals(monthIndex);
-                } else {
-                    this.render.renderBalanceSummary();
+                if (this.state.activeMonthIndex !== monthIndex && this.state.saveTimeout) {
+                    clearTimeout(this.state.saveTimeout); 
+                    this.saveDataToFirestore();                   
+                    this.state.saveTimeout = null;           
                 }
-            }
-        },
+                this.state.activeMonthIndex = monthIndex;
+                Object.values(this.state.chartInstances).forEach(c => c?.destroy());
+                document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+                if (monthIndex < 12) { this.applyRecurringEntries(monthIndex); }
+                this.render.renderTabs();
+                const contentEl = document.getElementById(`month-${monthIndex}-content`);
+                if (contentEl) {
+                    contentEl.classList.add('active');
+                    if (monthIndex < 12) {
+                        this.render.renderPJEntries(monthIndex);
+                        this.render.renderPFEntries(monthIndex);
+                        this.render.renderExpenseTable(monthIndex);
+                        this.recalculateAndDisplayTotals(monthIndex);
+                    } else {
+                        this.render.renderBalanceSummary();
+                    }
+                }
+            },
             
             recalculateAndDisplayTotals(m) {
                 const d = this.state.monthlyData[m];
@@ -426,57 +411,46 @@
             },
 
             applyRecurringEntries(monthIndex) {
-            if (!this.state.monthlyData[monthIndex]) return;
-            let wasModified = false;
-            const appliedRecurringIds = new Set();
-            const month = this.state.monthlyData[monthIndex];
-
-            // Constrói uma lista de IDs de recorrências que já foram aplicadas neste mês
-            month.pfEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
-            month.pjEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
-            month.expenses.forEach(day => {
-                day.personalEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
-                day.businessEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
-            });
-
-            // Itera sobre todas as regras de recorrência salvas
-            this.state.recurringEntries.forEach(r => {
-                // Aplica a regra apenas se ela ainda não foi aplicada neste mês
-                if (r.id && !appliedRecurringIds.has(r.id)) {
-                    const dayIndex = r.dayOfMonth - 1;
-                    if (dayIndex < 0 || dayIndex > 30) return; // Dia inválido
-
-                    // **CORREÇÃO DO UNDEFINED ESTÁ AQUI**
-                    const newEntry = {
-                        id: Date.now() + Math.random(),
-                        description: r.description || 'Lançamento recorrente', // Garante que não haja descrição 'undefined'
-                        amount: r.amount,
-                        isRecurring: true,
-                        recurringId: r.id
-                    };
-
-                    // ---- LÓGICA CORRETA DE DISTRIBUIÇÃO ----
-                    if (r.type === "Ganho PF") {
-                        month.pfEntries.push(newEntry);
-                        wasModified = true;
-                    } else if (r.type === "Ganho PJ") {
-                        month.pjEntries.push(newEntry);
-                        wasModified = true;
-                    } else if (r.type === "Gasto Pessoal") {
-                        Object.assign(newEntry, { category: r.category, paymentMethod: r.paymentMethod, card: r.card });
-                        month.expenses[dayIndex].personalEntries.push(newEntry);
-                        wasModified = true;
-                    } else if (r.type === "Gasto Empresa") {
-                        Object.assign(newEntry, { category: 'N/A', paymentMethod: r.paymentMethod, card: r.card });
-                        month.expenses[dayIndex].businessEntries.push(newEntry);
-                        wasModified = true;
+                if (!this.state.monthlyData[monthIndex]) return;
+                let wasModified = false;
+                const appliedRecurringIds = new Set();
+                const month = this.state.monthlyData[monthIndex];
+                month.pfEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
+                month.pjEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
+                month.expenses.forEach(day => {
+                    day.personalEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
+                    day.businessEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
+                });
+                this.state.recurringEntries.forEach(r => {
+                    if (r.id && !appliedRecurringIds.has(r.id)) {
+                        const dayIndex = r.dayOfMonth - 1;
+                        if (dayIndex < 0 || dayIndex > 30) return;
+                        const newEntry = {
+                            id: Date.now() + Math.random(),
+                            description: r.description || 'Lançamento recorrente',
+                            amount: r.amount,
+                            isRecurring: true,
+                            recurringId: r.id
+                        };
+                        if (r.type === "Ganho PF") {
+                            month.pfEntries.push(newEntry);
+                            wasModified = true;
+                        } else if (r.type === "Ganho PJ") {
+                            month.pjEntries.push(newEntry);
+                            wasModified = true;
+                        } else if (r.type === "Gasto Pessoal") {
+                            Object.assign(newEntry, { category: r.category, paymentMethod: r.paymentMethod, card: r.card });
+                            month.expenses[dayIndex].personalEntries.push(newEntry);
+                            wasModified = true;
+                        } else if (r.type === "Gasto Empresa") {
+                            Object.assign(newEntry, { category: 'N/A', paymentMethod: r.paymentMethod, card: r.card });
+                            month.expenses[dayIndex].businessEntries.push(newEntry);
+                            wasModified = true;
+                        }
                     }
-                }
-            });
-
-            // Salva no banco de dados se alguma nova recorrência foi aplicada
-            if (wasModified) { this.saveDataToFirestore(); }
-        },
+                });
+                if (wasModified) { this.saveDataToFirestore(); }
+            },
             
             exportMonthToCSV(monthIndex) {
                 const monthData = this.state.monthlyData[monthIndex];
@@ -576,26 +550,21 @@
                 document.getElementById('close-modal-btn').addEventListener('click', () => { this.ui.settingsModal.classList.add('hidden'); this.showMonth(this.state.activeMonthIndex); });
                 document.getElementById('manage-account-btn').addEventListener('click', () => { this.render.renderAccountModal(); });
                 document.getElementById('close-account-modal-btn').addEventListener('click', () => { this.ui.accountModal.classList.add('hidden'); });
-
-                // Lógica de salvar o perfil (AGORA CORRETA)
                 document.getElementById('save-profile-btn').addEventListener('click', () => {
                     App.state.profile.name = App.ui.userNameInput.value;
                     App.saveDataToFirestore();
-                    App.ui.accountModal.classList.add('hidden'); // Fecha a modal após salvar
+                    App.ui.accountModal.classList.add('hidden');
                     App.helpers.showSaveFeedback();
                 });
-
-                // Lógica de salvar a integração (reorganizada para evitar bugs)
                 document.getElementById('save-integration-btn').addEventListener('click', () => {
                     const wa = App.state.integrations.whatsapp;
                     wa.phoneNumberId = App.ui.whatsappPhoneId.value;
                     wa.accessToken = App.ui.whatsappToken.value;
                     wa.webhookVerifyToken = App.ui.whatsappVerifyToken.value;
                     App.saveDataToFirestore();
-                    App.ui.accountModal.classList.add('hidden'); // Fecha a modal após salvar
+                    App.ui.accountModal.classList.add('hidden');
                     App.helpers.showSaveFeedback();
                 });
-
                 document.getElementById('generate-verify-token-btn').addEventListener('click', () => {
                     const newToken = this.helpers.generateRandomToken();
                     App.ui.whatsappVerifyToken.value = newToken;
@@ -605,12 +574,10 @@
                     e.target.textContent = 'Copiado!';
                     setTimeout(() => { e.target.textContent = 'Copiar'; }, 2000);
                 });
-
                 document.getElementById('close-ai-modal-btn').addEventListener('click', () => { this.ui.aiAnalysisModal.classList.add('hidden'); });
                 document.getElementById('add-card-btn').addEventListener('click', () => { const n = this.ui.newCardNameInput.value.trim(); if (n && !this.state.creditCards.includes(n)) { this.state.creditCards.push(n); this.ui.newCardNameInput.value = ''; this.render.renderCardList(); this.saveDataToFirestore(); } });
                 document.getElementById('add-category-btn').addEventListener('click', () => {
                     const newName = this.ui.newCategoryNameInput.value.trim();
-                    // Normaliza o nome para minúsculas para evitar duplicatas
                     const normalizedNewName = newName.toLowerCase(); 
                     if (newName && !this.state.categories.some(c => c.name.toLowerCase() === normalizedNewName)) {
                         this.state.categories.push({ name: newName, budget: 0 });
@@ -638,9 +605,8 @@
                     
                     if (t.closest('.suggest-category-btn')) {
                         const btn = t.closest('.suggest-category-btn');
-                        // Usamos a nova classe para achar o container pai correto
                         const el = btn.closest('.expense-entry-row');
-                        if (el) { // Adicionamos uma verificação para segurança
+                        if (el) {
                             const entryId = el.querySelector('.remove-btn').dataset.entryId;
                             const descriptionInput = el.querySelector('[data-field="description"]');
                             if (descriptionInput && descriptionInput.value) {
@@ -677,10 +643,8 @@
                     if (t.matches('.category-name-input')) {
                         const oldName = t.dataset.oldName;
                         const newName = t.value.trim();
-                        // Normaliza o nome para a verificação
                         const normalizedNewName = newName.toLowerCase();
                         const normalizedOldName = oldName.toLowerCase();
-
                         const categoryExists = this.state.categories.some(c => c.name.toLowerCase() === normalizedNewName);
                         if (newName && normalizedOldName !== normalizedNewName && !categoryExists) {
                             for (let i = 0; i < 12; i++) {
@@ -708,34 +672,26 @@
             ai: {
                 async getFinancialAnalysis(monthIndex) {
                     console.log(`Iniciando análise de IA para o mês ${monthIndex}...`);
-                    
                     App.ui.aiAnalysisModal.classList.remove('hidden');
                     App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados...</p>';
-
                     try {
                         const monthData = App.state.monthlyData[monthIndex];
                         if (!monthData) throw new Error("Dados do mês não encontrados.");
-
                         const prompt = `
-    Você é um assistente que gera relatórios financeiros em HTML.
-    Sua única função é retornar o código HTML do relatório.
-    NÃO inclua explicações, observações, introduções ou qualquer texto fora do código HTML.
-    NÃO use blocos de código como \`\`\`html.
-    Sua resposta deve começar DIRETAMENTE com a primeira tag HTML (ex: <h3>) e terminar com a última.
-
-    Analise os seguintes dados financeiros: ${JSON.stringify(monthData)}.
-
-    Gere o relatório contendo:
-    1. Um resumo dos ganhos e gastos.
-    2. A maior categoria de despesa pessoal.
-    3. Três sugestões práticas e personalizadas para melhorar a saúde financeira.
-`;
-
+                            Você é um assistente que gera relatórios financeiros em HTML.
+                            Sua única função é retornar o código HTML do relatório.
+                            NÃO inclua explicações, observações, introduções ou qualquer texto fora do código HTML.
+                            NÃO use blocos de código como \`\`\`html.
+                            Sua resposta deve começar DIRETAMENTE com a primeira tag HTML (ex: <h3>) e terminar com a última.
+                            Analise os seguintes dados financeiros: ${JSON.stringify(monthData)}.
+                            Gere o relatório contendo:
+                            1. Um resumo dos ganhos e gastos.
+                            2. A maior categoria de despesa pessoal.
+                            3. Três sugestões práticas e personalizadas para melhorar a saúde financeira.
+                        `;
                         const analysisResult = await this.callVercelFunction(prompt);
-
                         const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
                         App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
-
                     } catch (error) {
                         console.error("Erro ao obter análise da IA:", error);
                         App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados. Verifique o console para mais detalhes.</p>';
@@ -745,47 +701,30 @@
                 async getCategorySuggestion(description, entryId, button) {
                     console.log(`Buscando sugestão de categoria para: ${description}`);
                     const originalContent = button.innerHTML;
-                    button.innerHTML = '...'; // Animação de "carregando"
+                    button.innerHTML = '...';
                     button.disabled = true;
-
                     try {
-                        // Pega a lista de categorias que o usuário já criou
                         const availableCategories = App.state.categories.map(c => c.name).join(', ');
-
-                        // Cria um prompt específico para a IA focar apenas em categorizar
                         const prompt = `
                             Analise a despesa: "${description}".
                             Qual das seguintes categorias melhor se encaixa? Categorias disponíveis: [${availableCategories}].
                             Responda APENAS com o nome exato de uma das categorias da lista. Sem frases, apenas a categoria.
                         `;
-
-                        // Chama a mesma função que já funciona para a análise do mês
                         let suggestedCategory = await this.callVercelFunction(prompt);
-                        
-                        // Limpa a resposta da IA para garantir que temos apenas o nome da categoria
                         suggestedCategory = suggestedCategory.trim().replace(/["'.]/g, '');
-
                         const entryElement = button.closest('.expense-entry-row');
                         const selectElement = entryElement.querySelector('[data-field="category"]');
-
-                        // Verifica se a categoria sugerida pela IA existe na lista do usuário
                         const categoryExists = App.state.categories.find(c => c.name.toLowerCase() === suggestedCategory.toLowerCase());
-
                         if (selectElement && categoryExists) {
-                            // Atualiza o valor da caixa de seleção
                             selectElement.value = categoryExists.name;
-
-                            // Dispara o evento 'input' para que o sistema salve a alteração automaticamente
                             const event = new Event('input', { bubbles: true });
                             selectElement.dispatchEvent(event);
                         } else {
                             console.warn(`Categoria sugerida "${suggestedCategory}" não é válida ou não foi encontrada.`);
                         }
-
                     } catch (error) {
                         console.error("Erro ao obter sugestão de categoria:", error);
                     } finally {
-                        // Restaura o botão ao seu estado original
                         button.innerHTML = originalContent;
                         button.disabled = false;
                     }
@@ -793,19 +732,14 @@
 
                 async callVercelFunction(prompt) {
                     const VERCEL_API_URL = "https://controledegastos1-0.vercel.app/api/analyze";
-
                     const response = await fetch(VERCEL_API_URL, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ prompt: prompt })
                     });
-
                     if (!response.ok) {
                         throw new Error(`Erro na API da Vercel: ${response.statusText}`);
                     }
-
                     const data = await response.json();
                     return data.analysis; 
                 }
@@ -818,30 +752,22 @@
                     const { monthIndex, dayIndex, category, entry, type } = config;
                     const d = document.createElement('div');
                     d.classList.add('flex', 'items-center', 'gap-2', 'w-full', 'flex-wrap', 'expense-entry-row');
-
                     let r = '', p = '', c = '', s = '', aiBtn = '';
-
                     if (type === 'expense') {
                         r = `<button class="remove-btn" data-type="expense" data-month-index="${monthIndex}" data-day="${dayIndex}" data-category="${category}" data-entry-id="${entry.id}">×</button>`;
                         p = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="paymentMethod">${App.constants.basePaymentMethods.map(m => `<option value="${m}" ${entry.paymentMethod === m ? 'selected' : ''}>${m}</option>`).join('')}</select>`;
-                        
                         if (entry.paymentMethod === 'Crédito') {
                             c = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="card">${App.state.creditCards.map(c => `<option value="${c}" ${entry.card === c ? 'selected' : ''}>${c}</option>`).join('')}</select>`;
                         }
-
                         s = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="category">${App.state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
-                        
                         aiBtn = `<div class="tooltip-container">
                                     <button class="suggest-category-btn flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-xl" style="background-color: var(--secondary-bg); color: var(--secondary-text);">✨</button>
                                     <span class="tooltip-text">Sugerir categoria com IA</span>
                                  </div>`;
-                        
                     } else {
                         r = `<button class="remove-btn" data-type="${type}" data-month-index="${monthIndex}" data-entry-id="${entry.id}">×</button>`;
                     }
-                    
                     d.innerHTML = `<input type="text" value="${entry.description}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description"><input type="number" value="${entry.amount}" min="0" step="0.01" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">${s}${aiBtn}${p}<span class="card-selector-container">${c}</span>${r}`;
-                    
                     return d;
                 },
                 renderPJEntries: (m) => { const c = document.getElementById(`pj-entries-container-${m}`); if (!c) return; c.innerHTML = ''; App.state.monthlyData[m].pjEntries.forEach(e => c.appendChild(App.render.createEntryElement({ monthIndex: m, entry: e, type: 'pj' }))); },
@@ -861,13 +787,11 @@
                     if (user) {
                         App.ui.userNameInput.value = App.state.profile.name || '';
                         App.ui.userEmailDisplay.value = user.email || '';
-                        
                         const wa = App.state.integrations.whatsapp;
                         App.ui.whatsappPhoneId.value = wa.phoneNumberId || '';
                         App.ui.whatsappToken.value = wa.accessToken || '';
                         App.ui.whatsappWebhookUrl.value = `${window.location.origin}/api/whatsapp-webhook`;
                         App.ui.whatsappVerifyToken.value = wa.webhookVerifyToken || '';
-                        
                         if (wa.phoneNumberId && wa.accessToken) {
                             App.ui.whatsappStatus.textContent = 'Configurado';
                             App.ui.whatsappStatus.style.color = 'var(--green-color)';
@@ -875,7 +799,6 @@
                             App.ui.whatsappStatus.textContent = 'Não configurado';
                             App.ui.whatsappStatus.style.color = 'var(--muted-text)';
                         }
-
                         App.ui.accountModal.classList.remove('hidden');
                         setTimeout(() => App.ui.accountModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
                     }
