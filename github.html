@@ -256,62 +256,6 @@ node_modules/
                     }
                 });
             });
-
-            // --- LÓGICA DO ASSISTENTE IA PARA O GITHUB.HTML ---
-            const aiQuestionInput = document.getElementById('ai-question');
-            const askAiBtn = document.getElementById('ask-ai-btn');
-            const aiResponseContainer = document.getElementById('ai-response-container');
-            const aiBtnText = document.getElementById('ai-btn-text');
-            const aiSpinner = document.getElementById('ai-spinner');
-
-            const handleAIQuery = async () => {
-                const question = aiQuestionInput.value.trim();
-                if (!question) {
-                    aiResponseContainer.innerHTML = '<p class="text-red-600 font-medium">Por favor, digite uma pergunta.</p>';
-                    aiResponseContainer.classList.remove('hidden');
-                    return;
-                }
-
-                aiBtnText.innerText = 'Pensando...';
-                aiSpinner.classList.remove('hidden');
-                askAiBtn.disabled = true;
-                aiResponseContainer.classList.remove('hidden');
-                aiResponseContainer.innerHTML = '<p class="text-slate-500">Conectando com a IA...</p>';
-
-                try {
-                    // AQUI ESTÁ A MUDANÇA: Chamamos a nossa nova API diretamente
-                    const response = await fetch('/api/ask-ai', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ prompt: question }),
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Houve um problema ao contatar a IA.');
-                    }
-
-                    const data = await response.json();
-                    aiResponseContainer.innerHTML = data.answer;
-
-                } catch (error) {
-                    aiResponseContainer.innerHTML = `<p class="text-red-600 font-medium">Erro: ${error.message}</p>`;
-                } finally {
-                    aiBtnText.innerText = 'Perguntar à IA';
-                    aiSpinner.classList.add('hidden');
-                    askAiBtn.disabled = false;
-                    aiQuestionInput.value = '';
-                }
-            };
-
-            askAiBtn.addEventListener('click', handleAIQuery);
-            aiQuestionInput.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    handleAIQuery();
-                }
-            });
         });
     </script>
 </body>
