@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Interativo de Comandos Git</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .command-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .command-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-10">
+        <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-indigo-600">Git Cheatsheet</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#essenciais" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Essenciais</a>
+                        <a href="#fluxo" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Fluxo de Trabalho</a>
+                        <a href="#dicas" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dicas e Soluções</a>
+                        <a href="#ia-assistant" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Assistente IA</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">Guia Completo de Comandos Git</h1>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500">Uma referência interativa para os comandos mais úteis do Git no seu dia a dia.</p>
+        </div>
+
+        <section id="essenciais" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-indigo-500 pb-2 mb-8">1. Comandos Essenciais para Iniciar um Projeto</h2>
+             <p class="text-lg text-slate-600 mb-8">Esta seção cobre os primeiros passos indispensáveis para transformar uma pasta local em um repositório Git e enviar seu projeto para o GitHub. São os comandos fundamentais que formam a base para todo o controle de versão.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git init</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Inicia um novo repositório Git na sua pasta local.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
+                </div>
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git add .</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Adiciona todos os arquivos modificados para a área de "stage", preparando-os para o próximo commit.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
+                </div>
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                       <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git commit -m "Sua mensagem"</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Salva as mudanças que estão na área de "stage" no seu histórico local do Git.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
+                </div>
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git remote add origin &lt;URL&gt;</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Conecta o seu repositório local a um repositório remoto no GitHub.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
+                </div>
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git push -u origin main</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Envia as suas alterações locais para o GitHub pela primeira vez.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="fluxo" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-teal-500 pb-2 mb-8">2. Comandos para Fluxo de Trabalho e Branches</h2>
+             <p class="text-lg text-slate-600 mb-8">Depois que seu projeto está configurado, estes comandos se tornam parte da sua rotina. Eles permitem que você gerencie diferentes linhas de desenvolvimento (branches), sincronize com o repositório remoto e lide com alterações de forma segura e organizada.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git branch -a</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Lista todas as branches do seu projeto, tanto as locais quanto as remotas.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
+                </div>
+                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git fetch</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Baixa as informações mais recentes do repositório remoto sem alterar seus arquivos locais.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
+                </div>
+                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git checkout &lt;nome-da-branch&gt;</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Troca para uma branch existente no seu projeto.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
+                </div>
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                       <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git checkout -b &lt;nova-branch&gt;</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Cria uma nova branch e já troca para ela em um único comando.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
+                </div>
+                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git stash</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Guarda temporariamente as alterações não salvas, permitindo que você troque de branch sem perder o trabalho.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
+                </div>
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git stash pop</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Aplica de volta as mudanças que foram guardadas com git stash.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="dicas" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-amber-500 pb-2 mb-8">3. Dicas e Soluções de Problemas</h2>
+            <p class="text-lg text-slate-600 mb-8">Todo desenvolvedor encontra pequenos desafios ao usar o Git. Esta seção oferece soluções para problemas comuns e dicas para otimizar seu ambiente de trabalho, como ignorar arquivos desnecessários e gerenciar múltiplos projetos de forma eficiente no VS Code.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div class="command-card bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4">Como lidar com arquivos temporários como o .DS_Store</h3>
+                    <p class="text-slate-600 mb-4">Para evitar que o Git rastreie arquivos de sistema ou pastas de dependências (como `node_modules`), use um arquivo `.gitignore`.</p>
+                    <ol class="list-decimal list-inside text-slate-600 space-y-2">
+                        <li>Crie um arquivo chamado <strong>.gitignore</strong> na pasta principal do seu projeto.</li>
+                        <li>Dentro dele, adicione o nome do arquivo ou pasta que você quer ignorar. Por exemplo:</li>
+                    </ol>
+                    <pre class="bg-slate-100 rounded p-3 my-4 overflow-x-auto"><code class="text-sm font-mono">.DS_Store
+node_modules/
+.env</code></pre>
+                    <p class="text-slate-600">Salve o arquivo. O Git não vai mais se preocupar com eles. Lembre-se de fazer um commit do arquivo `.gitignore`!</p>
+                </div>
+
+                <div class="command-card bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4">Como trabalhar com vários projetos na mesma janela</h3>
+                    <p class="text-slate-600 mb-4">Para gerenciar múltiplos projetos relacionados sem ter que abrir várias janelas do VS Code, utilize o recurso de <strong>Workspace</strong>.</p>
+                     <ol class="list-decimal list-inside text-slate-600 space-y-2">
+                        <li>Com um projeto já aberto, vá em <strong>File > Add Folder to Workspace...</strong></li>
+                        <li>Selecione a outra pasta de projeto que deseja adicionar.</li>
+                        <li>Repita para quantos projetos precisar.</li>
+                        <li>Vá em <strong>File > Save Workspace As...</strong> para salvar a configuração.</li>
+                    </ol>
+                    <p class="text-slate-600 mt-4">Agora, basta abrir o arquivo `.code-workspace` para carregar todos os seus projetos de uma vez, cada um com seu próprio controle Git independente.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="ia-assistant" class="mt-16 scroll-mt-20">
+            <div class="bg-white rounded-lg shadow-lg p-8 border-t-4 border-indigo-500">
+                <div class="flex items-start sm:items-center mb-4">
+                    <div class="flex-shrink-0">
+                         <svg class="h-10 w-10 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V7.5a2.25 2.25 0 00-2.25-2.25H7.5A2.25 2.25 0 005.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Ainda com dúvidas?</h2>
+                        <p class="text-lg text-slate-600 mt-1">Pergunte ao nosso assistente de IA sobre Git e GitHub.</p>
+                    </div>
+                </div>
+               
+                <div class="space-y-4 mt-6">
+                    <div>
+                        <label for="ai-question" class="sr-only">Sua pergunta</label>
+                        <input type="text" id="ai-question" placeholder="Ex: Como eu desfaço o último commit?" class="w-full px-4 py-3 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-200">
+                    </div>
+                    <button id="ask-ai-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors flex items-center justify-center disabled:bg-indigo-400 disabled:cursor-not-allowed">
+                        <span id="ai-btn-text">Perguntar à IA</span>
+                        <svg id="ai-spinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                    <div id="ai-response-container" class="mt-4 p-5 bg-slate-100 rounded-md border border-slate-200 min-h-[50px] text-slate-700 leading-relaxed hidden">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+
+    <footer class="bg-white mt-16 border-t">
+        <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-slate-500">
+            <p>&copy; 2025 Guia Interativo Git. Criado para facilitar seu dia a dia.</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Lógica existente para copiar comandos ---
+        // (Vou omitir o código dos outros botões para sermos breves, não precisa mexer nele)
+        const copyButtons = document.querySelectorAll('.copy-btn');
+        copyButtons.forEach(button => { /* ... seu código de copiar ... */ });
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => { /* ... seu código de navegação ... */ });
+
+
+        // --- LÓGICA DE DEPURAÇÃO PARA O ASSISTENTE IA ---
+        console.log("Script da IA iniciado.");
+
+        const aiQuestionInput = document.getElementById('ai-question');
+        const askAiBtn = document.getElementById('ask-ai-btn');
+        const aiResponseContainer = document.getElementById('ai-response-container');
+        const aiBtnText = document.getElementById('ai-btn-text');
+        const aiSpinner = document.getElementById('ai-spinner');
+
+        // LOG 1: Vamos verificar se os elementos foram encontrados no HTML
+        console.log("Elementos encontrados:", { askAiBtn, aiQuestionInput });
+
+        const handleAIQuery = async () => {
+            // LOG 3: Vamos verificar se a função é chamada ao clicar
+            console.log("Função handleAIQuery foi EXECUTADA!");
+
+            const question = aiQuestionInput.value.trim();
+            if (!question) {
+                aiResponseContainer.innerHTML = '<p class="text-red-600 font-medium">Por favor, digite uma pergunta.</p>';
+                aiResponseContainer.classList.remove('hidden');
+                return;
+            }
+
+            aiBtnText.innerText = 'Pensando...';
+            aiSpinner.classList.remove('hidden');
+            askAiBtn.disabled = true;
+            aiResponseContainer.classList.remove('hidden');
+            aiResponseContainer.innerHTML = '<p class="text-slate-500">Conectando com a IA...</p>';
+
+            try {
+                const response = await fetch('/api/ask-ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: question }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Houve um problema ao contatar a IA.');
+                }
+
+                const data = await response.json();
+                aiResponseContainer.innerHTML = data.answer;
+            } catch (error) {
+                aiResponseContainer.innerHTML = `<p class="text-red-600 font-medium">Erro: ${error.message}</p>`;
+            } finally {
+                aiBtnText.innerText = 'Perguntar à IA';
+                aiSpinner.classList.add('hidden');
+                askAiBtn.disabled = false;
+                aiQuestionInput.value = '';
+            }
+        };
+
+        // Verificação para garantir que o botão existe antes de adicionar o "ouvinte"
+        if (askAiBtn) {
+            askAiBtn.addEventListener('click', handleAIQuery);
+            // LOG 2: Vamos confirmar que o "ouvinte de clique" foi adicionado
+            console.log("Ouvinte de clique ADICIONADO com sucesso ao botão.");
+        } else {
+            console.error("ERRO CRÍTICO: O botão com id 'ask-ai-btn' não foi encontrado no HTML!");
+        }
+
+        aiQuestionInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                handleAIQuery();
+            }
+        });
+    });
+</script>
+</body>
+</html>
