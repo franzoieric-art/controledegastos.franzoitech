@@ -728,6 +728,7 @@
                     const toggleBtn = t.closest('.toggle-days-list-btn'); if (toggleBtn) { const wrapper = document.getElementById(`expense-section-wrapper-${toggleBtn.dataset.monthIndex}`); if (wrapper) { wrapper.classList.toggle('hidden'); toggleBtn.textContent = wrapper.classList.contains('hidden') ? 'Mostrar Lançamentos Diários ▼' : 'Ocultar Lançamentos Diários ▲'; } }
                     if (t.closest('.accordion-trigger')) { const trigger = t.closest('.accordion-trigger'); const parentItem = trigger.parentElement; const allItems = parentItem.parentElement.querySelectorAll('.accordion-item'); if (parentItem.classList.contains('active')) { parentItem.classList.remove('active'); } else { allItems.forEach(item => item.classList.remove('active')); parentItem.classList.add('active'); } }
                     if (t.closest('.ai-analysis-btn')) this.ai.getFinancialAnalysis(parseInt(t.closest('.ai-analysis-btn').dataset.monthIndex));
+                    if (t.matches('#ai-annual-analysis-btn')) this.ai.getAnnualFinancialAnalysis();
                     
                     if (t.closest('.suggest-category-btn')) {
                         const btn = t.closest('.suggest-category-btn');
@@ -796,80 +797,103 @@
             },
             
             ai: {
-                async getFinancialAnalysis(monthIndex) {
-                    console.log(`Iniciando análise de IA para o mês ${monthIndex}...`);
-                    App.ui.aiAnalysisModal.classList.remove('hidden');
-                    App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados...</p>';
-                    try {
-                        const monthData = App.state.monthlyData[monthIndex];
-                        if (!monthData) throw new Error("Dados do mês não encontrados.");
-                        const prompt = `
-                            Você é um assistente que gera relatórios financeiros em HTML.
-                            Sua única função é retornar o código HTML do relatório.
-                            NÃO inclua explicações, observações, introduções ou qualquer texto fora do código HTML.
-                            NÃO use blocos de código como \`\`\`html.
-                            Sua resposta deve começar DIRETAMENTE com a primeira tag HTML (ex: <h3>) e terminar com a última.
-                            Analise os seguintes dados financeiros: ${JSON.stringify(monthData)}.
-                            Gere o relatório contendo:
-                            1. Um resumo dos ganhos e gastos.
-                            2. A maior categoria de despesa pessoal.
-                            3. Três sugestões práticas e personalizadas para melhorar a saúde financeira.
-                        `;
-                        const analysisResult = await this.callVercelFunction(prompt);
-                        const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
-                        App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
-                    } catch (error) {
-                        console.error("Erro ao obter análise da IA:", error);
-                        App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados. Verifique o console para mais detalhes.</p>';
-                    }
-                },
+    async getFinancialAnalysis(monthIndex) {
+        console.log(`Iniciando análise de IA para o mês ${monthIndex}...`);
+        App.ui.aiAnalysisModal.classList.remove('hidden');
+        App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados...</p>';
+        try {
+            const monthData = App.state.monthlyData[monthIndex];
+            if (!monthData) throw new Error("Dados do mês não encontrados.");
+            const prompt = `
+                Você é um assistente que gera relatórios financeiros em HTML.
+                Sua única função é retornar o código HTML do relatório.
+                NÃO inclua explicações, observações, introduções ou qualquer texto fora do código HTML.
+                NÃO use blocos de código como \`\`\`html.
+                Sua resposta deve começar DIRETAMENTE com a primeira tag HTML (ex: <h3>) e terminar com a última.
+                Analise os seguintes dados financeiros: ${JSON.stringify(monthData)}.
+                Gere o relatório contendo:
+                1. Um resumo dos ganhos e gastos.
+                2. A maior categoria de despesa pessoal.
+                3. Três sugestões práticas e personalizadas para melhorar a saúde financeira.
+            `;
+            const analysisResult = await this.callVercelFunction(prompt);
+            const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
+            App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
+        } catch (error) {
+            console.error("Erro ao obter análise da IA:", error);
+            App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados. Verifique o console para mais detalhes.</p>';
+        }
+    },
+    async getAnnualFinancialAnalysis() {
+        console.log(`Iniciando análise de IA para o ano inteiro...`);
+        App.ui.aiAnalysisModal.classList.remove('hidden');
+        App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados anuais...</p>';
+        try {
+            const annualData = App.state.monthlyData;
+            if (!annualData) throw new Error("Dados anuais não encontrados.");
+            const prompt = `
+                Você é um assistente de finanças. Analise os seguintes dados financeiros do ano inteiro: ${JSON.stringify(annualData)}.
+                Sua resposta deve ser em HTML.
+                Gere um relatório conciso contendo:
+                1. Um resumo geral dos ganhos, gastos e saldo final do ano.
+                2. O mês de maior gasto e o mês de maior ganho.
+                3. Três insights ou sugestões estratégicas para o próximo ano com base nesses dados.
+            `;
+            const analysisResult = await this.callVercelFunction(prompt);
+            const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
+            App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
+        } catch (error) {
+            console.error("Erro ao obter análise anual da IA:", error);
+            App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados anuais.</p>';
+        }
+    },
+    
+    async getCategorySuggestion(description, entryId, button) {
+        console.log(`Buscando sugestão de categoria para: ${description}`);
+        const originalContent = button.innerHTML;
+        button.innerHTML = '...';
+        button.disabled = true;
+        try {
+            const availableCategories = App.state.categories.map(c => c.name).join(', ');
+            const prompt = `
+                Analise a despesa: "${description}".
+                Qual das seguintes categorias melhor se encaixa? Categorias disponíveis: [${availableCategories}].
+                Responda APENAS com o nome exato de uma das categorias da lista. Sem frases, apenas a categoria.
+            `;
+            let suggestedCategory = await this.callVercelFunction(prompt);
+            suggestedCategory = suggestedCategory.trim().replace(/["'.]/g, '');
+            const entryElement = button.closest('.expense-entry-row');
+            const selectElement = entryElement.querySelector('[data-field="category"]');
+            const categoryExists = App.state.categories.find(c => c.name.toLowerCase() === suggestedCategory.toLowerCase());
+            if (selectElement && categoryExists) {
+                selectElement.value = categoryExists.name;
+                const event = new Event('input', { bubbles: true });
+                selectElement.dispatchEvent(event);
+            } else {
+                console.warn(`Categoria sugerida "${suggestedCategory}" não é válida ou não foi encontrada.`);
+            }
+        } catch (error) {
+            console.error("Erro ao obter sugestão de categoria:", error);
+        } finally {
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        }
+    },
 
-                async getCategorySuggestion(description, entryId, button) {
-                    console.log(`Buscando sugestão de categoria para: ${description}`);
-                    const originalContent = button.innerHTML;
-                    button.innerHTML = '...';
-                    button.disabled = true;
-                    try {
-                        const availableCategories = App.state.categories.map(c => c.name).join(', ');
-                        const prompt = `
-                            Analise a despesa: "${description}".
-                            Qual das seguintes categorias melhor se encaixa? Categorias disponíveis: [${availableCategories}].
-                            Responda APENAS com o nome exato de uma das categorias da lista. Sem frases, apenas a categoria.
-                        `;
-                        let suggestedCategory = await this.callVercelFunction(prompt);
-                        suggestedCategory = suggestedCategory.trim().replace(/["'.]/g, '');
-                        const entryElement = button.closest('.expense-entry-row');
-                        const selectElement = entryElement.querySelector('[data-field="category"]');
-                        const categoryExists = App.state.categories.find(c => c.name.toLowerCase() === suggestedCategory.toLowerCase());
-                        if (selectElement && categoryExists) {
-                            selectElement.value = categoryExists.name;
-                            const event = new Event('input', { bubbles: true });
-                            selectElement.dispatchEvent(event);
-                        } else {
-                            console.warn(`Categoria sugerida "${suggestedCategory}" não é válida ou não foi encontrada.`);
-                        }
-                    } catch (error) {
-                        console.error("Erro ao obter sugestão de categoria:", error);
-                    } finally {
-                        button.innerHTML = originalContent;
-                        button.disabled = false;
-                    }
-                },
-
-                async callVercelFunction(prompt) {
-                    const VERCEL_API_URL = "https://controledegastos1-0.vercel.app/api/analyze";
-                    const response = await fetch(VERCEL_API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: prompt })
-                    });
-                    if (!response.ok) {
-                        throw new Error(`Erro na API da Vercel: ${response.statusText}`);
-                    }
-                    const data = await response.json();
-                    return data.analysis; 
-                }
-            },
+    async callVercelFunction(prompt) {
+        const VERCEL_API_URL = "https://controledegastos1-0.vercel.app/api/analyze";
+        const response = await fetch(VERCEL_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: prompt })
+        });
+        if (!response.ok) {
+            throw new Error(`Erro na API da Vercel: ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data.analysis; 
+    }
+},
             
             render: {
                 // INÍCIO DA ALTERAÇÃO 4: FUNÇÃO DE RENDERIZAÇÃO DO CABEÇALHO
@@ -981,7 +1005,43 @@
                         </div>
                     </div>
                 </div>`,
-                createBalanceContentHTML: () => `<div id="month-12-content" class="month-content"><h2 class="text-3xl font-bold text-center mb-8">Balanço Anual</h2><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-center"><div class="card border-t-4 border-yellow-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PJ</span><span id="totalAnnualPJ" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-green-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PF</span><span id="totalAnnualPF" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-red-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Gastos Totais</span><span id="totalAnnualExpenses" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-blue-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Saldo Final</span><span id="annualBalance" class="text-2xl font-bold">R$ 0,00</span><p id="annualPerformance" class="text-lg font-semibold mt-1"></p></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card p-6 rounded-2xl lg:col-span-2"><h3 class="text-xl font-semibold text-center mb-4">Desempenho Mensal</h3><div class="relative mx-auto" style="height: 400px;"><canvas id="monthlyPerformanceBarChart"></canvas></div></div><div class="card p-6 rounded-2xl"><h3 class="text-xl font-semibold text-center mb-4">Maiores Gastos do Ano (Top 5)</h3><div id="top-spends-container" class="text-sm space-y-2 max-h-96 overflow-y-auto p-2"></div></div></div></div>`,
+                createBalanceContentHTML: () => `<div id="month-12-content" class="month-content">
+                    <h2 class="text-3xl font-bold text-center mb-8">Balanço Anual</h2>
+                    <div class="text-center mb-8 -mt-4">
+                        <button id="ai-annual-analysis-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);">Analisar Ano com IA ✨</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-center">
+                        <div class="card border-t-4 border-yellow-400 p-5 rounded-2xl">
+                            <span class="block text-sm muted-text mb-2">Total Ganhos PJ</span>
+                            <span id="totalAnnualPJ" class="text-2xl font-semibold">R$ 0,00</span>
+                        </div>
+                        <div class="card border-t-4 border-green-400 p-5 rounded-2xl">
+                            <span class="block text-sm muted-text mb-2">Total Ganhos PF</span>
+                            <span id="totalAnnualPF" class="text-2xl font-semibold">R$ 0,00</span>
+                        </div>
+                        <div class="card border-t-4 border-red-400 p-5 rounded-2xl">
+                            <span class="block text-sm muted-text mb-2">Gastos Totais</span>
+                            <span id="totalAnnualExpenses" class="text-2xl font-semibold">R$ 0,00</span>
+                        </div>
+                        <div class="card border-t-4 border-blue-400 p-5 rounded-2xl">
+                            <span class="block text-sm muted-text mb-2">Saldo Final</span>
+                            <span id="annualBalance" class="text-2xl font-bold">R$ 0,00</span>
+                            <p id="annualPerformance" class="text-lg font-semibold mt-1"></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="card p-6 rounded-2xl lg:col-span-2">
+                            <h3 class="text-xl font-semibold text-center mb-4">Desempenho Mensal</h3>
+                            <div class="relative mx-auto" style="height: 400px;">
+                                <canvas id="monthlyPerformanceBarChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card p-6 rounded-2xl">
+                            <h3 class="text-xl font-semibold text-center mb-4">Maiores Gastos do Ano (Top 5)</h3>
+                            <div id="top-spends-container" class="text-sm space-y-2 max-h-96 overflow-y-auto p-2"></div>
+                        </div>
+                    </div>
+                </div>`,
                 createEntryElement: (config) => {
                     const { monthIndex, dayIndex, category, entry, type } = config;
                     const d = document.createElement('div');
