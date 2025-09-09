@@ -128,7 +128,24 @@
     </div>
 
     <div id="app-screen" class="hidden">
-        
+        <div id="chatbot-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end justify-end p-4 hidden z-50 transition-opacity">
+     <div class="modal-content card rounded-2xl shadow-xl w-full max-w-md h-2/3 flex flex-col transform translate-y-8 transition-transform">
+         <div class="flex justify-between items-center p-4 border-b flex-shrink-0" style="border-color: var(--border-color);">
+             <h2 class="text-xl font-bold">Assistente IA</h2>
+             <button id="close-chatbot-modal-btn" class="px-3 py-1 rounded-lg" style="background-color: var(--secondary-bg);">&times;</button>
+         </div>
+         <div id="chatbot-messages" class="flex-grow p-4 overflow-y-auto space-y-4">
+             <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
+                 <p class="font-bold mb-1">Assistente</p>
+                 <p>Olá! Como posso ajudar com suas finanças hoje?</p>
+             </div>
+         </div>
+         <div class="p-4 border-t flex gap-2 flex-shrink-0" style="border-color: var(--border-color);">
+             <input type="text" id="chatbot-input" placeholder="Ex: Qual foi meu maior gasto em Setembro?" class="flex-grow p-3 input-field">
+             <button id="chatbot-send-btn" class="px-5 py-3 text-white font-semibold rounded-xl" style="background-color: var(--primary-color);">Enviar</button>
+         </div>
+     </div>
+ </div>
         <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
                 <div class="flex justify-between items-center mb-6 flex-shrink-0">
@@ -273,7 +290,7 @@
             </div>
         </div>
     </div>
-
+<button id="floating-chatbot-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full text-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: var(--primary-color); color: white;">🤖</button>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
@@ -664,6 +681,68 @@
             
             bindGlobalEventListeners() {
                 this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
+                // --- CHATBOT LOGIC ---
+const chatbotModal = document.getElementById('chatbot-modal');
+const chatbotModalContent = chatbotModal.querySelector('.modal-content');
+
+document.getElementById('floating-chatbot-btn').addEventListener('click', () => {
+    chatbotModal.classList.remove('hidden');
+    setTimeout(() => {
+        chatbotModal.style.opacity = '1';
+        chatbotModalContent.style.transform = 'translateY(0)';
+    }, 10);
+});
+
+const closeChatbot = () => {
+    chatbotModal.style.opacity = '0';
+    chatbotModalContent.style.transform = 'translateY(2rem)';
+    setTimeout(() => {
+        chatbotModal.classList.add('hidden');
+    }, 300);
+};
+
+document.getElementById('close-chatbot-modal-btn').addEventListener('click', closeChatbot);
+
+document.getElementById('chatbot-send-btn').addEventListener('click', () => {
+    const input = document.getElementById('chatbot-input');
+    const messagesContainer = document.getElementById('chatbot-messages');
+    const userMessage = input.value.trim();
+
+    if (userMessage) {
+        // Adiciona a mensagem do usuário na tela
+        messagesContainer.innerHTML += `
+            <div class="flex justify-end">
+                <div class="p-3 rounded-lg max-w-[85%] text-sm text-white" style="background-color: var(--primary-color);">
+                    <p class="font-bold mb-1">Você</p>
+                    <p>${userMessage}</p>
+                </div>
+            </div>
+        `;
+        messagesContainer.scrollTop = messagesContainer.scrollHeight; // Rola para o final
+        
+        // Simula a IA pensando e chama a função real
+        setTimeout(() => {
+            messagesContainer.innerHTML += `
+                <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
+                    <p class="font-bold mb-1">Assistente</p>
+                    <p class="italic">Pensando...</p>
+                </div>
+            `;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            App.ai.getChatbotResponse(userMessage);
+        }, 500);
+        
+        input.value = '';
+    }
+});
+document.getElementById('chatbot-input').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById('chatbot-send-btn').click();
+    }
+});
+// --- END CHATBOT LOGIC ---
 
                 // INÍCIO DA ALTERAÇÃO 7: EVENT LISTENER DO UPLOAD
                 document.getElementById('avatar-upload-input').addEventListener('change', this.handleAvatarUpload.bind(this));
@@ -847,7 +926,7 @@
             App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados anuais.</p>';
         }
     },
-    
+
     async getCategorySuggestion(description, entryId, button) {
         console.log(`Buscando sugestão de categoria para: ${description}`);
         const originalContent = button.innerHTML;
