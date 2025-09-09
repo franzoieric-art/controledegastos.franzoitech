@@ -94,6 +94,7 @@
             .action-buttons {
                 flex-direction: row; /* Botões lado a lado em telas maiores */
             }
+            
         }
         /* ================================================= */
 
@@ -240,12 +241,9 @@
     </div>
 </div>
 
-    <div class="flex items-center gap-4">
-        <button id="manage-account-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Conta</button>
-        <button id="manage-settings-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Gerenciar</button>
-        <button id="logout-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Sair</button>
-        <button id="theme-toggle-btn" class="p-2 rounded-full text-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">🌙</button>
-    </div>
+<div class="absolute top-4 right-4 tooltip-container">
+    <button id="ai-assistant-btn" class="p-2 rounded-full text-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">🤖</button>
+    <div class="tooltip-text" role="tooltip">Assistente IA (em breve)</div>
 </div>
 
 <div class="text-center mb-8 space-y-2">
