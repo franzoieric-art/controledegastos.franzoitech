@@ -112,6 +112,59 @@
             content: none !important;
             display: none !important;
         }
+        /* ================================================= */
+.calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 1.5rem; 
+        }
+        .calendar-header {
+            text-align: center;
+            font-weight: 600;
+            color: var(--muted-text);
+            padding-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        .calendar-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+            border-radius: 9999px; 
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            position: relative;
+        }
+        .calendar-day.not-current-month {
+            color: var(--muted-text);
+            opacity: 0.5;
+            cursor: default;
+        }
+        .calendar-day.current-month:hover {
+            background-color: var(--secondary-bg);
+        }
+        .calendar-day.active {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .calendar-day.has-entries::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: var(--red-color);
+        }
+        .calendar-day.active.has-entries::after {
+            background-color: white;
+        }
 
     </style>
 </head>
@@ -508,6 +561,7 @@
                 if (contentEl) {
                     contentEl.classList.add('active');
                     if (monthIndex < 12) {
+                        this.render.renderCalendarView(monthIndex);
                         this.render.renderPJEntries(monthIndex);
                         this.render.renderPFEntries(monthIndex);
                         this.render.renderExpenseTable(monthIndex);
@@ -799,6 +853,31 @@ document.getElementById('chatbot-input').addEventListener('keydown', (event) => 
                 
                 document.body.addEventListener('click', (event) => {
                     const t = event.target;
+                    const dayCell = t.closest('.calendar-day.current-month');
+if (dayCell) {
+    const dayIndex = parseInt(dayCell.dataset.day);
+    const monthIndex = App.state.activeMonthIndex;
+    const allAccordions = document.querySelectorAll(`#expense-accordion-container-${monthIndex} .accordion-item`);
+    const accordionToToggle = allAccordions[dayIndex];
+
+    // 1. Verifica se o dia clicado já estava ativo ANTES de qualquer mudança
+    const wasActive = dayCell.classList.contains('active');
+
+    // 2. Limpa o estado de todos (tanto os dias do calendário quanto os acordeões)
+    document.querySelectorAll(`#calendar-container-${monthIndex} .calendar-day.active`).forEach(el => el.classList.remove('active'));
+    allAccordions.forEach(item => item.classList.remove('active'));
+
+    // 3. Decide a nova ação com base no estado anterior
+    if (!wasActive) {
+        // Se NÃO estava ativo, então ativa o dia clicado e seu respectivo acordeão
+        dayCell.classList.add('active');
+        if (accordionToToggle) accordionToToggle.classList.add('active');
+        document.getElementById(`expense-section-wrapper-${monthIndex}`).classList.remove('hidden');
+    }
+    // Se já estava ativo (wasActive = true), o código simplesmente para aqui,
+    // deixando tudo limpo e fechado, que é o efeito que você quer.
+}
+    /* ======================================================= */
                     if (t.matches('.tab-button')) this.showMonth(parseInt(t.dataset.monthIndex));
                     if (t.matches('.export-csv-btn')) this.exportMonthToCSV(parseInt(t.dataset.monthIndex));
                     if (t.matches('.export-pdf-btn')) this.exportMonthToPDF(parseInt(t.dataset.monthIndex));
@@ -1029,6 +1108,42 @@ async getChatbotResponse(userMessage) {
                     const avatarUrl = App.state.profile.avatarUrl || 'images/default-avatar.svg';
                     document.getElementById('user-avatar').src = avatarUrl;
                 },
+renderCalendarView(monthIndex) {
+    const container = document.getElementById(`calendar-container-${monthIndex}`);
+    if (!container) return;
+
+    const year = new Date().getFullYear();
+    const firstDay = new Date(year, monthIndex, 1);
+    const lastDay = new Date(year, monthIndex + 1, 0);
+    const startingDayOfWeek = firstDay.getDay(); // 0 = Domingo, 1 = Segunda, ...
+
+    let html = '<div class="calendar-grid">';
+    
+    // Cabeçalho dos dias da semana
+    ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(day => {
+        html += `<div class="calendar-header">${day}</div>`;
+    });
+
+    // Células vazias para o início do mês
+    for (let i = 0; i < startingDayOfWeek; i++) {
+        html += '<div></div>';
+    }
+
+    // Dias do mês
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+        const monthData = App.state.monthlyData[monthIndex];
+        const dayData = monthData.expenses[day - 1];
+        let classes = 'calendar-day current-month';
+        if (dayData && (dayData.personalEntries.length > 0 || dayData.businessEntries.length > 0)) {
+            classes += ' has-entries';
+        }
+        
+        html += `<div class="${classes}" data-day="${day - 1}">${day}</div>`;
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+},
                 // FIM DA ALTERAÇÃO 4
                 createMonthContentHTML: (monthIndex) => `<div id="month-${monthIndex}-content" class="month-content">
                     <div class="flex justify-end gap-2 mb-4">
@@ -1092,10 +1207,11 @@ async getChatbotResponse(userMessage) {
                     <div class="text-center mb-4">
                         <button class="ai-analysis-btn px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')" data-month-index="${monthIndex}">Analisar Mês com IA ✨</button>
                     </div>
-                    <div class="flex justify-center mb-4">
-                        <button class="toggle-days-list-btn text-sm font-medium hover:underline" style="color: var(--primary-color);" data-month-index="${monthIndex}">Ocultar Lançamentos Diários ▲</button>
+                    <div id="calendar-container-${monthIndex}" class="mb-8"></div>
+                    <div class="text-center mb-4">
+                        <button class="toggle-days-list-btn text-sm font-medium hover:underline" style="color: var(--primary-color);" data-month-index="${monthIndex}">Mostrar Lançamentos em Lista ▼</button>
                     </div>
-                    <div id="expense-section-wrapper-${monthIndex}" class="">
+                    <div id="expense-section-wrapper-${monthIndex}" class="hidden">
                         <div id="expense-accordion-container-${monthIndex}" class="space-y-2 mb-8"></div>
                     </div>
                     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-8">
