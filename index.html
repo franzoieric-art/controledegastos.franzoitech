@@ -926,7 +926,42 @@ document.getElementById('chatbot-input').addEventListener('keydown', (event) => 
             App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados anuais.</p>';
         }
     },
+async getChatbotResponse(userMessage) {
+        try {
+            const financialData = App.state.monthlyData;
+            const prompt = `
+                Você é um chatbot assistente financeiro. Um usuário te fez a seguinte pergunta: "${userMessage}".
+                Use os dados financeiros a seguir para formular sua resposta: ${JSON.stringify(financialData)}.
+                Responda de forma curta e direta. Se a pergunta for complexa, explique o que encontrou.
+                Se a pergunta não tiver relação com os dados, diga que você só pode responder sobre as finanças do usuário.
+                NÃO retorne a resposta em formato HTML, apenas texto simples.
+            `;
+            const aiResponse = await this.callVercelFunction(prompt);
 
+            const messagesContainer = document.getElementById('chatbot-messages');
+            messagesContainer.removeChild(messagesContainer.lastChild); 
+
+            messagesContainer.innerHTML += `
+                <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
+                    <p class="font-bold mb-1">Assistente</p>
+                    <p>${aiResponse}</p>
+                </div>
+            `;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        } catch (error) {
+            console.error("Erro na resposta do chatbot:", error);
+            const messagesContainer = document.getElementById('chatbot-messages');
+            messagesContainer.removeChild(messagesContainer.lastChild); 
+            messagesContainer.innerHTML += `
+                <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
+                    <p class="font-bold mb-1">Assistente</p>
+                    <p>Desculpe, não consegui processar sua pergunta. Tente novamente.</p>
+                </div>
+            `;
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    },
     async getCategorySuggestion(description, entryId, button) {
         console.log(`Buscando sugestão de categoria para: ${description}`);
         const originalContent = button.innerHTML;
