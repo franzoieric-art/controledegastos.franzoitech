@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rico Plus - Teste Grátis de 7 Dias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .bg-hero {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F3F4F6 100%);
+        }
+        
+        /* Estilos para a animação */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(10px); /* Ajuste para animação mais sutil */
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            transition-delay: var(--animation-delay, 0s);
+        }
+
+        .fade-in.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .line-through-price {
+            position: relative;
+            display: inline-block;
+        }
+        .line-through-price::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            border-top: 3px solid #ff453a;
+            transform: translateY(-50%) rotate(-5deg);
+        }
+
+        /* Animação do botão de preço */
+        @keyframes pulse-once {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .price-animation {
+            animation: pulse-once 1s ease-in-out;
+        }
+
+        /* Animação para entrada de informações */
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            transition-delay: var(--animation-delay, 0s);
+        }
+        .slide-in-left.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            transition-delay: var(--animation-delay, 0s);
+        }
+        .slide-in-right.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <main>
+        <section class="bg-hero py-12 md:py-16">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <img src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/edce14b0be6a60fc650fb1b50142615f48033158/logoricoplus.png" alt="Rico Plus Logo" class="h-28 md:h-32 w-auto mx-auto mb-6 fade-in">
+                <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 leading-tight fade-in" style="--animation-delay: 0.1s;">
+                    Controle suas finanças em <br><span class="text-indigo-600">7 dias grátis</span>. Sem pagar nada para começar.
+                </h1>
+                <p class="mt-3 md:text-lg text-gray-600 max-w-2xl mx-auto fade-in" style="--animation-delay: 0.2s;">
+                    Ao final do teste, se você amar a plataforma, o acesso de 1 ano custará apenas R$ 47.
+                </p>
+                <div class="mt-5 fade-in" style="--animation-delay: 0.3s;">
+                    <a href="#buy" class="px-7 py-3 text-base font-bold bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition-colors">
+                        Começar Meu Teste Grátis Agora
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-10 md:py-14">
+            <div class="max-w-6xl mx-auto px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 fade-in">Por que o Rico Plus é a Solução?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white rounded-xl shadow-md slide-in-left" style="--animation-delay: 0.1s;">
+                            <div class="flex items-start">
+                                <svg class="w-8 h-8 flex-shrink-0 text-red-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                <div>
+                                    <p class="text-lg font-semibold text-gray-800">
+                                        Inadimplência no Brasil: Uma realidade que afeta milhões.
+                                    </p>
+                                    <p class="mt-2 text-gray-700">
+                                        Mais de 70 milhões de brasileiros têm dívidas atrasadas, um cenário que impacta a economia e o bem-estar das famílias.
+                                    </p>
+                                    <a href="https://site.cndl.org.br/inadimplencia-de-pessoas-fisicas-no-brasil-acelera-e-atinge-7137-milhoes-de-devedores-em-julho-aponta-cndlspc-brasil/" target="_blank" rel="noopener noreferrer" class="mt-3 inline-block px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                                        Ver dados oficiais <span aria-hidden="true">&rarr;</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl shadow-md slide-in-left" style="--animation-delay: 0.2s;">
+                            <div class="flex items-start">
+                                <svg class="w-8 h-8 flex-shrink-0 text-yellow-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                <div>
+                                    <p class="text-lg font-semibold text-gray-800">
+                                        Educação Financeira: Um privilégio para poucos.
+                                    </p>
+                                    <p class="mt-2 text-gray-700">
+                                        Pesquisas indicam que a grande maioria dos brasileiros nunca teve acesso a ensinamentos sobre finanças, seja em casa ou na escola.
+                                    </p>
+                                    <a href="https://www.cndl.org.br/noticias/pesquisa-mostra-que-81-dos-brasileiros-nao-receberam-educacao-financeira/" target="_blank" rel="noopener noreferrer" class="mt-3 inline-block px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors">
+                                        Ver dados oficiais <span aria-hidden="true">&rarr;</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slide-in-left" style="--animation-delay: 0.3s;">
+                            <p class="text-xl font-bold text-gray-900 mt-6">
+                                O Rico Plus é a solução para que você tome o controle total de suas finanças.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white rounded-xl shadow-md slide-in-right" style="--animation-delay: 0.1s;">
+                            <svg class="h-10 w-10 text-indigo-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                            <h3 class="text-xl font-semibold text-gray-900">Gestão Completa e Unificada</h3>
+                            <p class="mt-2 text-gray-600">Unifique todas as suas finanças, de receitas PJ a gastos pessoais, em um só painel intuitivo e fácil de usar. Diga adeus às planilhas complicadas!</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl shadow-md slide-in-right" style="--animation-delay: 0.2s;">
+                            <svg class="h-10 w-10 text-indigo-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            <h3 class="text-xl font-semibold text-gray-900">Inteligência Artificial Personalizada</h3>
+                            <p class="mt-2 text-gray-600">Receba insights e sugestões personalizadas para otimizar seus gastos, identificar padrões e alcançar suas metas financeiras de forma inteligente.</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl shadow-md slide-in-right" style="--animation-delay: 0.3s;">
+                            <svg class="h-10 w-10 text-indigo-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V9m0 3v1m0 3v1m-9-3.75h1.5m-3 0h.01M21 12h-1.5m-3 0h.01M18 19.5h-1.5m-3 0h.01M8.25 4.5h1.5m-3 0h.01M12 21.5h.01"></path>
+                            </svg>
+                            <h3 class="text-xl font-semibold text-gray-900">Experimente Grátis por 7 Dias</h3>
+                            <p class="mt-2 text-gray-600">Tenha 7 dias para testar todas as funcionalidades do Rico Plus, sem compromisso, e decida por você mesmo se é a ferramenta certa para sua jornada financeira.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-10 md:py-14 bg-gray-50">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 fade-in">O que nossos clientes dizem</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-5 bg-white rounded-xl shadow-md fade-in" style="--animation-delay: 0.1s;">
+                        <p class="text-gray-700 italic text-base">"Com o Rico Plus, finalmente entendi para onde meu dinheiro estava indo. A funcionalidade de IA é um diferencial incrível!"</p>
+                        <p class="mt-3 font-semibold text-gray-800 text-sm">- Nome do Cliente</p>
+                    </div>
+                    <div class="p-5 bg-white rounded-xl shadow-md fade-in" style="--animation-delay: 0.2s;">
+                        <p class="text-gray-700 italic text-base">"Simples de usar, completo e sem complicação. É a ferramenta que eu precisava para gerenciar meus ganhos PJ e PF."</p>
+                        <p class="mt-3 font-semibold text-gray-800 text-sm">- Nome do Cliente</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="buy" class="py-10 md:py-14">
+            <div class="max-w-3xl mx-auto px-4 text-center p-7 bg-white rounded-xl shadow-lg border-t-4 border-indigo-600 fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900">Democratizamos a educação financeira.</h2>
+                <p class="mt-3 text-gray-600 md:text-lg">
+                    Todos os recursos do Rico Plus poderiam custar mais de R$ 97, mas nosso compromisso é oferecer um preço justo para que mais pessoas tomem controle de suas finanças.
+                </p>
+                <div class="mt-5">
+                    <p class="text-2xl font-extrabold text-gray-500 line-through-price fade-in" style="--animation-delay: 0.1s;">R$ 97,00</p>
+                    <p class="text-4xl md:text-5xl font-extrabold text-indigo-600 price-animation fade-in" style="--animation-delay: 0.2s;">R$ 47,00</p>
+                    <p class="mt-2 text-gray-500 text-sm fade-in" style="--animation-delay: 0.3s;">Pagamento Único, Válido por 1 Ano após 7 dias de teste grátis.</p>
+                </div>
+                <div class="mt-5">
+                    <a href="SUA_URL_DA_HOTMART" class="px-8 py-3 text-base font-bold bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition-colors fade-in" style="--animation-delay: 0.4s;">
+                        Começar Meu Teste Grátis de 7 Dias
+                    </a>
+                </div>
+                <div class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200 fade-in" style="--animation-delay: 0.5s;">
+                    <div class="flex items-center justify-center space-x-3">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Shield_check_icon.svg/1200px-Shield_check_icon.svg.png" alt="Selo de Garantia" class="h-8 w-8">
+                        <p class="text-green-800 font-semibold text-base">
+                            Garantia de 7 Dias: Satisfação ou seu dinheiro de volta! Sem perguntas, sem burocracia.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="fixed bottom-5 right-5 z-50 fade-in" style="--animation-delay: 0.6s;">
+        <a href="https://wa.me/SEU_NUMERO_DE_WHATSAPP" target="_blank" rel="noopener noreferrer" class="bg-green-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-green-600 transition-transform hover:scale-110">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1em" viewBox="0 0 448 512" fill="currentColor">
+                <path d="M380.9 97.1C339.5 55.6 283.4 32 223.8 32c-96.1 0-174.1 78-174.1 174.1 0 29.2 8.7 57.8 24.2 82.8L32 440l103.7-30.8c24.6 13.4 52 20.3 79.9 20.3h.1c96.1 0 174.1-78 174.1-174.1 0-59.5-23.5-115.5-65.1-157zM223.8 382.6c-24.8 0-48.4-6.5-69.5-18.1L110.1 391l18.5-62.8c-12.4-21-19-44.2-19-68.9 0-70.5 57.5-128 128-128s128 57.5 128 128-57.5 128-128 128zm-41.6-118.8c-1.3-.8-6.8-3.4-7.4-3.6-1-.2-1.8-.3-2.6.5-1.1 1.1-4.3 5.4-5.3 6.5s-2.1 1.2-4 0-6.8-2.5-13-8.1c-10.1-9.1-16.7-22.1-18.7-25.5-.3-.6-.3-.7-.5-1.2s-2.1-5.3-.8-7.7c1.4-2.4 3.1-3.6 4.3-4.9.5-.5 1.1-1.3 1.6-1.9s.8-.9 1.1-2.2c.4-1.3 0-2.4-.7-3.6-.6-1-.5-1.9-.4-2.2s.3-.8.6-1.5.3-1.1.8-1.5c.4-.4 1.1-1 1.5-1s.9-.2 1.5-.2h2.6c.4 0 .7.1 1 .5s1.2 1.1 1.8 2.3c.6 1.3 2.1 4.5 2.3 4.9.3.4 4.5 7.1 10.9 14.7 6.4 7.6 12 11.2 13.5 11.8.4.2.9.3 1.2.3.9 0 7.4-4.8 8.1-5.4.9-.7 1.8-1.1 2.6-1.7.9-.6 1.8-.9 2.6-.9 1.3-.1 2.8.2 4.1 2.3.9 1.3 2.8 5.7 1.7 7.4-1.1 1.8-4.3 5.7-5.3 6.8s-.9 1.1-1.8 1.5c-1-.7-2.1-1.2-3.2-1.7-1.1-.5-2.2-.8-3.4-.8z"/>
+            </svg>
+        </a>
+    </div>
+
+    <footer class="py-6 bg-gray-800 text-white text-xs">
+        <div class="max-w-6xl mx-auto px-4 text-center md:flex md:justify-between md:items-center">
+            <p>&copy; 2025 Rico Plus. Todos os direitos reservados.</p>
+            <div class="mt-3 md:mt-0 flex justify-center space-x-4">
+                <a href="#" class="text-gray-300 hover:text-white transition-colors">Termos de Uso</a>
+                <a href="#" class="text-gray-300 hover:text-white transition-colors">Política de Privacidade</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            copyButtons.forEach(button => {
+                const commandText = button.closest('.command-card').querySelector('.command-text').innerText;
+                button.addEventListener('click', () => {
+                    navigator.clipboard.writeText(commandText).then(() => {
+                        const originalText = button.innerText;
+                        button.innerText = 'Copiado!';
+                        setTimeout(() => {
+                            button.innerText = originalText;
+                        }, 1500);
+                    });
+                });
+            });
+
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const targetId = event.target.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Lógica de animação na rolagem (Fade-in e Slide-in)
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        
+                        // Handle elements with specific delays within the section
+                        const elementsWithDelay = entry.target.querySelectorAll('[style*="--animation-delay"]');
+                        elementsWithDelay.forEach(el => {
+                            el.classList.add('is-visible');
+                        });
+
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1 // Ajustado para iniciar a animação um pouco antes
+            });
+
+            document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Ajuste para o botão do WhatsApp
+            const whatsappButton = document.querySelector('.fixed.bottom-5.right-5');
+            if (whatsappButton) {
+                observer.observe(whatsappButton);
+            }
+        });
+
+        // Este script não está sendo usado no HTML atual, mas mantive a estrutura caso decida implementá-lo.
+        const aiQuestionInput = document.getElementById('ai-question');
+        const askAiBtn = document.getElementById('ask-ai-btn');
+        const aiResponseContainer = document.getElementById('ai-response-container');
+        const aiBtnText = document.getElementById('ai-btn-text');
+        const aiSpinner = document.getElementById('ai-spinner');
+
+        const handleAIQuery = async () => {
+            const question = aiQuestionInput.value.trim();
+            if (!question) {
+                if (aiResponseContainer) {
+                    aiResponseContainer.innerHTML = '<p class="text-red-600 font-medium">Por favor, digite uma pergunta.</p>';
+                    aiResponseContainer.classList.remove('hidden');
+                }
+                return;
+            }
+
+            if (aiBtnText) aiBtnText.innerText = 'Pensando...';
+            if (aiSpinner) aiSpinner.classList.remove('hidden');
+            if (askAiBtn) askAiBtn.disabled = true;
+            if (aiResponseContainer) {
+                aiResponseContainer.classList.remove('hidden');
+                aiResponseContainer.innerHTML = '<p class="text-slate-500">Conectando com a IA...</p>';
+            }
+
+            const aiPrompt = `
+                Você é um assistente de programação especialista em Git, GitHub e na ferramenta de minificação e ofuscação Terser.
+                Sua tarefa é responder a uma pergunta do usuário sobre esses tópicos de forma clara e objetiva.
+
+                Contexto sobre as ferramentas:
+                - **Git/GitHub:** É um sistema de controle de versão. Comandos incluem 'git init', 'git add', 'git commit', 'git push', 'git branch', 'git fetch', 'git stash'.
+                - **Terser/Minificação:** A ferramenta 'html-minifier-terser' é usada para diminuir o tamanho do código HTML, CSS e JavaScript. Os principais comandos são 'npm install html-minifier-terser' e 'npx html-minifier-terser' com as opções '--collapse-whitespace', '--remove-comments' e '--minify-js true'.
+
+                Pergunta do usuário: "${question}"
+
+                Responda com base neste conhecimento.
+            `;
+
+            try {
+                // Aqui você faria a chamada real para a sua API de IA
+                // Por enquanto, é um placeholder
+                const response = await new Promise(resolve => setTimeout(() => {
+                    resolve({ ok: true, json: () => ({ answer: "Esta é uma resposta simulada da IA para a sua pergunta." }) });
+                }, 1500)); // Simula um atraso de 1.5 segundos
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Houve um problema ao contatar a IA.');
+                }
+
+                const data = await response.json();
+                if (aiResponseContainer) aiResponseContainer.innerHTML = `<p>${data.answer}</p>`;
+            } catch (error) {
+                if (aiResponseContainer) aiResponseContainer.innerHTML = `<p class="text-red-600 font-medium">Erro: ${error.message}</p>`;
+            } finally {
+                if (aiBtnText) aiBtnText.innerText = 'Perguntar à IA';
+                if (aiSpinner) aiSpinner.classList.add('hidden');
+                if (askAiBtn) askAiBtn.disabled = false;
+                if (aiQuestionInput) aiQuestionInput.value = '';
+            }
+        };
+
+        if (askAiBtn) {
+            askAiBtn.addEventListener('click', handleAIQuery);
+        }
+
+        if (aiQuestionInput) {
+            aiQuestionInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    handleAIQuery();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
