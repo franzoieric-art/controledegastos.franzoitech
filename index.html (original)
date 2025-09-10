@@ -271,7 +271,6 @@
             },
             ui: {
                 monthContentContainer: document.getElementById('monthContentContainer'),
-                monthTabsContainer: document.getElementById('monthTabs'),
                 settingsModal: document.getElementById('settings-modal'),
                 accountModal: document.getElementById('account-modal'),
                 userNameInput: document.getElementById('user-name-input'),
@@ -318,44 +317,22 @@
                 generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
             },
             async handleAvatarUpload(event) {
-                console.clear();
-                console.log("--- INICIANDO PROCESSO DE UPLOAD ---");
                 const file = event.target.files[0];
-                if (!file) {
-                    console.log("Passo 1: Falhou. Nenhum arquivo selecionado.");
-                    return;
-                }
-                console.log("Passo 1: Sucesso. Arquivo selecionado:", file.name);
-                if (!this.state.currentUserId) {
-                    console.log("Passo 2: Falhou. User ID está ausente (null ou undefined).");
-                    return;
-                }
-                console.log("Passo 2: Sucesso. User ID encontrado:", this.state.currentUserId);
+                if (!file) { return; }
+                if (!this.state.currentUserId) { return; }
                 const avatarImg = document.getElementById('user-avatar');
                 const originalSrc = avatarImg.src;
                 avatarImg.style.opacity = '0.5';
                 try {
                     const storagePath = `avatars/${this.state.currentUserId}`;
                     const storageRef = ref(storage, storagePath);
-                    console.log("Passo 3: Sucesso. Criando referência para o caminho:", storagePath);
-                    console.log("Passo 4: Enviando arquivo para o Firebase Storage...");
                     await uploadBytes(storageRef, file);
-                    console.log("Passo 4: Sucesso. Arquivo enviado!");
-                    console.log("Passo 5: Obtendo a URL de download do arquivo...");
                     const downloadURL = await getDownloadURL(storageRef);
-                    console.log("Passo 5: Sucesso. URL recebida:", downloadURL);
-                    console.log("Passo 6: Atualizando estado local e a imagem na tela...");
                     this.state.profile.avatarUrl = downloadURL;
                     avatarImg.src = downloadURL;
-                    console.log("Passo 6: Sucesso. Imagem na tela foi atualizada.");
-                    console.log("Passo 7: Salvando a nova URL no Firestore...");
                     await this.saveDataToFirestore();
-                    console.log("Passo 7: Sucesso. Dados salvos no Firestore.");
-                    console.log("--- PROCESSO DE UPLOAD CONCLUÍDO COM SUCESSO! ---");
                 } catch (error) {
-                    console.error("--- ERRO CRÍTICO NO PROCESSO DE UPLOAD ---");
-                    console.error("O processo parou em algum lugar entre o Passo 3 e o 7. Veja o erro abaixo:");
-                    console.error(error);
+                    console.error("Erro no upload do avatar:", error);
                     avatarImg.src = originalSrc;
                 } finally {
                     avatarImg.style.opacity = '1';
@@ -867,47 +844,55 @@
             },
             ai: {
                 async getFinancialAnalysis(monthIndex) {
-                    console.log(`Iniciando análise de IA para o mês ${monthIndex}...`);
                     App.ui.aiAnalysisModal.classList.remove('hidden');
                     App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados...</p>';
                     try {
                         const monthData = App.state.monthlyData[monthIndex];
                         if (!monthData) throw new Error("Dados do mês não encontrados.");
                         const prompt = `
-                        Você é um assistente que gera relatórios financeiros em HTML.
-                        Sua única função é retornar o código HTML do relatório.
-                        NÃO inclua explicações, observações, introduções ou qualquer texto fora do código HTML.
-                        NÃO use blocos de código como \`\`\`html.
-                        Sua resposta deve começar DIRETAMENTE com a primeira tag HTML (ex: <h3>) e terminar com a última.
-                        Analise os seguintes dados financeiros: ${JSON.stringify(monthData)}.
-                        Gere o relatório contendo:
-                        1. Um resumo dos ganhos e gastos.
-                        2. A maior categoria de despesa pessoal.
-                        3. Três sugestões práticas e personalizadas para melhorar a saúde financeira.
-                    `;
+                            **Contexto, Regras e Funcionalidades do App:**
+                            1. Você é o assistente de IA da plataforma "Rico Plus".
+                            2. Você pode dar dicas financeiras gerais, mas ao sugerir ações, SÓ PODE usar as funcionalidades existentes.
+                            3. Funcionalidades existentes: Lançamento de ganhos/despesas, categorização, metas de gastos, resumos, gráficos, lançamentos recorrentes, gestão de cartões, exportação PDF/CSV.
+                            4. **NÃO INVENTE** funcionalidades que não existem (ex: notificações).
+                            5. **NUNCA** mencione apps concorrentes.
+
+                            **Tarefa:**
+                            Gere um relatório em HTML (sem texto fora do HTML) analisando os dados: ${JSON.stringify(monthData)}.
+                            O relatório deve conter:
+                            1. Um resumo dos ganhos e gastos.
+                            2. A maior categoria de despesa pessoal.
+                            3. Três sugestões práticas para melhorar a saúde financeira, baseadas nas funcionalidades existentes do Rico Plus.
+                        `;
                         const analysisResult = await this.callVercelFunction(prompt);
                         const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
                         App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
                     } catch (error) {
                         console.error("Erro ao obter análise da IA:", error);
-                        App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados. Verifique o console para mais detalhes.</p>';
+                        App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados.</p>';
                     }
                 },
                 async getAnnualFinancialAnalysis() {
-                    console.log(`Iniciando análise de IA para o ano inteiro...`);
                     App.ui.aiAnalysisModal.classList.remove('hidden');
                     App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados anuais...</p>';
                     try {
                         const annualData = App.state.monthlyData;
                         if (!annualData) throw new Error("Dados anuais não encontrados.");
                         const prompt = `
-                        Você é um assistente de finanças. Analise os seguintes dados financeiros do ano inteiro: ${JSON.stringify(annualData)}.
-                        Sua resposta deve ser em HTML.
-                        Gere um relatório conciso contendo:
-                        1. Um resumo geral dos ganhos, gastos e saldo final do ano.
-                        2. O mês de maior gasto e o mês de maior ganho.
-                        3. Três insights ou sugestões estratégicas para o próximo ano com base nesses dados.
-                    `;
+                            **Contexto, Regras e Funcionalidades do App:**
+                            1. Você é o assistente de IA da plataforma "Rico Plus".
+                            2. Você pode dar dicas financeiras gerais, mas ao sugerir ações, SÓ PODE usar as funcionalidades existentes.
+                            3. Funcionalidades existentes: Lançamento de ganhos/despesas, categorização, metas de gastos, resumos, gráficos, lançamentos recorrentes, gestão de cartões, exportação PDF/CSV.
+                            4. **NÃO INVENTE** funcionalidades que não existem (ex: notificações).
+                            5. **NUNCA** mencione apps concorrentes.
+
+                            **Tarefa:**
+                            Gere um relatório em HTML (sem texto fora do HTML) analisando os dados anuais: ${JSON.stringify(annualData)}.
+                            O relatório deve conter:
+                            1. Um resumo geral dos ganhos, gastos e saldo final do ano.
+                            2. O mês de maior gasto e o mês de maior ganho.
+                            3. Três insights estratégicos para o próximo ano.
+                        `;
                         const analysisResult = await this.callVercelFunction(prompt);
                         const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
                         App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
@@ -920,37 +905,47 @@
                     try {
                         const financialData = App.state.monthlyData;
                         const prompt = `
-                        Você é um chatbot assistente financeiro. Um usuário te fez a seguinte pergunta: "${userMessage}".
-                        Use os dados financeiros a seguir para formular sua resposta: ${JSON.stringify(financialData)}.
-                        Responda de forma curta e direta. Se a pergunta for complexa, explique o que encontrou.
-                        Se a pergunta não tiver relação com os dados, diga que você só pode responder sobre as finanças do usuário.
-                        NÃO retorne a resposta em formato HTML, apenas texto simples.
-                    `;
+                            **Contexto, Regras e Funcionalidades do App:**
+                            1. Você é o assistente de IA da plataforma "Rico Plus". Sua personalidade é prestativa e focada em ajudar.
+                            2. Você pode dar dicas financeiras gerais e conceituais (ex: importância de poupar).
+                            3. **REGRA CRÍTICA:** Ao sugerir uma AÇÃO PRÁTICA ou FERRAMENTA, você SÓ PODE se basear na seguinte lista de funcionalidades que REALMENTE EXISTEM no Rico Plus:
+                                - Lançamento de ganhos (PJ/PF) e despesas.
+                                - Categorização de gastos e definição de metas de orçamento.
+                                - Resumos, saldos e gráficos.
+                                - Lançamentos recorrentes.
+                                - Gerenciamento de cartões de crédito.
+                            4. **NÃO INVENTE** funcionalidades que não estão na lista (ex: notificações).
+                            5. **NUNCA** mencione apps concorrentes. Se o usuário pedir uma ferramenta, reforce o uso do Rico Plus.
+
+                            **Tarefa:**
+                            Responda à pergunta do usuário: "${userMessage}". Use os dados financeiros a seguir como base: ${JSON.stringify(financialData)}.
+                            Formate sua resposta de forma clara usando Markdown.
+                        `;
                         const aiResponse = await this.callVercelFunction(prompt);
                         const messagesContainer = document.getElementById('chatbot-messages');
                         messagesContainer.removeChild(messagesContainer.lastChild);
+                        const formattedResponse = marked.parse(aiResponse);
                         messagesContainer.innerHTML += `
-                        <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
-                            <p class="font-bold mb-1">Assistente</p>
-                            <p>${aiResponse}</p>
-                        </div>
-                    `;
+                            <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
+                                <p class="font-bold mb-1">Assistente</p>
+                                <div class="prose dark:prose-invert max-w-none">${formattedResponse}</div>
+                            </div>
+                        `;
                         messagesContainer.scrollTop = messagesContainer.scrollHeight;
                     } catch (error) {
                         console.error("Erro na resposta do chatbot:", error);
                         const messagesContainer = document.getElementById('chatbot-messages');
                         messagesContainer.removeChild(messagesContainer.lastChild);
                         messagesContainer.innerHTML += `
-                        <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
-                            <p class="font-bold mb-1">Assistente</p>
-                            <p>Desculpe, não consegui processar sua pergunta. Tente novamente.</p>
-                        </div>
-                    `;
+                            <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
+                                <p class="font-bold mb-1">Assistente</p>
+                                <p>Desculpe, não consegui processar sua pergunta. Tente novamente.</p>
+                            </div>
+                        `;
                         messagesContainer.scrollTop = messagesContainer.scrollHeight;
                     }
                 },
                 async getCategorySuggestion(description, entryId, button) {
-                    console.log(`Buscando sugestão de categoria para: ${description}`);
                     const originalContent = button.innerHTML;
                     button.innerHTML = '...';
                     button.disabled = true;
@@ -1110,8 +1105,8 @@
                     </div>
                     <div class="text-center mb-8 -mt-4"><button id="ai-annual-analysis-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);">Analisar Ano com IA ✨</button></div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-center">
-                        <div class="card border-t-4 border-yellow-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos Pessoais</span><span id="totalAnnualPJ" class="text-2xl font-semibold">R$ 0,00</span></div>
-                        <div class="card border-t-4 border-green-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos Empresa</span><span id="totalAnnualPF" class="text-2xl font-semibold">R$ 0,00</span></div>
+                        <div class="card border-t-4 border-yellow-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PJ</span><span id="totalAnnualPJ" class="text-2xl font-semibold">R$ 0,00</span></div>
+                        <div class="card border-t-4 border-green-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PF</span><span id="totalAnnualPF" class="text-2xl font-semibold">R$ 0,00</span></div>
                         <div class="card border-t-4 border-red-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Gastos Totais</span><span id="totalAnnualExpenses" class="text-2xl font-semibold">R$ 0,00</span></div>
                         <div class="card border-t-4 border-blue-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Saldo Final</span><span id="annualBalance" class="text-2xl font-bold">R$ 0,00</span><p id="annualPerformance" class="text-lg font-semibold mt-1"></p></div>
                     </div>
@@ -1130,11 +1125,7 @@
                     const { monthIndex, dayIndex, category, entry, type } = config;
                     const d = document.createElement('div');
                     d.classList.add('flex', 'items-center', 'gap-2', 'w-full', 'flex-wrap', 'expense-entry-row');
-                    let r = '',
-                        p = '',
-                        c = '',
-                        s = '',
-                        aiBtn = '';
+                    let r = '', p = '', c = '', s = '', aiBtn = '';
                     if (type === 'expense') {
                         r = `<button class="remove-btn" data-type="expense" data-month-index="${monthIndex}" data-day="${dayIndex}" data-category="${category}" data-entry-id="${entry.id}">×</button>`;
                         p = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="paymentMethod">${App.constants.basePaymentMethods.map(m => `<option value="${m}" ${entry.paymentMethod === m ? 'selected' : ''}>${m}</option>`).join('')}</select>`;
@@ -1142,32 +1133,18 @@
                             c = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="card">${App.state.creditCards.map(c => `<option value="${c}" ${entry.card === c ? 'selected' : ''}>${c}</option>`).join('')}</select>`;
                         }
                         s = `<select class="entry-input p-2 input-field text-sm w-full sm:w-auto" data-field="category">${App.state.categories.map(c => `<option value="${c.name}" ${entry.category === c.name ? 'selected' : ''}>${c.name}</option>`).join('')}</select>`;
-                        aiBtn = `<div class="tooltip-container">
-                                    <button class="suggest-category-btn flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-xl" style="background-color: var(--secondary-bg); color: var(--secondary-text);">✨</button>
-                                    <span class="tooltip-text">Sugerir categoria com IA</span>
-                                </div>`;
+                        aiBtn = `<div class="tooltip-container"><button class="suggest-category-btn flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-xl" style="background-color: var(--secondary-bg); color: var(--secondary-text);">✨</button><span class="tooltip-text">Sugerir categoria com IA</span></div>`;
                     } else {
                         r = `<button class="remove-btn" data-type="${type}" data-month-index="${monthIndex}" data-entry-id="${entry.id}">×</button>`;
                     }
                     d.innerHTML = `<input type="text" value="${entry.description}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description"><input type="number" value="${entry.amount}" min="0" step="0.01" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">${s}${aiBtn}${p}<span class="card-selector-container">${c}</span>${r}`;
                     return d;
                 },
-                renderPJEntries: (m) => { const c = document.getElementById(`pj-entries-container-${m}`); if (!c) return;
-                    c.innerHTML = '';
-                    App.state.monthlyData[m].pjEntries.forEach(e => c.appendChild(App.render.createEntryElement({ monthIndex: m, entry: e, type: 'pj' }))); },
-                renderPFEntries: (m) => { const c = document.getElementById(`pf-entries-container-${m}`); if (!c) return;
-                    c.innerHTML = '';
-                    App.state.monthlyData[m].pfEntries.forEach(e => c.appendChild(App.render.createEntryElement({ monthIndex: m, entry: e, type: 'pf' }))); },
-                renderExpenseTable: (m) => { const container = document.getElementById(`expense-accordion-container-${m}`); if (!container) return;
-                    container.innerHTML = ''; for (let day = 0; day < 31; day++) { const item = document.createElement('div');
-                        item.className = 'accordion-item card rounded-xl overflow-hidden';
-                        item.innerHTML = `<div class="accordion-trigger flex justify-between items-center p-4 cursor-pointer" style="background-color: var(--input-bg);"><span class="font-semibold">Dia ${day + 1}</span><span class="arrow text-xl muted-text">▼</span></div><div class="accordion-content"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><h3 class="font-semibold mb-3">Gastos Pessoais</h3><div id="personal-entries-${m}-${day}" class="flex flex-col gap-3"></div><button class="add-entry-btn mt-3 px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="personal">+ Gasto Pessoal</button></div><div><h3 class="font-semibold mb-3">Gastos da Empresa</h3><div id="business-entries-${m}-${day}" class="flex flex-col gap-3"></div><button class="add-entry-btn mt-3 px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="business">+ Gasto Empresa</button></div></div></div>`;
-                        container.appendChild(item);
-                        ['personal', 'business'].forEach(type => { const entriesContainer = item.querySelector(`#${type}-entries-${m}-${day}`);
-                            App.state.monthlyData[m].expenses[day][`${type}Entries`].forEach(e => entriesContainer.appendChild(App.render.createEntryElement({ monthIndex: m, dayIndex: day, category: type, entry: e, type: 'expense' }))); }); } },
-                updateBudgetAlerts: (m) => { const c = document.getElementById(`budget-alerts-${m}`); if (!c) return; const expenses = App.state.categories.reduce((a, cat) => ({...a, [cat.name]: 0 }), {});
-                    App.state.monthlyData[m].expenses.forEach(d => { d.personalEntries.forEach(e => { if (expenses[e.category] !== undefined) expenses[e.category] += e.amount; }); }); const alerts = App.state.categories.map(cat => (expenses[cat.name] > cat.budget && cat.budget > 0) ? `<li style="color: var(--red-color);">${cat.name}: ${App.helpers.formatCurrency(expenses[cat.name] - cat.budget)} acima da meta.</li>` : '').filter(Boolean);
-                    c.innerHTML = alerts.length > 0 ? `<p class="font-semibold mt-2">Atenção ao Orçamento:</p><ul class="list-disc list-inside ml-4">${alerts.join('')}</ul>` : ''; },
+                renderPJEntries: (m) => { const c = document.getElementById(`pj-entries-container-${m}`); if (!c) return; c.innerHTML = ''; App.state.monthlyData[m].pjEntries.forEach(e => c.appendChild(App.render.createEntryElement({ monthIndex: m, entry: e, type: 'pj' }))); },
+                renderPFEntries: (m) => { const c = document.getElementById(`pf-entries-container-${m}`); if (!c) return; c.innerHTML = ''; App.state.monthlyData[m].pfEntries.forEach(e => c.appendChild(App.render.createEntryElement({ monthIndex: m, entry: e, type: 'pf' }))); },
+                renderExpenseTable: (m) => { const container = document.getElementById(`expense-accordion-container-${m}`); if (!container) return; container.innerHTML = ''; for (let day = 0; day < 31; day++) { const item = document.createElement('div'); item.className = 'accordion-item card rounded-xl overflow-hidden'; item.innerHTML = `<div class="accordion-trigger flex justify-between items-center p-4 cursor-pointer" style="background-color: var(--input-bg);"><span class="font-semibold">Dia ${day + 1}</span><span class="arrow text-xl muted-text">▼</span></div><div class="accordion-content"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><h3 class="font-semibold mb-3">Gastos Pessoais</h3><div id="personal-entries-${m}-${day}" class="flex flex-col gap-3"></div><button class="add-entry-btn mt-3 px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="personal">+ Gasto Pessoal</button></div><div><h3 class="font-semibold mb-3">Gastos da Empresa</h3><div id="business-entries-${m}-${day}" class="flex flex-col gap-3"></div><button class="add-entry-btn mt-3 px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="business">+ Gasto Empresa</button></div></div></div>`; container.appendChild(item);
+                        ['personal', 'business'].forEach(type => { const entriesContainer = item.querySelector(`#${type}-entries-${m}-${day}`); App.state.monthlyData[m].expenses[day][`${type}Entries`].forEach(e => entriesContainer.appendChild(App.render.createEntryElement({ monthIndex: m, dayIndex: day, category: type, entry: e, type: 'expense' }))); }); } },
+                updateBudgetAlerts: (m) => { const c = document.getElementById(`budget-alerts-${m}`); if (!c) return; const expenses = App.state.categories.reduce((a, cat) => ({...a, [cat.name]: 0 }), {}); App.state.monthlyData[m].expenses.forEach(d => { d.personalEntries.forEach(e => { if (expenses[e.category] !== undefined) expenses[e.category] += e.amount; }); }); const alerts = App.state.categories.map(cat => (expenses[cat.name] > cat.budget && cat.budget > 0) ? `<li style="color: var(--red-color);">${cat.name}: ${App.helpers.formatCurrency(expenses[cat.name] - cat.budget)} acima da meta.</li>` : '').filter(Boolean); c.innerHTML = alerts.length > 0 ? `<p class="font-semibold mt-2">Atenção ao Orçamento:</p><ul class="list-disc list-inside ml-4">${alerts.join('')}</ul>` : ''; },
                 updateAllCharts: (m, totals) => {
                     const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
                     const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color');
