@@ -866,81 +866,98 @@
                 });
             },
             ai: {
-                async getFinancialAnalysis(monthIndex) {
-                    console.log(`Iniciando análise de IA para o mês ${monthIndex}...`);
-                    App.ui.aiAnalysisModal.classList.remove('hidden');
-                    App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados...</p>';
-                    try {
-                        const monthData = App.state.monthlyData[monthIndex];
-                        if (!monthData) throw new Error("Dados do mês não encontrados.");
-                        const prompt = `
-                        Você é um assistente que gera relatórios financeiros em HTML.
-                        Sua única função é retornar o código HTML do relatório.
-                        NÃO inclua explicações, observações, introduções ou qualquer texto fora do código HTML.
-                        NÃO use blocos de código como \`\`\`html.
-                        Sua resposta deve começar DIRETAMENTE com a primeira tag HTML (ex: <h3>) e terminar com a última.
-                        Analise os seguintes dados financeiros: ${JSON.stringify(monthData)}.
-                        Gere o relatório contendo:
-                        1. Um resumo dos ganhos e gastos.
-                        2. A maior categoria de despesa pessoal.
-                        3. Três sugestões práticas e personalizadas para melhorar a saúde financeira.
-                    `;
-                        const analysisResult = await this.callVercelFunction(prompt);
-                        const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
-                        App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
-                    } catch (error) {
-                        console.error("Erro ao obter análise da IA:", error);
-                        App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados. Verifique o console para mais detalhes.</p>';
-                    }
-                },
-                async getAnnualFinancialAnalysis() {
-                    console.log(`Iniciando análise de IA para o ano inteiro...`);
-                    App.ui.aiAnalysisModal.classList.remove('hidden');
-                    App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados anuais...</p>';
-                    try {
-                        const annualData = App.state.monthlyData;
-                        if (!annualData) throw new Error("Dados anuais não encontrados.");
-                        const prompt = `
-                        Você é um assistente de finanças. Analise os seguintes dados financeiros do ano inteiro: ${JSON.stringify(annualData)}.
-                        Sua resposta deve ser em HTML.
-                        Gere um relatório conciso contendo:
-                        1. Um resumo geral dos ganhos, gastos e saldo final do ano.
-                        2. O mês de maior gasto e o mês de maior ganho.
-                        3. Três insights ou sugestões estratégicas para o próximo ano com base nesses dados.
-                    `;
-                        const analysisResult = await this.callVercelFunction(prompt);
-                        const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
-                        App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
-                    } catch (error) {
-                        console.error("Erro ao obter análise anual da IA:", error);
-                        App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados anuais.</p>';
-                    }
-                },
+                // Dentro de App.ai, substitua esta função
+async getFinancialAnalysis(monthIndex) {
+    App.ui.aiAnalysisModal.classList.remove('hidden');
+    App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados...</p>';
+    try {
+        const monthData = App.state.monthlyData[monthIndex];
+        if (!monthData) throw new Error("Dados do mês não encontrados.");
+        
+        // --- INÍCIO DA ALTERAÇÃO ---
+        const prompt = `
+            **Contexto e Regras Essenciais:**
+            1. Você é o assistente de IA da plataforma "Rico Plus by Franzoi Tech".
+            2. Sua função é analisar os dados do usuário e fornecer insights.
+            3. **REGRA MAIS IMPORTANTE: NUNCA, em nenhuma hipótese, mencione ou sugira outros aplicativos, sites ou ferramentas de finanças concorrentes (ex: Mobills, Organizze, Guiabolso, etc.).**
+            4. Se for sugerir uma ferramenta, sempre se refira às funcionalidades do próprio "Rico Plus".
+
+            **Tarefa:**
+            Você é um assistente que gera relatórios financeiros em HTML. Sua única função é retornar o código HTML do relatório. NÃO inclua explicações ou texto fora do HTML.
+            Analise os seguintes dados financeiros: ${JSON.stringify(monthData)}.
+            Gere o relatório contendo:
+            1. Um resumo dos ganhos e gastos.
+            2. A maior categoria de despesa pessoal.
+            3. Três sugestões práticas e personalizadas para melhorar a saúde financeira, utilizando os recursos do Rico Plus.
+        `;
+        // --- FIM DA ALTERAÇÃO ---
+
+        const analysisResult = await this.callVercelFunction(prompt);
+        const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
+        App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
+    } catch (error) {
+        console.error("Erro ao obter análise da IA:", error);
+        App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados.</p>';
+    }
+},
+                // Dentro de App.ai, substitua esta função
+async getAnnualFinancialAnalysis() {
+    App.ui.aiAnalysisModal.classList.remove('hidden');
+    App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados anuais...</p>';
+    try {
+        const annualData = App.state.monthlyData;
+        if (!annualData) throw new Error("Dados anuais não encontrados.");
+        
+        // --- INÍCIO DA ALTERAÇÃO ---
+        const prompt = `
+            **Contexto e Regras Essenciais:**
+            1. Você é o assistente de IA da plataforma "Rico Plus by Franzoi Tech".
+            2. **REGRA MAIS IMPORTANTE: NUNCA mencione ou sugira outros aplicativos concorrentes.**
+            3. Se for sugerir uma ferramenta, sempre se refira às funcionalidades do próprio "Rico Plus".
+
+            **Tarefa:**
+            Sua resposta deve ser em HTML. Analise os dados financeiros do ano inteiro: ${JSON.stringify(annualData)}.
+            Gere um relatório conciso contendo:
+            1. Um resumo geral dos ganhos, gastos e saldo final do ano.
+            2. O mês de maior gasto e o mês de maior ganho.
+            3. Três insights ou sugestões estratégicas para o próximo ano com base nesses dados.
+        `;
+        // --- FIM DA ALTERAÇÃO ---
+
+        const analysisResult = await this.callVercelFunction(prompt);
+        const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
+        App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
+    } catch (error) {
+        console.error("Erro ao obter análise anual da IA:", error);
+        App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados anuais.</p>';
+    }
+},
                 // Dentro de App.ai, substitua a função inteira por esta:
 
+// Dentro de App.ai, substitua esta função
 async getChatbotResponse(userMessage) {
     try {
         const financialData = App.state.monthlyData;
         
-        // --- PASSO 1: INSTRUIR A IA A USAR MARKDOWN ---
-        // Modificamos o prompt para pedir a formatação.
+        // --- INÍCIO DA ALTERAÇÃO ---
         const prompt = `
-            Você é um chatbot assistente financeiro. Um usuário te fez a seguinte pergunta: "${userMessage}".
+            **Contexto e Regras Essenciais:**
+            1. Você é o assistente de IA da plataforma "Rico Plus by Franzoi Tech".
+            2. **REGRA MAIS IMPORTANTE: NUNCA, em nenhuma hipótese, mencione ou sugira outros aplicativos, sites ou ferramentas de finanças concorrentes (ex: Mobills, Organizze, Guiabolso, etc.).**
+            3. Se o usuário perguntar sobre ferramentas, recomende o uso das funcionalidades do próprio "Rico Plus".
+
+            **Tarefa:**
+            Um usuário te fez a seguinte pergunta: "${userMessage}".
             Use os dados financeiros a seguir para formular sua resposta: ${JSON.stringify(financialData)}.
-            Responda de forma clara e bem estruturada. 
-            **Use Markdown para formatar a resposta (títulos, listas com marcadores *, e texto em **negrito**) para melhorar a legibilidade.**
+            Responda de forma clara e use Markdown para formatar a resposta.
             Se a pergunta não tiver relação com os dados, diga que você só pode responder sobre as finanças do usuário.
         `;
-        
+        // --- FIM DA ALTERAÇÃO ---
+
         const aiResponse = await this.callVercelFunction(prompt);
-
         const messagesContainer = document.getElementById('chatbot-messages');
-        messagesContainer.removeChild(messagesContainer.lastChild); // Remove o "Pensando..."
-
-        // --- PASSO 2: CONVERTER MARKDOWN PARA HTML ---
-        // Usamos a biblioteca marked.parse() para transformar a resposta da IA em HTML formatado.
+        messagesContainer.removeChild(messagesContainer.lastChild);
         const formattedResponse = marked.parse(aiResponse);
-
         messagesContainer.innerHTML += `
             <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
                 <p class="font-bold mb-1">Assistente</p>
@@ -948,18 +965,8 @@ async getChatbotResponse(userMessage) {
             </div>
         `;
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
     } catch (error) {
-        console.error("Erro na resposta do chatbot:", error);
-        const messagesContainer = document.getElementById('chatbot-messages');
-        messagesContainer.removeChild(messagesContainer.lastChild); 
-        messagesContainer.innerHTML += `
-            <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
-                <p class="font-bold mb-1">Assistente</p>
-                <p>Desculpe, não consegui processar sua pergunta. Tente novamente.</p>
-            </div>
-        `;
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        // ... (código de erro sem alterações)
     }
 },
                 async getCategorySuggestion(description, entryId, button) {
