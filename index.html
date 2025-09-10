@@ -874,23 +874,21 @@ async getFinancialAnalysis(monthIndex) {
         const monthData = App.state.monthlyData[monthIndex];
         if (!monthData) throw new Error("Dados do mês não encontrados.");
         
-        // --- INÍCIO DA ALTERAÇÃO ---
         const prompt = `
-            **Contexto e Regras Essenciais:**
-            1. Você é o assistente de IA da plataforma "Rico Plus by Franzoi Tech".
-            2. Sua função é analisar os dados do usuário e fornecer insights.
-            3. **REGRA MAIS IMPORTANTE: NUNCA, em nenhuma hipótese, mencione ou sugira outros aplicativos, sites ou ferramentas de finanças concorrentes (ex: Mobills, Organizze, Guiabolso, etc.).**
-            4. Se for sugerir uma ferramenta, sempre se refira às funcionalidades do próprio "Rico Plus".
+            **Contexto, Regras e Funcionalidades do App:**
+            1. Você é o assistente de IA da plataforma "Rico Plus".
+            2. Você pode dar dicas financeiras gerais, mas ao sugerir ações, SÓ PODE usar as funcionalidades existentes.
+            3. Funcionalidades existentes: Lançamento de ganhos/despesas, categorização, metas de gastos, resumos, gráficos, lançamentos recorrentes, gestão de cartões, exportação PDF/CSV.
+            4. **NÃO INVENTE** funcionalidades que não existem (ex: notificações).
+            5. **NUNCA** mencione apps concorrentes.
 
             **Tarefa:**
-            Você é um assistente que gera relatórios financeiros em HTML. Sua única função é retornar o código HTML do relatório. NÃO inclua explicações ou texto fora do HTML.
-            Analise os seguintes dados financeiros: ${JSON.stringify(monthData)}.
-            Gere o relatório contendo:
+            Gere um relatório em HTML (sem texto fora do HTML) analisando os dados: ${JSON.stringify(monthData)}.
+            O relatório deve conter:
             1. Um resumo dos ganhos e gastos.
             2. A maior categoria de despesa pessoal.
-            3. Três sugestões práticas e personalizadas para melhorar a saúde financeira, utilizando os recursos do Rico Plus.
+            3. Três sugestões práticas para melhorar a saúde financeira, baseadas nas funcionalidades existentes do Rico Plus.
         `;
-        // --- FIM DA ALTERAÇÃO ---
 
         const analysisResult = await this.callVercelFunction(prompt);
         const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
@@ -908,21 +906,21 @@ async getAnnualFinancialAnalysis() {
         const annualData = App.state.monthlyData;
         if (!annualData) throw new Error("Dados anuais não encontrados.");
         
-        // --- INÍCIO DA ALTERAÇÃO ---
         const prompt = `
-            **Contexto e Regras Essenciais:**
-            1. Você é o assistente de IA da plataforma "Rico Plus by Franzoi Tech".
-            2. **REGRA MAIS IMPORTANTE: NUNCA mencione ou sugira outros aplicativos concorrentes.**
-            3. Se for sugerir uma ferramenta, sempre se refira às funcionalidades do próprio "Rico Plus".
+            **Contexto, Regras e Funcionalidades do App:**
+            1. Você é o assistente de IA da plataforma "Rico Plus".
+            2. Você pode dar dicas financeiras gerais, mas ao sugerir ações, SÓ PODE usar as funcionalidades existentes.
+            3. Funcionalidades existentes: Lançamento de ganhos/despesas, categorização, metas de gastos, resumos, gráficos, lançamentos recorrentes, gestão de cartões, exportação PDF/CSV.
+            4. **NÃO INVENTE** funcionalidades que não existem (ex: notificações).
+            5. **NUNCA** mencione apps concorrentes.
 
             **Tarefa:**
-            Sua resposta deve ser em HTML. Analise os dados financeiros do ano inteiro: ${JSON.stringify(annualData)}.
-            Gere um relatório conciso contendo:
+            Gere um relatório em HTML (sem texto fora do HTML) analisando os dados anuais: ${JSON.stringify(annualData)}.
+            O relatório deve conter:
             1. Um resumo geral dos ganhos, gastos e saldo final do ano.
             2. O mês de maior gasto e o mês de maior ganho.
-            3. Três insights ou sugestões estratégicas para o próximo ano com base nesses dados.
+            3. Três insights estratégicos para o próximo ano.
         `;
-        // --- FIM DA ALTERAÇÃO ---
 
         const analysisResult = await this.callVercelFunction(prompt);
         const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
@@ -939,22 +937,26 @@ async getChatbotResponse(userMessage) {
     try {
         const financialData = App.state.monthlyData;
         
-        // --- INÍCIO DA ALTERAÇÃO ---
         const prompt = `
-            **Contexto e Regras Essenciais:**
-            1. Você é o assistente de IA da plataforma "Rico Plus by Franzoi Tech".
-            2. **REGRA MAIS IMPORTANTE: NUNCA, em nenhuma hipótese, mencione ou sugira outros aplicativos, sites ou ferramentas de finanças concorrentes (ex: Mobills, Organizze, Guiabolso, etc.).**
-            3. Se o usuário perguntar sobre ferramentas, recomende o uso das funcionalidades do próprio "Rico Plus".
+            **Contexto, Regras e Funcionalidades do App:**
+            1. Você é o assistente de IA da plataforma "Rico Plus". Sua personalidade é prestativa e focada em ajudar.
+            2. Você pode dar dicas financeiras gerais e conceituais (ex: importância de poupar).
+            3. **REGRA CRÍTICA:** Ao sugerir uma AÇÃO PRÁTICA ou FERRAMENTA, você SÓ PODE se basear na seguinte lista de funcionalidades que REALMENTE EXISTEM no Rico Plus:
+                - Lançamento de ganhos (PJ/PF) e despesas.
+                - Categorização de gastos e definição de metas de orçamento.
+                - Resumos, saldos e gráficos.
+                - Lançamentos recorrentes.
+                - Gerenciamento de cartões de crédito.
+            4. **NÃO INVENTE** funcionalidades que não estão na lista (ex: notificações).
+            5. **NUNCA** mencione apps concorrentes. Se o usuário pedir uma ferramenta, reforce o uso do Rico Plus.
 
             **Tarefa:**
-            Um usuário te fez a seguinte pergunta: "${userMessage}".
-            Use os dados financeiros a seguir para formular sua resposta: ${JSON.stringify(financialData)}.
-            Responda de forma clara e use Markdown para formatar a resposta.
-            Se a pergunta não tiver relação com os dados, diga que você só pode responder sobre as finanças do usuário.
+            Responda à pergunta do usuário: "${userMessage}". Use os dados financeiros a seguir como base: ${JSON.stringify(financialData)}.
+            Formate sua resposta de forma clara usando Markdown.
         `;
-        // --- FIM DA ALTERAÇÃO ---
 
         const aiResponse = await this.callVercelFunction(prompt);
+        // ... (resto da função sem alterações)
         const messagesContainer = document.getElementById('chatbot-messages');
         messagesContainer.removeChild(messagesContainer.lastChild);
         const formattedResponse = marked.parse(aiResponse);
