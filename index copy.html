@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Financeiro - Franzoi Tech</title>
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="FranzoiTech" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> 
+    <style>
+        :root {
+            --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
+            --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
+            --secondary-bg: #e8e8ed; --secondary-text: #1d1d1f; --border-color: #d2d2d7;
+            --green-color: #30a14f; --red-color: #d82c0d;
+        }
+        html.dark {
+            --bg-color: #000000; --card-bg: #1d1d1f; --text-color: #f5f5f7; --muted-text: #86868b;
+            --input-bg: #3a3a3c; --input-border: #545458; --primary-color: #2997ff; --primary-color-hover: #53b0ff;
+            --secondary-bg: #3a3a3c; --secondary-text: #f5f5f7; --border-color: #424245;
+            --green-color: #32d74b; --red-color: #ff453a;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
+        .input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
+        .input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
+        .muted-text { color: var(--muted-text); }
+        input[type="number"] { -moz-appearance: textfield; appearance: none; }
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        .remove-btn { background-color: var(--secondary-bg); color: var(--muted-text); border-radius: 9999px; width: 1.75rem; height: 1.75rem; font-weight: 500; transition: background-color 0.2s, color 0.2s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .remove-btn:hover { background-color: var(--red-color); color: white; }
+        .month-content { display: none; } .month-content.active { display: block; }
+        #save-feedback { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background-color: var(--green-color); color: white; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500; z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
+        #save-feedback.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-10px); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; padding: 0 1.5rem; border-top: 1px solid var(--border-color); }
+        .accordion-item.active .accordion-content { max-height: 1000px; padding: 1.5rem; }
+        .accordion-trigger .arrow { transition: transform 0.3s ease-out; }
+        .accordion-item.active .accordion-trigger .arrow { transform: rotate(180deg); }
+        .prose { color: var(--text-color); } .prose h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5em; }
+        .prose p { margin-bottom: 1em; line-height: 1.6; } .prose ul { list-style-position: inside; margin-bottom: 1em; padding-left: 1em; }
+        .prose li { margin-bottom: 0.5em; }
+        .action-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
+        @media (min-width: 640px) { .action-buttons { flex-direction: row; } }
+        #theme-toggle-btn { font-size: 1.25rem !important; color: var(--text-color) !important; background-image: none !important; line-height: 1; }
+        #theme-toggle-btn::before, #theme-toggle-btn::after { content: none !important; display: none !important; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; border: 1px solid var(--border-color); padding: 1rem; border-radius: 1.5rem; }
+        .calendar-header { text-align: center; font-weight: 600; color: var(--muted-text); padding-bottom: 0.5rem; font-size: 0.875rem; }
+        .calendar-day { display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s, color 0.2s; position: relative; }
+        .calendar-day.not-current-month { color: var(--muted-text); opacity: 0.5; cursor: default; }
+        .calendar-day.current-month:hover { background-color: var(--secondary-bg); }
+        .calendar-day.active { background-color: var(--primary-color); color: white; font-weight: 600; }
+        .calendar-day.has-entries::after { content: ''; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background-color: var(--red-color); }
+        .calendar-day.active.has-entries::after { background-color: white; }
+        #expense-section-wrapper .accordion-item { display: none; }
+        #expense-section-wrapper .accordion-item.active { display: block; }
+    </style>
+</head>
+<body class="p-2 sm:p-4">
+    
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
+
+    <div id="auth-screen" class="container mx-auto max-w-md mt-10 p-8 card rounded-2xl">
+        <div class="text-center mb-6"><div class="flex justify-center mb-4"><img src="images/logo.png" alt="Logo Franzoi Tech" width="100" height="100"></div><h1 id="auth-title" class="text-2xl font-bold">Acesso ao Painel</h1><p class="muted-text">Faça login ou crie sua conta.</p></div>
+        <div class="space-y-4"><input type="email" id="email-input" placeholder="Email" class="w-full p-3 input-field"><input type="password" id="password-input" placeholder="Senha" class="w-full p-3 input-field"><input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 input-field hidden"></div>
+        <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
+        <div class="mt-4 flex flex-col gap-2"><button id="main-auth-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors disabled:opacity-50" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')">Entrar</button><a href="#" id="forgot-password-link" class="text-center text-sm hover:underline" style="color: var(--primary-color);">Esqueceu a senha?</a></div>
+        <div class="mt-4 text-center"><a href="#" id="toggle-auth-mode-link" class="text-sm muted-text hover:underline">Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span></a></div>
+    </div>
+
+    <div id="app-screen" class="hidden">
+        <div id="chatbot-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end justify-end p-4 hidden z-50 transition-opacity">
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-md h-2/3 flex flex-col transform translate-y-8 transition-transform">
+                <div class="flex justify-between items-center p-4 border-b flex-shrink-0" style="border-color: var(--border-color);">
+                    <h2 class="text-xl font-bold">Assistente IA</h2>
+                    <button id="close-chatbot-modal-btn" class="px-3 py-1 rounded-lg" style="background-color: var(--secondary-bg);">&times;</button>
+                </div>
+                <div id="chatbot-messages" class="flex-grow p-4 overflow-y-auto space-y-4">
+                    <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);">
+                        <p class="font-bold mb-1">Assistente</p>
+                        <p>Olá! Como posso ajudar com suas finanças hoje?</p>
+                    </div>
+                </div>
+                <div class="p-4 border-t flex gap-2 flex-shrink-0" style="border-color: var(--border-color);">
+                    <input type="text" id="chatbot-input" placeholder="Ex: Qual foi meu maior gasto em Setembro?" class="flex-grow p-3 input-field">
+                    <button id="chatbot-send-btn" class="px-5 py-3 text-white font-semibold rounded-xl" style="background-color: var(--primary-color);">Enviar</button>
+                </div>
+            </div>
+        </div>
+        <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                    <h2 class="text-2xl font-bold">Minha Conta</h2>
+                    <button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
+                </div>
+                <div class="overflow-y-auto space-y-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Informações do Perfil</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label>
+                                <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field">
+                            </div>
+                            <div>
+                                <label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label>
+                                <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;">
+                            </div>
+                        </div>
+                        <button id="save-profile-btn" class="mt-4 w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações do Perfil</button>
+                    </div>
+                    <div class="border-t pt-6" style="border-color: var(--border-color);">
+                        <h3 class="text-xl font-bold mb-1">Conectar Assistente IA via WhatsApp</h3>
+                        <p class="muted-text text-sm mb-4">Configure a integração para lançar despesas e interagir com seu painel diretamente do WhatsApp.</p>
+                        <div class="p-3 mb-4 rounded-xl text-center text-sm" style="background-color: var(--secondary-bg);">
+                            ✨ <span class="font-semibold">Funcionalidade em desenvolvimento.</span> Disponível em breve!
+                        </div>
+                        <div class="space-y-4 opacity-60">
+                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
+                                <h4 class="font-semibold">Passo 1: Suas Credenciais da Meta</h4>
+                                <p class="text-xs muted-text -mt-3">Insira as credenciais da sua API encontradas no <a href="#" class="underline" style="color: var(--primary-color);">Painel de Desenvolvedores</a>.</p>
+                                <div>
+                                    <label for="whatsapp-phone-id" class="block text-sm font-medium muted-text mb-1">ID do Número de Telefone</label>
+                                    <input type="text" id="whatsapp-phone-id" placeholder="Ex: 102030405060708" class="w-full p-3 input-field" disabled>
+                                </div>
+                                <div>
+                                    <label for="whatsapp-token" class="block text-sm font-medium muted-text mb-1">Token de Acesso da API</label>
+                                    <input type="password" id="whatsapp-token" placeholder="Cole seu token permanente aqui" class="w-full p-3 input-field" disabled>
+                                </div>
+                            </div>
+                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);">
+                                <h4 class="font-semibold">Passo 2: Configurar Webhook na Meta</h4>
+                                <p class="text-xs muted-text -mt-3">Copie os valores abaixo e cole-os na seção "Webhook" da sua aplicação na Meta.</p>
+                                 <div>
+                                    <label class="block text-sm font-medium muted-text mb-1">URL do Webhook (para colar na Meta)</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="whatsapp-webhook-url" class="w-full p-3 input-field" readonly disabled>
+                                        <button id="copy-webhook-url-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Copiar</button>
+                                    </div>
+                                </div>
+                                 <div>
+                                    <label class="block text-sm font-medium muted-text mb-1">Token de Verificação do Webhook (para colar na Meta)</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="whatsapp-verify-token" class="w-full p-3 input-field" readonly disabled>
+                                         <button id="generate-verify-token-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Gerar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="text-sm muted-text">Status: <span id="whatsapp-status" class="font-semibold" style="color: var(--primary-color);">Indisponível</span></div>
+                                <button id="save-integration-btn" class="px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);" disabled>Salvar Configuração</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-6 flex-shrink-0">
+                    <h2 class="text-2xl font-bold">Gerenciar</h2>
+                    <button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Cartões de Crédito</h3>
+                        <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+                        <div id="card-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Categorias e Metas</h3>
+                        <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+                        <div id="category-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Lançamentos Recorrentes</h3>
+                        <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);"><input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field"><div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field"></div><select id="recurring-type" class="w-full p-2 input-field"></select><div id="recurring-expense-fields" class="space-y-2 hidden"><select id="recurring-category" class="w-full p-2 input-field"></select><select id="recurring-payment" class="w-full p-2 input-field"></select><select id="recurring-card" class="w-full p-2 input-field hidden"></select></div><button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button></div>
+                        <div id="recurring-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="ai-analysis-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50"><div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]"><div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 class="text-2xl font-bold">Análise Financeira com IA</h2><button id="close-ai-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div><div id="ai-analysis-result" class="overflow-y-auto prose dark:prose-invert"><p class="muted-text">Analisando seus dados...</p></div></div></div>
+
+        <div class="container mx-auto card p-6 sm:p-8 rounded-3xl relative">
+            <div id="save-feedback">Salvo ✓</div>
+            <div id="user-header" class="flex items-start justify-between mb-8 pb-8 border-b" style="border-color: var(--border-color);">
+                <div class="flex items-center space-x-4">
+                    <label for="avatar-upload-input" class="cursor-pointer group relative">
+                        <img id="user-avatar" src="images/default-avatar.svg" class="w-14 h-14 rounded-full object-cover border-2 transition-all group-hover:opacity-80" style="border-color: var(--border-color);">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                    </label>
+                    <input type="file" id="avatar-upload-input" class="hidden" accept="image/png, image/jpeg">
+                    <div>
+                        <p id="time-greeting" class="text-sm muted-text">Boa tarde!</p>
+                        <h2 id="greeting-text" class="text-2xl font-bold leading-tight">Olá, Eric</h2>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="action-buttons">
+                        <button id="manage-account-btn" class="px-3 py-1 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Conta</button>
+                        <button id="manage-settings-btn" class="px-3 py-1 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Gerenciar</button>
+                        <button id="logout-btn" class="px-3 py-1 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--red-color);">Sair</button>
+                    </div>
+                    <button id="theme-toggle-btn" class="p-2 rounded-full text-lg self-start" style="background-color: var(--secondary-bg); color: var(--secondary-text);">🌙</button>
+                </div>
+            </div>
+            <div class="text-center mb-8 space-y-2">
+                <p class="text-xs font-semibold" style="color: var(--primary-color);">Rico Plus <span class="muted-text">by Franzoi Tech</span></p>
+                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Painel Financeiro</h1>
+                <p class="text-lg muted-text max-w-xs mx-auto">Sua central de controle financeiro.</p>
+            </div>
+
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 mb-8" id="monthTabs"></div>
+            <div id="monthContentContainer"></div>
+
+            <div class="mt-12 pt-8 border-t text-center" style="border-color: var(--border-color);">
+                <p class="text-sm muted-text">Ajude a manter este projeto</p>
+                <p class="text-xs muted-text mb-2">Doe qualquer valor via Pix</p>
+                <div class="mt-2 flex justify-center"><img src="images/pix qrcode.jpeg" alt="QR Code PIX para doação" width="150" height="150"></div>
+                <div class="mt-2"><p class="text-xs muted-text">Ou use a chave (email):</p><div class="mt-1 flex justify-center items-center gap-2"><p id="pix-key" class="font-mono text-sm" style="color: var(--primary-color);">franzoitechcorp@gmail.com</p><button id="copy-pix-btn" class="px-3 py-1 text-xs font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Copiar</button></div></div>
+            </div>
+        </div>
+        
+        <button id="floating-chatbot-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full text-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: var(--primary-color); color: white;">🤖</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0", 
+            authDomain: "controle-de-gastos-74daf.firebaseapp.com", 
+            projectId: "controle-de-gastos-74daf", 
+            storageBucket: "controle-de-gastos-74daf.firebasestorage.app",
+            messagingSenderId: "331667008487", 
+            appId: "1:331667008487:web:c5200f64ac27d0c32feb42" 
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const authScreen = document.getElementById('auth-screen');
+        const appScreen = document.getElementById('app-screen');
+        const mainAuthBtn = document.getElementById('main-auth-btn');
+        const toggleAuthModeLink = document.getElementById('toggle-auth-mode-link');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const authError = document.getElementById('auth-error');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        let isLoginMode = true;
+
+        const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
+        document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress);
+        document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
+        document.getElementById('confirm-password-input').addEventListener('keydown', handleAuthKeyPress);
+
+        const showError = (message) => { authError.textContent = message; };
+
+        const setAuthMode = (mode) => {
+            isLoginMode = mode === 'login';
+            authError.textContent = '';
+            const authTitle = document.getElementById('auth-title');
+            const confirmPasswordInput = document.getElementById('confirm-password-input');
+            if (isLoginMode) {
+                authTitle.textContent = 'Acesso ao Painel';
+                mainAuthBtn.textContent = 'Entrar';
+                confirmPasswordInput.classList.add('hidden');
+                forgotPasswordLink.classList.remove('hidden');
+                toggleAuthModeLink.innerHTML = 'Ainda não tem conta? Crie uma, <span class="font-semibold">é grátis!</span>';
+            } else {
+                authTitle.textContent = 'Criar Nova Conta';
+                mainAuthBtn.textContent = 'Criar Conta';
+                confirmPasswordInput.classList.remove('hidden');
+                forgotPasswordLink.classList.add('hidden');
+                toggleAuthModeLink.textContent = 'Já tem conta? Faça login';
+            }
+        };
+
+        const applyTheme = (theme) => {
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+            themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+            if (window.App && App.state.currentUserId) {
+                App.showMonth(App.state.activeMonthIndex);
+            }
+        };
+        applyTheme(localStorage.getItem('theme') || 'light');
+
+        toggleAuthModeLink.addEventListener('click', (e) => { e.preventDefault(); setAuthMode(isLoginMode ? 'signup' : 'login'); });
+
+        mainAuthBtn.addEventListener('click', () => {
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            showError('');
+            const originalBtnText = mainAuthBtn.textContent;
+            mainAuthBtn.disabled = true;
+            mainAuthBtn.textContent = 'Aguarde...';
+            const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; };
+
+            if (isLoginMode) {
+                signInWithEmailAndPassword(auth, email, password).catch(error => { showError('Email ou senha inválidos.'); restoreBtn(); });
+            } else {
+                const confirmPassword = document.getElementById('confirm-password-input').value;
+                if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; }
+                createUserWithEmailAndPassword(auth, email, password).catch(error => {
+                    if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.');
+                    else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.');
+                    else showError('Erro ao criar conta.');
+                    restoreBtn();
+                });
+            }
+        });
+
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email-input').value;
+            if (!email) { showError('Por favor, insira seu email para recuperar a senha.'); return; }
+            sendPasswordResetEmail(auth, email)
+                .then(() => { showError('Email de recuperação enviado!'); })
+                .catch((error) => { showError('Não foi possível enviar o email.'); });
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => { signOut(auth); });
+        
+        const App = {
+            state: {
+                currentUserId: null,
+                profile: { name: '', avatarUrl: '' },
+                integrations: { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } },
+                creditCards: [],
+                categories: [
+                    { name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 },
+                    { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }
+                ],
+                recurringEntries: [],
+                monthlyData: {},
+                activeMonthIndex: new Date().getMonth(),
+                chartInstances: {},
+                saveTimeout: null
+            },
+            ui: {
+                monthContentContainer: document.getElementById('monthContentContainer'),
+                monthTabsContainer: document.getElementById('monthTabs'),
+                settingsModal: document.getElementById('settings-modal'),
+                accountModal: document.getElementById('account-modal'),
+                userNameInput: document.getElementById('user-name-input'),
+                userEmailDisplay: document.getElementById('user-email-display'),
+                whatsappPhoneId: document.getElementById('whatsapp-phone-id'),
+                whatsappToken: document.getElementById('whatsapp-token'),
+                whatsappWebhookUrl: document.getElementById('whatsapp-webhook-url'),
+                whatsappVerifyToken: document.getElementById('whatsapp-verify-token'),
+                whatsappStatus: document.getElementById('whatsapp-status'),
+                newCardNameInput: document.getElementById('new-card-name'),
+                cardListContainer: document.getElementById('card-list'),
+                newCategoryNameInput: document.getElementById('new-category-name'),
+                categoryListContainer: document.getElementById('category-list'),
+                recurringListContainer: document.getElementById('recurring-list'),
+                saveFeedback: document.getElementById('save-feedback'),
+                aiAnalysisModal: document.getElementById('ai-analysis-modal'),
+                aiAnalysisResult: document.getElementById('ai-analysis-result'),
+            },
+            constants: {
+                monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
+                basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
+            },
+
+            init(userId) {
+                this.state.currentUserId = userId;
+                this.loadData();
+                this.bindGlobalEventListeners();
+            },
+
+            helpers: {
+                formatCurrency: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`,
+                debounce(func, delay) {
+                    return (...args) => {
+                        clearTimeout(App.state.saveTimeout);
+                        App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay);
+                    };
+                },
+                showSaveFeedback() {
+                    App.ui.saveFeedback.classList.add('show');
+                    setTimeout(() => { App.ui.saveFeedback.classList.remove('show'); }, 2000);
+                },
+                cleanAIResponse(text) {
+                    if (typeof text !== 'string') return '';
+                    let cleanedText = text.replace(/```html|```/g, '');
+                    const firstTagIndex = cleanedText.indexOf('<');
+                    if (firstTagIndex > -1) { cleanedText = cleanedText.substring(firstTagIndex); }
+                    const noiseKeywords = ["Observações:", "Como usar:", "Cálculo dos Totais:", "Formatação HTML:", "Personalização das Sugestões:"];
+                    for (const keyword of noiseKeywords) {
+                        const noiseIndex = cleanedText.indexOf(keyword);
+                        if (noiseIndex > 50) { cleanedText = cleanedText.substring(0, noiseIndex); }
+                    }
+                    return cleanedText.trim();
+                },
+                generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
+            },
+            
+            async handleAvatarUpload(event) {
+                const file = event.target.files[0];
+                if (!file || !this.state.currentUserId) return;
+
+                const avatarImg = document.getElementById('user-avatar');
+                const originalSrc = avatarImg.src;
+                avatarImg.style.opacity = '0.5';
+
+                try {
+                    const storagePath = `avatars/${this.state.currentUserId}`;
+                    const storageRef = ref(storage, storagePath);
+                    await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(storageRef);
+                    this.state.profile.avatarUrl = downloadURL;
+                    avatarImg.src = downloadURL;
+                    await this.saveDataToFirestore();
+                } catch (error) {
+                    console.error("Erro no upload do avatar:", error);
+                    avatarImg.src = originalSrc;
+                } finally {
+                    avatarImg.style.opacity = '1';
+                }
+            },
+
+            async saveDataToFirestore() {
+                if (!App.state.currentUserId) return;
+                try {
+                    const dataToSave = {
+                        profile: App.state.profile,
+                        integrations: App.state.integrations,
+                        monthlyData: App.state.monthlyData,
+                        creditCards: App.state.creditCards,
+                        categories: App.state.categories,
+                        recurringEntries: App.state.recurringEntries
+                    };
+                    await setDoc(doc(db, 'users', App.state.currentUserId), dataToSave, { merge: true });
+                    App.helpers.showSaveFeedback();
+                } catch (e) { console.error("Erro ao salvar dados: ", e); }
+            },
+            
+            debouncedSave: null,
+
+            async loadData() {
+                if (!this.state.currentUserId) return;
+                try {
+                    const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
+                    if (docSnap.exists()) {
+                        const d = docSnap.data();
+                        this.state.profile = d.profile || { name: '', avatarUrl: '' };
+                        this.state.integrations = d.integrations || { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } };
+                        this.state.monthlyData = d.monthlyData || {};
+                        this.state.creditCards = d.creditCards || [];
+                        this.state.categories = d.categories && d.categories.length > 0 ? d.categories : this.state.categories;
+                        this.state.recurringEntries = d.recurringEntries || [];
+                    }
+                    if (!this.state.integrations.whatsapp.webhookVerifyToken) {
+                        this.state.integrations.whatsapp.webhookVerifyToken = this.helpers.generateRandomToken();
+                    }
+                    for (let i = 0; i < 12; i++) {
+                        this.state.monthlyData[i] = this.state.monthlyData[i] || { pjEntries: [], pfEntries: [], expenses: Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] })) };
+                        this.state.monthlyData[i].expenses.forEach(day => {
+                            [...day.personalEntries, ...day.businessEntries].forEach(entry => { if (!entry.category) { entry.category = 'Outros'; } });
+                        });
+                    }
+                } catch (error) { console.error("Erro ao carregar dados:", error); }
+
+                this.ui.monthContentContainer.innerHTML = '';
+                this.constants.monthNames.forEach((_, index) => {
+                    this.ui.monthContentContainer.insertAdjacentHTML('beforeend', index === 12 ? this.render.createBalanceContentHTML() : this.render.createMonthContentHTML(index));
+                });
+                
+                this.showMonth(this.state.activeMonthIndex);
+                loadingOverlay.classList.add('hidden');
+                this.render.updateHeader();
+            },
+            
+            showMonth(monthIndex) {
+                if (this.state.activeMonthIndex !== monthIndex && this.state.saveTimeout) {
+                    clearTimeout(this.state.saveTimeout); 
+                    this.saveDataToFirestore();                   
+                    this.state.saveTimeout = null;          
+                }
+                this.state.activeMonthIndex = monthIndex;
+                Object.values(this.state.chartInstances).forEach(c => c?.destroy());
+                document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+                
+                if (monthIndex < 12) { this.applyRecurringEntries(monthIndex); }
+                
+                this.render.renderTabs();
+                const contentEl = document.getElementById(`month-${monthIndex}-content`);
+                if (contentEl) {
+                    contentEl.classList.add('active');
+                    if (monthIndex < 12) {
+                        this.render.renderCalendarView(monthIndex);
+                        this.render.renderPJEntries(monthIndex);
+                        this.render.renderPFEntries(monthIndex);
+                        this.render.renderExpenseTable(monthIndex);
+                        this.recalculateAndDisplayTotals(monthIndex);
+                    } else {
+                        this.render.renderBalanceSummary();
+                    }
+                }
+            },
+            
+            recalculateAndDisplayTotals(m) {
+                const d = this.state.monthlyData[m];
+                if (!d) return;
+                const t = {
+                    pj: d.pjEntries.reduce((s, e) => s + e.amount, 0),
+                    pf: d.pfEntries.reduce((s, e) => s + e.amount, 0),
+                    personal: d.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0),
+                    business: d.expenses.flat().reduce((a, day) => a + day.businessEntries.reduce((s, e) => s + e.amount, 0), 0)
+                };
+                t.remainingPersonal = t.pf - t.personal;
+                t.remainingBusiness = t.pj - t.business;
+                t.remainingTotal = (t.pj + t.pf) - (t.personal + t.business);
+                document.getElementById(`companyCash-${m}`).textContent = this.helpers.formatCurrency(t.pj);
+                document.getElementById(`personalCash-${m}`).textContent = this.helpers.formatCurrency(t.pf);
+                document.getElementById(`totalPersonalExpenses-${m}`).textContent = this.helpers.formatCurrency(t.personal);
+                document.getElementById(`totalBusinessExpenses-${m}`).textContent = this.helpers.formatCurrency(t.business);
+                const rpEl = document.getElementById(`remainingPersonal-${m}`);
+                rpEl.textContent = this.helpers.formatCurrency(t.remainingPersonal);
+                rpEl.style.color = t.remainingPersonal < 0 ? 'var(--red-color)' : 'var(--green-color)';
+                const rbEl = document.getElementById(`remainingBusiness-${m}`);
+                rbEl.textContent = this.helpers.formatCurrency(t.remainingBusiness);
+                rbEl.style.color = t.remainingBusiness < 0 ? 'var(--red-color)' : 'var(--green-color)';
+                const rtEl = document.getElementById(`remainingTotal-${m}`);
+                rtEl.textContent = this.helpers.formatCurrency(t.remainingTotal);
+                rtEl.style.color = t.remainingTotal < 0 ? 'var(--red-color)' : 'var(--primary-color)';
+                this.render.updateBudgetAlerts(m);
+                this.render.updateAllCharts(m, { totalPersonal: t.personal, totalBusiness: t.business, remainingBudget: t.remainingTotal });
+            },
+
+            applyRecurringEntries(monthIndex) {
+                if (!this.state.monthlyData[monthIndex]) return;
+                let wasModified = false;
+                const appliedRecurringIds = new Set();
+                const month = this.state.monthlyData[monthIndex];
+                month.pfEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
+                month.pjEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
+                month.expenses.forEach(day => {
+                    day.personalEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
+                    day.businessEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
+                });
+
+                this.state.recurringEntries.forEach(r => {
+                    if (r.id && !appliedRecurringIds.has(r.id)) {
+                        const dayIndex = r.dayOfMonth - 1;
+                        if (dayIndex < 0 || dayIndex > 30) return;
+                        const newEntry = {
+                            id: Date.now() + Math.random(),
+                            description: r.description || 'Lançamento recorrente',
+                            amount: r.amount,
+                            isRecurring: true,
+                            recurringId: r.id
+                        };
+                        if (r.type === "Ganho PF") {
+                            month.pfEntries.push(newEntry);
+                            wasModified = true;
+                        } else if (r.type === "Ganho PJ") {
+                            month.pjEntries.push(newEntry);
+                            wasModified = true;
+                        } else if (r.type === "Gasto Pessoal") {
+                            Object.assign(newEntry, { category: r.category, paymentMethod: r.paymentMethod, card: r.card });
+                            month.expenses[dayIndex].personalEntries.push(newEntry);
+                            wasModified = true;
+                        } else if (r.type === "Gasto Empresa") {
+                            Object.assign(newEntry, { category: 'N/A', paymentMethod: r.paymentMethod, card: r.card });
+                            month.expenses[dayIndex].businessEntries.push(newEntry);
+                            wasModified = true;
+                        }
+                    }
+                });
+                if (wasModified) { this.saveDataToFirestore(); }
+            },
+            
+            bindGlobalEventListeners() {
+                this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
+                
+                const chatbotModal = document.getElementById('chatbot-modal');
+                const chatbotModalContent = chatbotModal.querySelector('.modal-content');
+                document.getElementById('floating-chatbot-btn').addEventListener('click', () => {
+                    chatbotModal.classList.remove('hidden');
+                    setTimeout(() => {
+                        chatbotModal.style.opacity = '1';
+                        chatbotModalContent.style.transform = 'translateY(0)';
+                    }, 10);
+                });
+                const closeChatbot = () => {
+                    chatbotModal.style.opacity = '0';
+                    chatbotModalContent.style.transform = 'translateY(2rem)';
+                    setTimeout(() => { chatbotModal.classList.add('hidden'); }, 300);
+                };
+                document.getElementById('close-chatbot-modal-btn').addEventListener('click', closeChatbot);
+                const sendChatbotMessage = () => {
+                    const input = document.getElementById('chatbot-input');
+                    const messagesContainer = document.getElementById('chatbot-messages');
+                    const userMessage = input.value.trim();
+                    if (userMessage) {
+                        messagesContainer.innerHTML += `<div class="flex justify-end"><div class="p-3 rounded-lg max-w-[85%] text-sm text-white" style="background-color: var(--primary-color);"><p class="font-bold mb-1">Você</p><p>${userMessage}</p></div></div>`;
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        setTimeout(() => {
+                            messagesContainer.innerHTML += `<div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);"><p class="font-bold mb-1">Assistente</p><p class="italic">Pensando...</p></div>`;
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            App.ai.getChatbotResponse(userMessage);
+                        }, 500);
+                        input.value = '';
+                    }
+                };
+                document.getElementById('chatbot-send-btn').addEventListener('click', sendChatbotMessage);
+                document.getElementById('chatbot-input').addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') { event.preventDefault(); sendChatbotMessage(); }
+                });
+
+                document.getElementById('avatar-upload-input').addEventListener('change', this.handleAvatarUpload.bind(this));
+                themeToggleBtn.addEventListener('click', () => { const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); });
+                document.getElementById('manage-settings-btn').addEventListener('click', () => { this.render.renderSettingsModal(); });
+                document.getElementById('close-modal-btn').addEventListener('click', () => { this.ui.settingsModal.classList.add('hidden'); this.showMonth(this.state.activeMonthIndex); });
+                document.getElementById('manage-account-btn').addEventListener('click', () => { this.render.renderAccountModal(); });
+                document.getElementById('close-account-modal-btn').addEventListener('click', () => { this.ui.accountModal.classList.add('hidden'); });
+                document.getElementById('save-profile-btn').addEventListener('click', () => {
+                    App.state.profile.name = App.ui.userNameInput.value;
+                    App.saveDataToFirestore();
+                    App.ui.accountModal.classList.add('hidden');
+                    App.helpers.showSaveFeedback();
+                    App.render.updateHeader();
+                });
+                document.getElementById('save-integration-btn').addEventListener('click', () => {
+                    const wa = App.state.integrations.whatsapp;
+                    wa.phoneNumberId = App.ui.whatsappPhoneId.value;
+                    wa.accessToken = App.ui.whatsappToken.value;
+                    wa.webhookVerifyToken = App.ui.whatsappVerifyToken.value;
+                    App.saveDataToFirestore();
+                    App.ui.accountModal.classList.add('hidden');
+                    App.helpers.showSaveFeedback();
+                });
+                document.getElementById('generate-verify-token-btn').addEventListener('click', () => { App.ui.whatsappVerifyToken.value = this.helpers.generateRandomToken(); });
+                document.getElementById('copy-webhook-url-btn').addEventListener('click', (e) => {
+                    navigator.clipboard.writeText(App.ui.whatsappWebhookUrl.value);
+                    e.target.textContent = 'Copiado!';
+                    setTimeout(() => { e.target.textContent = 'Copiar'; }, 2000);
+                });
+                document.getElementById('close-ai-modal-btn').addEventListener('click', () => { this.ui.aiAnalysisModal.classList.add('hidden'); });
+                document.getElementById('add-card-btn').addEventListener('click', () => { const n = this.ui.newCardNameInput.value.trim(); if (n && !this.state.creditCards.includes(n)) { this.state.creditCards.push(n); this.ui.newCardNameInput.value = ''; this.render.renderCardList(); this.saveDataToFirestore(); } });
+                document.getElementById('add-category-btn').addEventListener('click', () => {
+                    const newName = this.ui.newCategoryNameInput.value.trim();
+                    const normalizedNewName = newName.toLowerCase(); 
+                    if (newName && !this.state.categories.some(c => c.name.toLowerCase() === normalizedNewName)) {
+                        this.state.categories.push({ name: newName, budget: 0 });
+                        this.ui.newCategoryNameInput.value = '';
+                        this.render.renderCategoryList();
+                        this.saveDataToFirestore();
+                    } else if (newName) {
+                        alert('Já existe uma categoria com este nome.');
+                    }
+                });
+                document.getElementById('recurring-type').addEventListener('change', (e) => { document.getElementById('recurring-expense-fields').classList.toggle('hidden', !e.target.value.includes('Gasto')); });
+                document.getElementById('recurring-payment').addEventListener('change', (e) => { document.getElementById('recurring-card').classList.toggle('hidden', e.target.value !== 'Crédito'); });
+                document.getElementById('add-recurring-btn').addEventListener('click', () => { const newRec = { id: Date.now(), description: document.getElementById('recurring-desc').value, amount: parseFloat(document.getElementById('recurring-amount').value) || 0, dayOfMonth: parseInt(document.getElementById('recurring-day').value) || 1, type: document.getElementById('recurring-type').value }; if (!newRec.description || newRec.amount <= 0) { alert('Preencha descrição e valor.'); return; } if (newRec.type.includes('Gasto')) { newRec.category = document.getElementById('recurring-category').value; newRec.paymentMethod = document.getElementById('recurring-payment').value; newRec.card = newRec.paymentMethod === 'Crédito' ? document.getElementById('recurring-card').value : ''; } this.state.recurringEntries.push(newRec); this.render.renderRecurringList(); this.saveDataToFirestore(); document.getElementById('recurring-form').querySelectorAll('input, select').forEach(el => el.value = ''); });
+                
+                document.body.addEventListener('click', (event) => {
+                    const t = event.target;
+                    
+                    if (t.matches('.tab-button')) this.showMonth(parseInt(t.dataset.monthIndex));
+                    if (t.matches('.export-csv-btn')) this.exportMonthToCSV(parseInt(t.dataset.monthIndex));
+                    if (t.matches('.export-pdf-btn')) this.exportMonthToPDF(parseInt(t.dataset.monthIndex));
+                    if (t.matches('#copy-pix-btn')) { const pixKey = document.getElementById('pix-key').textContent; navigator.clipboard.writeText(pixKey).then(() => { t.textContent = 'Copiado!'; setTimeout(() => { t.textContent = 'Copiar'; }, 2000); }); }
+                    
+                    const dayCell = t.closest('.calendar-day.current-month');
+                    if (dayCell) {
+                        const dayIndex = parseInt(dayCell.dataset.day);
+                        const monthIndex = App.state.activeMonthIndex;
+                        const allAccordions = document.querySelectorAll(`#expense-accordion-container-${monthIndex} .accordion-item`);
+                        const accordionToToggle = allAccordions[dayIndex];
+                        const wasActive = dayCell.classList.contains('active');
+                        document.querySelectorAll(`#calendar-container-${monthIndex} .calendar-day.active`).forEach(el => el.classList.remove('active'));
+                        allAccordions.forEach(item => item.classList.remove('active'));
+                        if (!wasActive) {
+                            dayCell.classList.add('active');
+                            if (accordionToToggle) accordionToToggle.classList.add('active');
+                        }
+                    } else if (t.closest('.toggle-days-list-btn')) { 
+                        const toggleBtn = t.closest('.toggle-days-list-btn');
+                        const wrapper = document.getElementById(`expense-section-wrapper-${toggleBtn.dataset.monthIndex}`); 
+                        if (wrapper) { 
+                            wrapper.classList.toggle('hidden'); 
+                            toggleBtn.textContent = wrapper.classList.contains('hidden') ? 'Mostrar Lançamentos em Lista ▼' : 'Ocultar Lançamentos em Lista ▲'; 
+                        } 
+                    } else if (t.closest('.accordion-trigger')) { 
+                        const trigger = t.closest('.accordion-trigger'); 
+                        const parentItem = trigger.parentElement; 
+                        if (!parentItem.classList.contains('active')) {
+                            const allItems = parentItem.parentElement.querySelectorAll('.accordion-item'); 
+                            allItems.forEach(item => item.classList.remove('active')); 
+                            parentItem.classList.add('active'); 
+                        } else {
+                            parentItem.classList.remove('active'); 
+                        }
+                    }
+
+                    if (t.closest('.ai-analysis-btn')) this.ai.getFinancialAnalysis(parseInt(t.closest('.ai-analysis-btn').dataset.monthIndex));
+                    if (t.matches('#ai-annual-analysis-btn')) this.ai.getAnnualFinancialAnalysis();
+                    if (t.closest('.suggest-category-btn')) { 
+                        const btn = t.closest('.suggest-category-btn'); 
+                        const el = btn.closest('.expense-entry-row'); 
+                        if (el) { 
+                            const entryId = el.querySelector('.remove-btn').dataset.entryId; 
+                            const descriptionInput = el.querySelector('[data-field="description"]'); 
+                            if (descriptionInput && descriptionInput.value) { 
+                                this.ai.getCategorySuggestion(descriptionInput.value, entryId, btn); 
+                            } 
+                        } 
+                    }
+                    if (t.matches('.add-entry-btn')) { 
+                        const { monthIndex, type, day, category } = t.dataset; 
+                        const month = parseInt(monthIndex); 
+                        const entries = (type === 'pj') ? this.state.monthlyData[month].pjEntries : (type === 'pf') ? this.state.monthlyData[month].pfEntries : this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`]; 
+                        if (type === 'pj' || type === 'pf') { 
+                            const newEntry = { id: Date.now(), description: '', amount: 0 }; 
+                            entries.push(newEntry); 
+                            document.getElementById(`${type}-entries-container-${month}`).appendChild(this.render.createEntryElement({ monthIndex: month, entry: newEntry, type: type })); 
+                        } else if (type === 'expense') { 
+                            const n = { id: Date.now(), description: '', amount: 0, paymentMethod: 'Pix', card: this.state.creditCards.length > 0 ? this.state.creditCards[0] : '', category: this.state.categories[0].name }; 
+                            entries.push(n); 
+                            document.getElementById(`${category}-entries-${month}-${day}`).appendChild(this.render.createEntryElement({ monthIndex: month, dayIndex: parseInt(day), category, entry: n, type: 'expense' })); 
+                        } 
+                        this.recalculateAndDisplayTotals(month); 
+                        this.saveDataToFirestore(); 
+                    }
+                    if (t.matches('.remove-btn')) { 
+                        const { monthIndex, type, day, category, entryId } = t.dataset; 
+                        const month = parseInt(monthIndex); 
+                        const id = parseFloat(entryId); 
+                        if (type === 'pj') { 
+                            this.state.monthlyData[month].pjEntries = this.state.monthlyData[month].pjEntries.filter(e => e.id !== id); 
+                        } else if (type === 'pf') { 
+                            this.state.monthlyData[month].pfEntries = this.state.monthlyData[month].pfEntries.filter(e => e.id !== id); 
+                        } else { 
+                            this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`] = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].filter(e => e.id !== id); 
+                        } 
+                        t.closest('.expense-entry-row').remove(); 
+                        this.recalculateAndDisplayTotals(month); 
+                        this.saveDataToFirestore(); 
+                    }
+                    if (t.matches('.remove-card-btn')) { 
+                        const cardNameToRemove = t.dataset.cardName; 
+                        for (let i = 0; i < 12; i++) { 
+                            this.state.monthlyData[i].expenses.forEach(day => { 
+                                [...day.personalEntries, ...day.businessEntries].forEach(entry => { 
+                                    if (entry.card === cardNameToRemove) entry.card = 'Cartão Removido'; 
+                                }); 
+                            }); 
+                        } 
+                        this.state.creditCards = this.state.creditCards.filter(c => c !== cardNameToRemove); 
+                        this.render.renderCardList(); 
+                        this.saveDataToFirestore(); 
+                    }
+                    if (t.matches('.remove-category-btn')) { 
+                        const categoryNameToRemove = t.dataset.categoryName; 
+                        for (let i = 0; i < 12; i++) { 
+                            this.state.monthlyData[i].expenses.forEach(day => { 
+                                day.personalEntries.forEach(entry => { 
+                                    if (entry.category === categoryNameToRemove) entry.category = 'Outros'; 
+                                }); 
+                            }); 
+                        } 
+                        this.state.categories = this.state.categories.filter(c => c.name !== categoryNameToRemove); 
+                        this.render.renderCategoryList(); 
+                        this.saveDataToFirestore(); 
+                    }
+                    if (t.matches('.remove-recurring-btn')) { 
+                        const index = parseInt(t.dataset.index); 
+                        this.state.recurringEntries.splice(index, 1); 
+                        this.render.renderRecurringList(); 
+                        this.saveDataToFirestore(); 
+                    }
+                });
+                
+                document.body.addEventListener('input', (event) => {
+                    const t = event.target;
+                    if (t.matches('.entry-input')) {
+                        const el = t.closest('.expense-entry-row');
+                        const btn = el.querySelector('.remove-btn');
+                        if (!btn) return;
+                        const { monthIndex, type, day, category, entryId } = btn.dataset;
+                        const month = parseInt(monthIndex);
+                        const id = parseFloat(entryId);
+                        let entry;
+                        if (type === 'pj') { entry = this.state.monthlyData[month].pjEntries.find(e => e.id === id); }
+                        else if (type === 'pf') { entry = this.state.monthlyData[month].pfEntries.find(e => e.id === id); }
+                        else { entry = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id === id); }
+                        
+                        if (entry) {
+                            const field = t.dataset.field;
+                            if (field === 'amount') { entry.amount = parseFloat(t.value) || 0; }
+                            else { entry[field] = t.value; }
+                            
+                            if (field === 'paymentMethod') { this.showMonth(month); }
+                            else { this.recalculateAndDisplayTotals(month); }
+                            this.debouncedSave();
+                        }
+                    }
+                    if (t.matches('.category-budget-input')) {
+                        const cat = this.state.categories.find(c => c.name === t.dataset.categoryName);
+                        if (cat) { cat.budget = parseFloat(t.value) || 0; this.debouncedSave(); }
+                    }
+                });
+
+                document.body.addEventListener('change', (event) => {
+                    const t = event.target;
+                    if (t.matches('.category-name-input')) {
+                        const oldName = t.dataset.oldName;
+                        const newName = t.value.trim();
+                        const normalizedNewName = newName.toLowerCase();
+                        const normalizedOldName = oldName.toLowerCase();
+                        const categoryExists = this.state.categories.some(c => c.name.toLowerCase() === normalizedNewName);
+                        
+                        if (newName && normalizedOldName !== normalizedNewName && !categoryExists) {
+                            for (let i = 0; i < 12; i++) {
+                                this.state.monthlyData[i].expenses.forEach(day => {
+                                    day.personalEntries.forEach(entry => {
+                                        if (entry.category.toLowerCase() === normalizedOldName) entry.category = newName;
+                                    });
+                                });
+                            }
+                            const cat = this.state.categories.find(c => c.name.toLowerCase() === normalizedOldName);
+                            if (cat) cat.name = newName;
+                            t.dataset.oldName = newName;
+                            this.state.recurringEntries.forEach(r => {
+                                if (r.category.toLowerCase() === normalizedOldName) r.category = newName;
+                            });
+                            this.saveDataToFirestore();
+                        } else if (categoryExists && normalizedOldName !== normalizedNewName) {
+                            alert('Já existe uma categoria com este nome.');
+                            t.value = oldName;
+                        }
+                    }
+                });
+            },
+            
+            ai: {
+                async getFinancialAnalysis(monthIndex) { /* ...código omitido para breveidade... */ },
+                async getAnnualFinancialAnalysis() { /* ...código omitido para breveidade... */ },
+                async getChatbotResponse(userMessage) { /* ...código omitido para breveidade... */ },
+                async getCategorySuggestion(description, entryId, button) { /* ...código omitido para breveidade... */ },
+                async callVercelFunction(prompt) { /* ...código omitido para breveidade... */ }
+            },
+            
+            render: {
+                updateHeader() { /* ...código omitido para breveidade... */ },
+                renderCalendarView(monthIndex) { /* ...código omitido para breveidade... */ },
+                createMonthContentHTML: (monthIndex) => `...`,
+                createBalanceContentHTML: () => `...`,
+                createEntryElement: (config) => { /* ...código omitido para breveidade... */ },
+                renderPJEntries: (m) => { /* ...código omitido para breveidade... */ },
+                renderPFEntries: (m) => { /* ...código omitido para breveidade... */ },
+                renderExpenseTable: (m) => { /* ...código omitido para breveidade... */ },
+                renderTabs: () => { /* ...código omitido para breveidade... */ },
+                updateBudgetAlerts: (m) => { /* ...código omitido para breveidade... */ },
+                updateAllCharts: (m, totals) => { /* ...código omitido para breveidade... */ },
+                renderBalanceSummary: () => { /* ...código omitido para breveidade... */ },
+                updateAnnualCharts: (performance) => { /* ...código omitido para breveidade... */ },
+                renderCardList: () => { /* ...código omitido para breveidade... */ },
+                renderCategoryList: () => { /* ...código omitido para breveidade... */ },
+                renderRecurringList: () => { /* ...código omitido para breveidade... */ },
+                renderSettingsModal: () => { /* ...código omitido para breveidade... */ },
+                renderAccountModal: () => { /* ...código omitido para breveidade... */ },
+            }
+        };
+        
+        window.App = App;
+        onAuthStateChanged(auth, user => { if (user) { authScreen.classList.add('hidden'); appScreen.classList.remove('hidden'); loadingOverlay.classList.remove('hidden'); App.init(user.uid); } else { App.state.currentUserId = null; setAuthMode('login'); authScreen.classList.remove('hidden'); appScreen.classList.add('hidden'); } });
+    </script>
+</body>
+</html>
