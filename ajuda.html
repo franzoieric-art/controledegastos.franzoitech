@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guia Interativo de Comandos Git</title>
+    <title>Guia de Comandos Git e Otimização de Código</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,13 +27,14 @@
         <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
-                    <span class="font-bold text-xl text-indigo-600">Git Cheatsheet</span>
+                    <span class="font-bold text-xl text-indigo-600">Git & Terser Cheatsheet</span>
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <a href="#essenciais" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Essenciais</a>
                         <a href="#fluxo" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Fluxo de Trabalho</a>
                         <a href="#dicas" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dicas e Soluções</a>
+                        <a href="#minificacao" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Minificação</a>
                         <a href="#ia-assistant" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Assistente IA</a>
                     </div>
                 </div>
@@ -169,6 +170,59 @@ node_modules/
             </div>
         </section>
         
+        <section id="minificacao" class="mt-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-orange-500 pb-2 mb-8">4. Minificação e Ofuscação com Terser</h2>
+            <p class="text-lg text-slate-600 mb-8">A minificação e ofuscação são processos para diminuir o tamanho do seu código e dificultar sua leitura, tornando sua página mais leve e segura. A ferramenta mais comum para isso, principalmente para JavaScript, é o Terser.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npm install html-minifier-terser</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Instala a ferramenta de minificação localmente no seu projeto.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
+                </div>
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx html-minifier-terser --collapse-whitespace --remove-comments --minify-js true index.html -o index.min.html</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Executa a minificação completa (HTML, CSS e JS) e salva no arquivo `index.min.html`.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
+                </div>
+                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx html-minifier-terser index.html > index.min.html</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Uma alternativa simples que minifica apenas o HTML e o CSS, criando um novo arquivo.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-slate-900 border-b-2 border-slate-300 pb-2 mt-12 mb-8">Opções Avançadas e Outros Usos</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx terser app.js -o app.min.js --compress --mangle</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Minifica e ofusca um arquivo JavaScript externo, salvando-o com um novo nome.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
+                </div>
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx html-minifier-terser --minify-js true --source-map index.html -o index.min.html</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Cria um arquivo `.map` que ajuda a depurar o código original no navegador.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
+                </div>
+                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx terser --compress --mangle --output dist/bundle.min.js src/main.js src/utils.js</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Combina e minifica múltiplos arquivos JavaScript de uma vez, de forma avançada.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
+                </div>
+            </div>
+        </section>
+
         <section id="ia-assistant" class="mt-16 scroll-mt-20">
             <div class="bg-white rounded-lg shadow-lg p-8 border-t-4 border-indigo-500">
                 <div class="flex items-start sm:items-center mb-4">
@@ -179,14 +233,14 @@ node_modules/
                     </div>
                     <div class="ml-4">
                         <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Ainda com dúvidas?</h2>
-                        <p class="text-lg text-slate-600 mt-1">Pergunte ao nosso assistente de IA sobre Git e GitHub.</p>
+                        <p class="text-lg text-slate-600 mt-1">Pergunte ao nosso assistente de IA sobre Git, GitHub e otimização de código.</p>
                     </div>
                 </div>
                
                 <div class="space-y-4 mt-6">
                     <div>
                         <label for="ai-question" class="sr-only">Sua pergunta</label>
-                        <input type="text" id="ai-question" placeholder="Ex: Como eu desfaço o último commit?" class="w-full px-4 py-3 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-200">
+                        <input type="text" id="ai-question" placeholder="Ex: Como desfaço o último commit? ou O que é ofuscação de código?" class="w-full px-4 py-3 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-200">
                     </div>
                     <button id="ask-ai-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors flex items-center justify-center disabled:bg-indigo-400 disabled:cursor-not-allowed">
                         <span id="ai-btn-text">Perguntar à IA</span>
@@ -212,29 +266,43 @@ node_modules/
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- Lógica existente para copiar comandos ---
-        // (Vou omitir o código dos outros botões para sermos breves, não precisa mexer nele)
         const copyButtons = document.querySelectorAll('.copy-btn');
-        copyButtons.forEach(button => { /* ... seu código de copiar ... */ });
+        copyButtons.forEach(button => {
+            const commandText = button.closest('.command-card').querySelector('.command-text').innerText;
+            button.addEventListener('click', () => {
+                navigator.clipboard.writeText(commandText).then(() => {
+                    const originalText = button.innerText;
+                    button.innerText = 'Copiado!';
+                    setTimeout(() => {
+                        button.innerText = originalText;
+                    }, 1500);
+                });
+            });
+        });
+
         const navLinks = document.querySelectorAll('nav a');
-        navLinks.forEach(link => { /* ... seu código de navegação ... */ });
+        navLinks.forEach(link => {
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+                const targetId = event.target.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80, // Offset para o cabeçalho fixo
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
 
-
-        // --- LÓGICA DE DEPURAÇÃO PARA O ASSISTENTE IA ---
-        console.log("Script da IA iniciado.");
-
+        // --- LÓGICA DO ASSISTENTE IA ---
         const aiQuestionInput = document.getElementById('ai-question');
         const askAiBtn = document.getElementById('ask-ai-btn');
         const aiResponseContainer = document.getElementById('ai-response-container');
         const aiBtnText = document.getElementById('ai-btn-text');
         const aiSpinner = document.getElementById('ai-spinner');
 
-        // LOG 1: Vamos verificar se os elementos foram encontrados no HTML
-        console.log("Elementos encontrados:", { askAiBtn, aiQuestionInput });
-
         const handleAIQuery = async () => {
-            // LOG 3: Vamos verificar se a função é chamada ao clicar
-            console.log("Função handleAIQuery foi EXECUTADA!");
-
             const question = aiQuestionInput.value.trim();
             if (!question) {
                 aiResponseContainer.innerHTML = '<p class="text-red-600 font-medium">Por favor, digite uma pergunta.</p>';
@@ -248,11 +316,25 @@ node_modules/
             aiResponseContainer.classList.remove('hidden');
             aiResponseContainer.innerHTML = '<p class="text-slate-500">Conectando com a IA...</p>';
 
+            // AQUI ESTÁ O CONTEXTO DO PROMPT, ESSENCIAL PARA A AJUDA DA IA
+            const aiPrompt = `
+                Você é um assistente de programação especialista em Git, GitHub e na ferramenta de minificação e ofuscação Terser.
+                Sua tarefa é responder a uma pergunta do usuário sobre esses tópicos de forma clara e objetiva.
+
+                Contexto sobre as ferramentas:
+                - **Git/GitHub:** É um sistema de controle de versão. Comandos incluem 'git init', 'git add', 'git commit', 'git push', 'git branch', 'git fetch', 'git stash'.
+                - **Terser/Minificação:** A ferramenta 'html-minifier-terser' é usada para diminuir o tamanho do código HTML, CSS e JavaScript. Os principais comandos são 'npm install html-minifier-terser' e 'npx html-minifier-terser' com as opções '--collapse-whitespace', '--remove-comments' e '--minify-js true'.
+
+                Pergunta do usuário: "${question}"
+
+                Responda com base neste conhecimento.
+            `;
+
             try {
                 const response = await fetch('/api/ask-ai', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: question }),
+                    body: JSON.stringify({ prompt: aiPrompt }),
                 });
 
                 if (!response.ok) {
@@ -261,7 +343,7 @@ node_modules/
                 }
 
                 const data = await response.json();
-                aiResponseContainer.innerHTML = data.answer;
+                aiResponseContainer.innerHTML = `<p>${data.answer}</p>`;
             } catch (error) {
                 aiResponseContainer.innerHTML = `<p class="text-red-600 font-medium">Erro: ${error.message}</p>`;
             } finally {
@@ -272,13 +354,8 @@ node_modules/
             }
         };
 
-        // Verificação para garantir que o botão existe antes de adicionar o "ouvinte"
         if (askAiBtn) {
             askAiBtn.addEventListener('click', handleAIQuery);
-            // LOG 2: Vamos confirmar que o "ouvinte de clique" foi adicionado
-            console.log("Ouvinte de clique ADICIONADO com sucesso ao botão.");
-        } else {
-            console.error("ERRO CRÍTICO: O botão com id 'ask-ai-btn' não foi encontrado no HTML!");
         }
 
         aiQuestionInput.addEventListener('keydown', (event) => {
