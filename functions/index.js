@@ -4,10 +4,17 @@ const nodemailer = require("nodemailer");
 
 admin.initializeApp();
 
+// --- CONFIGURAÇÃO ---
+// 1. TOKEN DA SUA CONTA HOTMART
 const HOTMART_TOKEN = "TxQUAdJjudKxmzlKEuxVAHfSu7cBml975237d1-4f36-4f16-aec1-513b651fdfc8";
+
+// 2. CREDENCIAIS DO EMAIL QUE VAI ENVIAR A SENHA
 const GMAIL_EMAIL = "cabanafranzoi@gmail.com";
 const GMAIL_APP_PASSWORD = "hbddowcmsfswesfm";
+// --- FIM DA CONFIGURAÇÃO ---
 
+
+// Configuração do serviço de email
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -16,6 +23,9 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+/**
+ * Função para enviar o email de boas-vindas com o link de criação de senha.
+ */
 async function sendWelcomeEmail(email, name, passwordLink) {
     const mailOptions = {
         from: `"Painel Financeiro" <${GMAIL_EMAIL}>`,
@@ -31,6 +41,7 @@ async function sendWelcomeEmail(email, name, passwordLink) {
     }
 }
 
+
 exports.hotmartWebhook = functions.https.onRequest(async (req, res) => {
     res.set("Access-Control-Allow-Origin", "*");
     res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -41,18 +52,19 @@ exports.hotmartWebhook = functions.https.onRequest(async (req, res) => {
         return;
     }
     
-    // --- LINHA DE DEPURAÇÃO ADICIONADA ---
     console.log("Corpo inteiro da requisição recebida (req.body):", JSON.stringify(req.body, null, 2));
-    // ------------------------------------
 
     const hottok = req.get("Hottok");
     if (hottok !== HOTMART_TOKEN) {
+        // A Hotmart pode não enviar o Hottok no teste, então vamos apenas logar e continuar
         console.warn("AVISO: Hottok não recebido ou inválido. Continuando para teste.");
     }
 
     const event = req.body.event;
     
-    if (event && event.toLowerCase() !== "purchase.approved") {
+    // --- CORREÇÃO FINAL AQUI ---
+    // Trocado "purchase.approved" por "purchase_approved"
+    if (event && event.toLowerCase() !== "purchase_approved") {
         console.log("Evento recebido, mas não é compra aprovada:", event);
         return res.status(200).send("Evento ignorado.");
     }
@@ -83,4 +95,3 @@ exports.hotmartWebhook = functions.https.onRequest(async (req, res) => {
         return res.status(500).send("Erro interno do servidor.");
     }
 });
-
