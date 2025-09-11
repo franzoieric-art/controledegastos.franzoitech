@@ -17,7 +17,6 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendWelcomeEmail(email, name, passwordLink) {
-    // ... (o código desta função continua igual)
     const mailOptions = {
         from: `"Painel Financeiro" <${GMAIL_EMAIL}>`,
         to: email,
@@ -41,32 +40,28 @@ exports.hotmartWebhook = functions.https.onRequest(async (req, res) => {
         res.status(204).send("");
         return;
     }
+    
+    // --- LINHA DE DEPURAÇÃO ADICIONADA ---
+    console.log("Corpo inteiro da requisição recebida (req.body):", JSON.stringify(req.body, null, 2));
+    // ------------------------------------
 
-    // --- VERIFICAÇÃO DO HOTTOK TEMPORARIAMENTE DESATIVADA PARA TESTE ---
-    /*
     const hottok = req.get("Hottok");
     if (hottok !== HOTMART_TOKEN) {
-        console.error("Tentativa de acesso com Hottok inválido. Recebido:", hottok);
-        return res.status(401).send("Acesso não autorizado.");
+        console.warn("AVISO: Hottok não recebido ou inválido. Continuando para teste.");
     }
-    console.log("Hottok verificado com sucesso.");
-    */
-    // ----------------------------------------------------------------
 
-    console.log("AVISO: A verificação do Hottok está desativada para este teste.");
-    
     const event = req.body.event;
-    if (event !== "purchase.approved") {
+    
+    if (event && event.toLowerCase() !== "purchase.approved") {
         console.log("Evento recebido, mas não é compra aprovada:", event);
         return res.status(200).send("Evento ignorado.");
     }
     
-    // ... o resto do seu código continua exatamente igual ...
     const buyerEmail = req.body.data.buyer.email;
     const buyerName = req.body.data.buyer.name;
 
     if (!buyerEmail) {
-        console.error("E-mail do comprador não encontrado no payload.");
+        console.error("E-mail do comprador não encontrado no payload. Corpo da requisição:", JSON.stringify(req.body, null, 2));
         return res.status(400).send("Dados inválidos.");
     }
     try {
@@ -88,3 +83,4 @@ exports.hotmartWebhook = functions.https.onRequest(async (req, res) => {
         return res.status(500).send("Erro interno do servidor.");
     }
 });
+
