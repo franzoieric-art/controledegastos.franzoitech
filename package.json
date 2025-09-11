@@ -7,13 +7,14 @@
   "description": "",
   "main": "index.js",
   "devDependencies": {
+    "cpx": "^1.5.0",
     "html-minifier-terser": "^7.2.0"
   },
   "scripts": {
-  "copy:images": "cpx \"images/**/*\" \"dist/images\"",
-  "minify:html": "html-minifier-terser --input-dir src --output-dir dist --file-ext html --collapse-whitespace --remove-comments --remove-redundant-attributes --minify-css true --minify-js true",
-  "build": "npm run copy:images && npm run minify:html"
-},
+    "copy:images": "cpx \"images/**/*\" \"dist/images\"",
+    "minify:html": "html-minifier-terser --input-dir src --output-dir dist --file-ext html --collapse-whitespace --remove-comments --remove-redundant-attributes --minify-css true --minify-js true",
+    "build": "npm run copy:images && npm run minify:html"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/franzoieric-art/controledegastos.franzoitech.git"
