@@ -5,13 +5,12 @@ const nodemailer = require("nodemailer");
 admin.initializeApp();
 
 // --- CONFIGURAÇÃO ---
-// 1. COLE AQUI O TOKEN QUE VOCÊ COPIOU DA TELA "AUTENTICAÇÃO" DA HOTMART
+// 1. TOKEN DA HOTMART (com a sintaxe corrigida)
 const HOTMART_TOKEN = "TxQUAdJjudKxmzlKEuxVAHfSu7cBml975237d1-4f36-4f16-aec1-513b651fdfc8";
 
-// 2. CONFIGURE AQUI O EMAIL QUE ENVIARÁ A SENHA PARA OS CLIENTES
-// (Requer uma "Senha de App" se você usa Gmail com 2FA)
+// 2. CREDENCIAIS DE EMAIL (com a senha sem espaços)
 const GMAIL_EMAIL = "cabanafranzoi@gmail.com";
-const GMAIL_APP_PASSWORD = "hbdd owcm sfsw ecfm";
+const GMAIL_APP_PASSWORD = "hbddowcmsfswesfm";
 // --- FIM DA CONFIGURAÇÃO ---
 
 
@@ -50,6 +49,7 @@ async function sendWelcomeEmail(email, name, passwordLink) {
         console.log(`Email de boas-vindas enviado com sucesso para ${email}`);
     } catch (error) {
         console.error(`Erro ao enviar email para ${email}:`, error);
+        // Mesmo que o email falhe, não paramos o processo principal.
     }
 }
 
@@ -68,7 +68,7 @@ exports.hotmartWebhook = functions.https.onRequest(async (req, res) => {
 
     const hottok = req.get("Hottok");
     if (hottok !== HOTMART_TOKEN) {
-        console.error("Tentativa de acesso com Hottok inválido:", hottok);
+        console.error("Tentativa de acesso com Hottok inválido. Recebido:", hottok);
         return res.status(401).send("Acesso não autorizado.");
     }
 
