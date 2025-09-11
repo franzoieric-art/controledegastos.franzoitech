@@ -64,14 +64,20 @@ exports.hotmartWebhook = functions.https.onRequest(async (req, res) => {
         return;
     }
 
+    // --- LINHA DE DEPURAÇÃO ADICIONADA ---
+    const hottok = req.get("Hottok");
+    console.log("Hottok RECEBIDO da Hotmart:", hottok);
+    console.log("Hottok ESPERADO no código:", HOTMART_TOKEN);
+    // ------------------------------------
+
     console.log("Webhook 'hotmartWebhook' recebido. Verificando Hottok...");
 
-    const hottok = req.get("Hottok");
     if (hottok !== HOTMART_TOKEN) {
-        console.error("Tentativa de acesso com Hottok inválido. Recebido:", hottok);
+        console.error("VERIFICAÇÃO FALHOU: Os Hottoks são diferentes.");
         return res.status(401).send("Acesso não autorizado.");
     }
 
+    // ... o resto do seu código continua igual ...
     console.log("Hottok verificado com sucesso.");
     
     const event = req.body.event;
