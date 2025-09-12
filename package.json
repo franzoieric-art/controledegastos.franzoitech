@@ -13,7 +13,8 @@
   "scripts": {
     "copy:images": "cpx \"images/**/*\" \"dist/images\"",
     "minify:html": "html-minifier-terser --input-dir src --output-dir dist --file-ext html --collapse-whitespace --remove-comments --remove-redundant-attributes --minify-css true --minify-js true",
-    "build": "npm run copy:images && npm run minify:html"
+    "build": "npm run copy:images && npm run minify:html",
+    "deploy": "npm run build && firebase deploy"
   },
   "repository": {
     "type": "git",

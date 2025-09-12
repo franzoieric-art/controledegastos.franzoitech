@@ -34,6 +34,7 @@
                         <a href="#essenciais" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Essenciais</a>
                         <a href="#fluxo" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Fluxo de Trabalho</a>
                         <a href="#dicas" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dicas e Soluções</a>
+                        <a href="#automacao" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Automação</a>
                         <a href="#minificacao" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Minificação</a>
                         <a href="#ia-assistant" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Assistente IA</a>
                     </div>
@@ -139,8 +140,36 @@
             </div>
         </section>
 
+        <section id="automacao" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-green-500 pb-2 mb-8">3. Automação e Deploy com npm e Firebase</h2>
+            <p class="text-lg text-slate-600 mb-8">Após as alterações no código, é preciso preparar os arquivos (`build`) e enviá-los para o servidor (`deploy`). Automatizar essas etapas com scripts do npm e Firebase simplifica seu fluxo de trabalho, garantindo que o seu site seja publicado de forma rápida e eficiente.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npm run build</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Executa a etapa de **construção** do seu projeto. Ele pega o código-fonte e o otimiza para produção, gerando a pasta `dist`.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors">Copiar</button>
+                </div>
+                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">firebase deploy</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Faz o **deploy** do seu projeto. Pega os arquivos da pasta `dist` e os publica no Firebase Hosting.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors">Copiar</button>
+                </div>
+                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npm run deploy</code></pre>
+                        <p class="text-slate-600"><strong>Para que serve:</strong> Executa a **construção** e, se não houver erros, faz o **deploy** para o Firebase automaticamente. Simplifica o processo em um único comando.</p>
+                    </div>
+                    <button class="copy-btn mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors">Copiar</button>
+                </div>
+            </div>
+        </section>
+
         <section id="dicas" class="scroll-mt-20">
-            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-amber-500 pb-2 mb-8">3. Dicas e Soluções de Problemas</h2>
+            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-amber-500 pb-2 mb-8">4. Dicas e Soluções de Problemas</h2>
             <p class="text-lg text-slate-600 mb-8">Todo desenvolvedor encontra pequenos desafios ao usar o Git. Esta seção oferece soluções para problemas comuns e dicas para otimizar seu ambiente de trabalho, como ignorar arquivos desnecessários e gerenciar múltiplos projetos de forma eficiente no VS Code.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div class="command-card bg-white rounded-lg shadow-md p-6">
@@ -171,7 +200,7 @@ node_modules/
         </section>
         
         <section id="minificacao" class="mt-16 scroll-mt-20">
-            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-orange-500 pb-2 mb-8">4. Minificação e Ofuscação com Terser</h2>
+            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-orange-500 pb-2 mb-8">5. Minificação e Ofuscação com Terser</h2>
             <p class="text-lg text-slate-600 mb-8">A minificação e ofuscação são processos para diminuir o tamanho do seu código e dificultar sua leitura, tornando sua página mais leve e segura. A ferramenta mais comum para isso, principalmente para JavaScript, é o Terser.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                  <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
