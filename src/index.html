@@ -192,16 +192,16 @@
                 <p class="text-lg muted-text max-w-xs mx-auto">Mais que números, decisões inteligentes.</p>
             </div>
             <div id="monthContentContainer"></div>
-            <div class="mt-12 pt-8 border-t text-center" style="border-color: var(--border-color);">
-                <p class="text-sm muted-text">Gostou do projeto?</p>
-                <p class="text-xs muted-text mb-2">Doe qualquer valor via Pix</p>
-                <div class="mt-2 flex justify-center"><img src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/main/ricoplus-landing-page/images/pix%20qrcode.jpeg" alt="QR Code PIX para doação" width="150" height="150"></div>
-                <div class="mt-2"><p class="text-xs muted-text">Ou use a chave (email):</p><div class="mt-1 flex justify-center items-center gap-2"><p id="pix-key" class="font-mono text-sm" style="color: var(--primary-color);">franzoitechcorp@gmail.com</p><button id="copy-pix-btn" class="px-3 py-1 text-xs font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Copiar</button></div></div>
-            </div>
-        </div>
-    </div>
-    <button id="floating-chatbot-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full text-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: var(--primary-color); color: white;">🤖</button>
-    <script type="module">
+        </div> 
+        
+<footer class="mt-4 px-4 py-2 border-t text-center text-xs" style="border-color: var(--border-color);">
+    <p class="text-[var(--muted-text)]">
+        <span class="font-semibold" style="color: var(--primary-color);">Rico Plus</span> by Franzoi Tech | Versão 1.12 | Desenvolvido por <a href="#" target="_blank" class="underline" style="color: var(--muted-text);">Eric Franzoi</a>
+    </p>
+</footer>
+    <button id="floating-chatbot-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full text-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: var(--primary-color); color: white;">🤖</button>
+</div> 
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
