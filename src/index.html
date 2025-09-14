@@ -2,20 +2,27 @@
 <html lang="pt-BR" class="">
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Financeiro - Franzoi Tech</title>
+    
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="FranzoiTech" />
     <link rel="manifest" href="/site.webmanifest" />
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <style>
         :root {
             --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
@@ -29,9 +36,9 @@
             --secondary-bg: #3a3a3c; --secondary-text: #f5f5f7; --border-color: #424245;
             --green-color: #32d74b; --red-color: #ff453a;
         }
-        body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg-color); 
+        body {  
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;  
+            background-color: var(--bg-color);  
             color: var(--text-color);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -192,32 +199,41 @@
                 <p class="text-lg muted-text max-w-xs mx-auto">Mais que números, decisões inteligentes.</p>
             </div>
             <div id="monthContentContainer"></div>
-        </div> 
+        </div>  
         
 <footer class="mt-4 px-4 py-2 border-t text-center text-xs" style="border-color: var(--border-color);">
     <p class="text-[var(--muted-text)]">
         <span class="font-semibold" style="color: var(--primary-color);">Rico Plus</span> by Franzoi Tech | Versão 1.12 | Desenvolvido por <a href="#" target="_blank" class="underline" style="color: var(--muted-text);">Eric Franzoi</a>
     </p>
 </footer>
-    <button id="floating-chatbot-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full text-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: var(--primary-color); color: white;">🤖</button>
-</div> 
-    <script type="module">
+    <button id="floating-chatbot-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full text-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: var(--primary-color); color: white;">🤖</button>
+</div>  
+    <script type="module">
+        // PONTO 4 CORRIGIDO (comentado): Em um projeto com build, os imports seriam simplificados, ex: import { initializeApp } from "firebase/app";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
-        const firebaseConfig = { 
-            apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0", 
-            authDomain: "controle-de-gastos-74daf.firebaseapp.com", 
-            projectId: "controle-de-gastos-74daf", 
-            storageBucket: "controle-de-gastos-74daf.firebasestorage.app",
-            messagingSenderId: "331667008487", 
-            appId: "1:331667008487:web:c5200f64ac27d0c32feb42" 
+        
+        // PONTO 1 CORRIGIDO: As chaves do Firebase foram removidas do código.
+        // Em um projeto real, você usaria Variáveis de Ambiente. Crie um arquivo .env.local na raiz do seu projeto
+        // e adicione suas chaves lá (ex: VITE_API_KEY="sua-chave").
+        // Ferramentas como Vite ou Next.js carregam essas variáveis automaticamente.
+        const firebaseConfig = {  
+            apiKey: import.meta.env.VITE_FIREBASE_API_KEY,  
+            authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,  
+            projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,  
+            storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+            messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,  
+            appId: import.meta.env.VITE_FIREBASE_APP_ID 
         };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const storage = getStorage(app);
+        
+        // ... (o restante do código JavaScript continua exatamente o mesmo)
         const authScreen = document.getElementById('auth-screen');
         const appScreen = document.getElementById('app-screen');
         const mainAuthBtn = document.getElementById('main-auth-btn');
