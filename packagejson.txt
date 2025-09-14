@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "@google/generative-ai": "^0.1.3"
+  },
+  "name": "controledegastos.franzoitech",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "cpx": "^1.2.1",
+    "html-minifier-terser": "^7.2.0"
+  },
+  "scripts": {
+    "copy:images": "cpx \"images/**/*\" \"dist/images\"",
+    "minify:html": "html-minifier-terser --input-dir src --output-dir dist --file-ext html --collapse-whitespace --remove-comments --remove-redundant-attributes --minify-css true --minify-js true",
+    "build": "npm run copy:images && npm run minify:html",
+    "deploy": "npm run build && firebase deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/franzoieric-art/controledegastos.franzoitech.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
