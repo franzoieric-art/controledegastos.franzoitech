@@ -425,6 +425,30 @@ const App = {
         doc.save(`relatorio_${monthName}.pdf`);
     },
     bindGlobalEventListeners() {
+        document.getElementById('debug-fevereiro-btn').addEventListener('click', () => {
+        console.clear(); // Limpa o console para facilitar a leitura
+        console.log("--- DADOS BRUTOS DE FEVEREIRO (ÍNDICE 1) ---");
+
+        // Pega os dados do mês de Fevereiro (índice 1)
+        const dadosFevereiro = App.state.monthlyData[1];
+
+        if (dadosFevereiro) {
+            console.log("GASTOS DE EMPRESA EM FEVEREIRO:");
+            
+            // Itera por cada dia de Fevereiro e mostra os gastos de empresa
+            dadosFevereiro.expenses.forEach((day, dayIndex) => {
+                if (day.businessEntries && day.businessEntries.length > 0) {
+                    console.log(`  -> Dia ${dayIndex + 1}:`, day.businessEntries);
+                }
+            });
+
+            // Mostra o objeto completo para análise
+            console.log("Objeto completo de Fevereiro:", dadosFevereiro);
+            alert('Dados de Fevereiro foram impressos no console. Por favor, envie um print para o Gemini.');
+        } else {
+            console.log("Não foram encontrados dados para Fevereiro.");
+        }
+    });
         this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
         const chatbotModal = document.getElementById('chatbot-modal');
         const chatbotModalContent = chatbotModal.querySelector('.modal-content');
