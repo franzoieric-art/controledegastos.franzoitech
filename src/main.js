@@ -192,27 +192,28 @@ const App = {
         this.render.updateHeader();
     },
      handleRecurringDeletion(recurringId, startingMonthIndex = 0) {
-        // Itera por todos os meses a partir do mês inicial definido
-        for (let i = startingMonthIndex; i < 12; i++) {
-            const monthData = this.state.monthlyData[i];
-            if (!monthData) continue;
-    
-            // Filtra para remover a recorrência dos Ganhos PJ e PF
-            monthData.pjEntries = monthData.pjEntries.filter(entry => entry.recurringId !== recurringId);
-            monthData.pfEntries = month.pfEntries.filter(entry => entry.recurringId !== recurringId);
-    
-            // Filtra para remover a recorrência dos Gastos (Pessoais e Empresa)
-            monthData.expenses.forEach(day => {
-                if (day.personalEntries) {
-                    day.personalEntries = day.personalEntries.filter(entry => entry.recurringId !== recurringId);
-                }
-                if (day.businessEntries) {
-                    day.businessEntries = day.businessEntries.filter(entry => entry.recurringId !== recurringId);
-                }
-            });
-        }
-        console.log(`Lançamentos com recurringId=${recurringId} removidos a partir do mês ${startingMonthIndex}.`);
-    },
+    // Itera por todos os meses a partir do mês inicial definido
+    for (let i = startingMonthIndex; i < 12; i++) {
+        const monthData = this.state.monthlyData[i];
+        if (!monthData) continue;
+
+        // Filtra para remover a recorrência dos Ganhos PJ e PF
+        monthData.pjEntries = monthData.pjEntries.filter(entry => entry.recurringId !== recurringId);
+        // A CORREÇÃO ESTÁ AQUI 👇 (era "month", agora é "monthData")
+        monthData.pfEntries = monthData.pfEntries.filter(entry => entry.recurringId !== recurringId);
+
+        // Filtra para remover a recorrência dos Gastos (Pessoais e Empresa)
+        monthData.expenses.forEach(day => {
+            if (day.personalEntries) {
+                day.personalEntries = day.personalEntries.filter(entry => entry.recurringId !== recurringId);
+            }
+            if (day.businessEntries) {
+                day.businessEntries = day.businessEntries.filter(entry => entry.recurringId !== recurringId);
+            }
+        });
+    }
+    console.log(`Lançamentos com recurringId=${recurringId} removidos a partir do mês ${startingMonthIndex}.`);
+},
     showMonth(monthIndex) {
         if (this.state.activeMonthIndex !== monthIndex && this.state.saveTimeout) {
             clearTimeout(this.state.saveTimeout);
