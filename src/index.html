@@ -67,7 +67,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
 @media (min-width: 640px) { .action-buttons { flex-direction: row; } }
 #theme-toggle-btn { font-size: 1.25rem !important; color: var(--text-color) !important; background-image: none !important; line-height: 1; }
 #theme-toggle-btn::before, #theme-toggle-btn::after { content: none !important; display: none !important; }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; border: 1px solid var(--border-color); padding: 1rem; border-radius: 1.5rem; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; border: 1px solid var(--border-color); padding: 1rem; border-radius: 1.5rem; width: 100%; }
 .calendar-header { text-align: center; font-weight: 600; color: var(--muted-text); padding-bottom: 0.5rem; font-size: 0.875rem; }
 .calendar-day { display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s, color 0.2s; position: relative; }
 .calendar-day.not-current-month { color: var(--muted-text); opacity: 0.5; cursor: default; }
