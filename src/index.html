@@ -19,7 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        :root {
+       :root {
     --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
     --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
     --secondary-bg: #e8e8ed; --secondary-text: #1d1d1f; --border-color: #d2d2d7;
@@ -78,21 +78,117 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
 .calendar-nav-btn:hover { background-color: var(--secondary-bg); color: var(--primary-color); transform: scale(1.1); }
 .calendar-nav-btn:active { transform: scale(0.95); }
 
-/* ESTILOS PARA BOTÕES - APPLE STYLE */
-.button-group-container { display: flex; align-items: center; background-color: rgba(128, 128, 128, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 9999px; padding: 4px; border: 1px solid rgba(128, 128, 128, 0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.apple-style-button { background-color: transparent; border: none; color: var(--muted-text); font-size: 0.875rem; font-weight: 500; padding: 8px 16px; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease; white-space: nowrap; }
-.apple-style-button:hover { background-color: rgba(128, 128, 128, 0.15); color: var(--text-color); }
-.apple-style-button:active { background-color: rgba(128, 128, 128, 0.25); }
-.apple-style-button-destructive:hover { color: var(--red-color); }
-.separator { width: 1px; height: 16px; background-color: rgba(128, 128, 128, 0.2); }
-.theme-toggle { font-size: 1rem !important; padding: 8px !important; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+/*
+ * =========================================
+ * ESTILOS PARA BOTÕES - APPLE STYLE (ATUALIZADO)
+ * =========================================
+ */
+.button-group-container {
+    display: flex;
+    align-items: center;
+    background-color: rgba(128, 128, 128, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 9999px;
+    padding: 4px;
+    border: 1px solid rgba(128, 128, 128, 0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    gap: 4px; /* Pequeno espaço entre os botões */
+}
 
-/* ESTILOS RESPONSIVOS PARA BOTÕES */
-.button-icon { display: none; width: 1.25rem; height: 1.25rem; }
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0; /* Botões de ação ficam colados */
+}
+
+.apple-style-button {
+    background-color: transparent;
+    border: none;
+    color: var(--muted-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.apple-style-button:hover {
+    background-color: rgba(128, 128, 128, 0.15);
+    color: var(--text-color);
+}
+
+.apple-style-button:active {
+    background-color: rgba(128, 128, 128, 0.25);
+}
+
+.apple-style-button-destructive:hover {
+    color: var(--red-color);
+}
+
+.theme-toggle {
+    font-size: 1rem !important;
+    padding: 8px !important;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+
+/*
+ * =========================================
+ * ESTILOS RESPONSIVOS PARA BOTÕES (ATUALIZADO)
+ * =========================================
+ */
+
+.button-icon {
+    display: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+
 @media (max-width: 640px) {
-    .button-text { display: none; }
-    .button-icon { display: block; }
-    .apple-style-button { padding: 8px; }
+    .button-group-container {
+        flex-direction: column;
+        border-radius: 20px; /* Um pouco mais arredondado */
+        width: auto; /* Deixa a largura ser automática */
+        padding: 6px;
+        gap: 6px; /* Espaço entre a fileira de cima e o botão de tema */
+    }
+
+    .action-buttons {
+        gap: 0;
+    }
+
+    .button-text {
+        display: none;
+    }
+
+    .button-icon {
+        display: block;
+    }
+
+    .apple-style-button {
+        padding: 10px; /* Padding igual em todos os lados para um círculo perfeito */
+        width: 44px; /* Tamanho padrão de toque Apple */
+        height: 44px;
+    }
+    
+    .theme-toggle {
+        padding: 10px !important;
+        width: 44px;
+        height: 44px;
+    }
 }
     </style>
 </head>
@@ -221,18 +317,15 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
             <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
             <span class="button-text">Conta</span>
         </button>
-        <div class="separator"></div>
         <button id="manage-settings-btn" class="apple-style-button">
             <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.242 1.411l-1.086.954a.996.996 0 000 1.616l1.086.954a1.125 1.125 0 01.242 1.411l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.242-1.411l1.086-.954a.996.996 0 000-1.616l-1.086-.954a1.125 1.125 0 01-.242-1.411l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.213-1.28z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             <span class="button-text">Gerenciar</span>
         </button>
-        <div class="separator"></div>
         <button id="logout-btn" class="apple-style-button apple-style-button-destructive">
             <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
             <span class="button-text">Sair</span>
         </button>
     </div>
-    <div class="separator"></div>
     <button id="theme-toggle-btn" class="apple-style-button theme-toggle">☀️</button>
 </div>
             </div>
