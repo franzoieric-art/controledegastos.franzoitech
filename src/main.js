@@ -191,7 +191,7 @@ const App = {
         loadingOverlay.classList.add('hidden');
         this.render.updateHeader();
     },
-     handleRecurringDeletion(recurringId, startingMonthIndex = 0) {
+      handleRecurringDeletion(recurringId, startingMonthIndex = 0) {
           console.log(`--- INICIANDO REMOÇÃO ---
     ID da Recorrência: ${recurringId}
     A partir do Mês (índice): ${startingMonthIndex}
@@ -203,7 +203,6 @@ const App = {
 
         // Filtra para remover a recorrência dos Ganhos PJ e PF
         monthData.pjEntries = monthData.pjEntries.filter(entry => entry.recurringId !== recurringId);
-        // A CORREÇÃO ESTÁ AQUI 👇 (era "month", agora é "monthData")
         monthData.pfEntries = monthData.pfEntries.filter(entry => entry.recurringId !== recurringId);
 
         // Filtra para remover a recorrência dos Gastos (Pessoais e Empresa)
@@ -286,7 +285,6 @@ const App = {
     const appliedRecurringIds = new Set();
     const month = this.state.monthlyData[monthIndex];
 
-    // Cria um conjunto de IDs já aplicados para evitar duplicatas
     month.pfEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
     month.pjEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
     month.expenses.forEach(day => {
@@ -294,20 +292,16 @@ const App = {
         day.businessEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
     });
 
-    // Pega o ano atual para calcular os dias do mês corretamente
     const currentYear = new Date().getFullYear();
     const daysInCurrentMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
 
     this.state.recurringEntries.forEach(r => {
         if (r.id && !appliedRecurringIds.has(r.id)) {
             
-            // --- LÓGICA CORRIGIDA AQUI ---
-            // Ajusta o dia do lançamento para o último dia do mês, se necessário
             const effectiveDay = Math.min(r.dayOfMonth, daysInCurrentMonth);
             const dayIndex = effectiveDay - 1;
-            // -----------------------------
 
-            if (dayIndex < 0 || dayIndex >= daysInCurrentMonth) return; // Checagem de segurança
+            if (dayIndex < 0 || dayIndex >= daysInCurrentMonth) return;
 
             const newEntry = {
                 id: Date.now() + Math.random(),
@@ -514,7 +508,21 @@ const App = {
             setTimeout(() => { e.target.textContent = 'Copiar'; }, 2000);
         });
         document.getElementById('close-ai-modal-btn').addEventListener('click', () => { this.ui.aiAnalysisModal.classList.add('hidden'); });
-        document.getElementById('add-card-btn').addEventListener('click', () => { const n = this.ui.newCardNameInput.value.trim(); if (n && !this.state.creditCards.includes(n)) { this.state.creditCards.push(n); this.ui.newCardNameInput.value = ''; this.render.renderCardList(); this.saveDataToFirestore(); } });
+        
+        // CORREÇÃO: Listener para adicionar cartão, usando 'App' em vez de 'this'
+        document.getElementById('add-card-btn').addEventListener('click', () => {
+            const n = App.ui.newCardNameInput.value.trim();
+            if (n && !App.state.creditCards.find(c => c.toLowerCase() === n.toLowerCase())) {
+                App.state.creditCards.push(n);
+                App.ui.newCardNameInput.value = '';
+                App.render.renderCardList();
+                App.saveDataToFirestore();
+                App.render.updateAllCardSelectors(); // Atualiza todos os seletores de cartão
+            } else if (n) {
+                alert('Já existe um cartão com este nome.');
+            }
+        });
+
         document.getElementById('add-category-btn').addEventListener('click', () => {
             const newName = this.ui.newCategoryNameInput.value.trim();
             const normalizedNewName = newName.toLowerCase();
@@ -621,6 +629,7 @@ const App = {
                 this.recalculateAndDisplayTotals(month);
                 this.saveDataToFirestore();
             }
+            // CORREÇÃO: Listener para remover cartão
             if (t.matches('.remove-card-btn')) {
                 const cardNameToRemove = t.dataset.cardName;
                 for (let i = 0; i < 12; i++) {
@@ -632,6 +641,7 @@ const App = {
                 }
                 this.state.creditCards = this.state.creditCards.filter(c => c !== cardNameToRemove);
                 this.render.renderCardList();
+                this.render.updateAllCardSelectors(); // Atualiza todos os seletores de cartão
                 this.saveDataToFirestore();
             }
             if (t.matches('.remove-category-btn')) {
@@ -648,22 +658,21 @@ const App = {
                 this.saveDataToFirestore();
             }
             if (t.matches('.remove-recurring-btn')) {
-    const index = parseInt(t.dataset.index);
-    const entryToDelete = App.state.recurringEntries[index];
-    
-    if (entryToDelete && entryToDelete.id) {
-        const modal = document.getElementById('confirm-recurring-delete-modal');
-        // Armazena o ID e o índice no próprio modal para uso posterior
-        modal.dataset.recurringId = entryToDelete.id;
-        modal.dataset.recurringIndex = index;
-        
-        const futureBtn = document.getElementById('delete-future-recurring-btn');
-        const activeMonthName = App.constants.monthNames[App.state.activeMonthIndex];
-        futureBtn.textContent = `Remover de ${activeMonthName} em diante`;
-        
-        modal.classList.remove('hidden');
-    }
-}
+                const index = parseInt(t.dataset.index);
+                const entryToDelete = App.state.recurringEntries[index];
+                
+                if (entryToDelete && entryToDelete.id) {
+                    const modal = document.getElementById('confirm-recurring-delete-modal');
+                    modal.dataset.recurringId = entryToDelete.id;
+                    modal.dataset.recurringIndex = index;
+                    
+                    const futureBtn = document.getElementById('delete-future-recurring-btn');
+                    const activeMonthName = App.constants.monthNames[App.state.activeMonthIndex];
+                    futureBtn.textContent = `Remover de ${activeMonthName} em diante`;
+                    
+                    modal.classList.remove('hidden');
+                }
+            }
             if (t.matches('[data-action="back-to-months"]')) {
                 const lastMonth = App.state.lastViewedMonthIndex;
                 if (typeof lastMonth === 'number') {
@@ -720,13 +729,10 @@ const App = {
 
         const confirmModal = document.getElementById('confirm-recurring-delete-modal');
 
-        // Botão "Remover todos"
         document.getElementById('delete-all-recurring-btn').addEventListener('click', () => {
             const id = parseFloat(confirmModal.dataset.recurringId);
             const index = parseInt(confirmModal.dataset.recurringIndex);
             console.log(`Botão "Remover Todos" clicado. Tentando remover ID: ${id}`);
-    // 1. Limpa os lançamentos de TODOS os meses
-    App.handleRecurringDeletion(id, 0);
             App.handleRecurringDeletion(id, 0); 
             App.state.recurringEntries.splice(index, 1);
             App.render.renderRecurringList();
@@ -735,7 +741,6 @@ const App = {
             confirmModal.classList.add('hidden');
         });
 
-        // Botão "Remover a partir do mês atual"
         document.getElementById('delete-future-recurring-btn').addEventListener('click', () => {
             const id = parseFloat(confirmModal.dataset.recurringId);
             const index = parseInt(confirmModal.dataset.recurringIndex);
@@ -747,13 +752,11 @@ const App = {
             confirmModal.classList.add('hidden');
         });
 
-        // Botão "Cancelar"
         document.getElementById('cancel-delete-recurring-btn').addEventListener('click', () => {
             confirmModal.classList.add('hidden');
         });
 
-    }, // <--- ESTA É A CHAVE E VÍRGULA QUE TERMINAM A FUNÇÃO
-
+    }, 
     ai: {
         async getFinancialAnalysis(monthIndex) {
             App.ui.aiAnalysisModal.classList.remove('hidden');
@@ -919,30 +922,39 @@ const App = {
             document.getElementById('user-avatar').src = avatarUrl;
         },
         updateStatCards(monthIndex) {
-    const monthData = App.state.monthlyData[monthIndex];
-    if (!monthData) return;
+            const monthData = App.state.monthlyData[monthIndex];
+            if (!monthData) return;
 
-    // Calcula os totais do mês
-    const totalIncome = monthData.pjEntries.reduce((sum, entry) => sum + entry.amount, 0) +
-                        monthData.pfEntries.reduce((sum, entry) => sum + entry.amount, 0);
+            const totalIncome = monthData.pjEntries.reduce((sum, entry) => sum + entry.amount, 0) +
+                                  monthData.pfEntries.reduce((sum, entry) => sum + entry.amount, 0);
 
-    const totalExpense = monthData.expenses.flat().reduce((acc, day) => 
-        acc + 
-        day.personalEntries.reduce((sum, entry) => sum + entry.amount, 0) +
-        day.businessEntries.reduce((sum, entry) => sum + entry.amount, 0), 0);
+            const totalExpense = monthData.expenses.flat().reduce((acc, day) => 
+                acc + 
+                day.personalEntries.reduce((sum, entry) => sum + entry.amount, 0) +
+                day.businessEntries.reduce((sum, entry) => sum + entry.amount, 0), 0);
 
-    const balance = totalIncome - totalExpense;
+            const balance = totalIncome - totalExpense;
 
-    // Pega os elementos do HTML que criamos no Passo 1
-    const balanceEl = document.getElementById('stat-balance');
-    const incomeEl = document.getElementById('stat-income');
-    const expenseEl = document.getElementById('stat-expense');
+            const balanceEl = document.getElementById('stat-balance');
+            const incomeEl = document.getElementById('stat-income');
+            const expenseEl = document.getElementById('stat-expense');
 
-    // Atualiza o texto de cada card com o valor formatado
-    if (balanceEl) balanceEl.textContent = App.helpers.formatCurrency(balance);
-    if (incomeEl) incomeEl.textContent = App.helpers.formatCurrency(totalIncome);
-    if (expenseEl) expenseEl.textContent = App.helpers.formatCurrency(totalExpense);
-},
+            if (balanceEl) balanceEl.textContent = App.helpers.formatCurrency(balance);
+            if (incomeEl) incomeEl.textContent = App.helpers.formatCurrency(totalIncome);
+            if (expenseEl) expenseEl.textContent = App.helpers.formatCurrency(totalExpense);
+        },
+        // NOVA FUNÇÃO
+        updateAllCardSelectors: () => {
+            const allCardSelects = document.querySelectorAll('select[data-field="card"], select#recurring-card');
+            const optionsHTML = App.state.creditCards.map(card => `<option value="${card}">${card}</option>`).join('');
+            allCardSelects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = optionsHTML;
+                if (App.state.creditCards.includes(currentValue)) {
+                    select.value = currentValue;
+                }
+            });
+        },
         renderCalendarView(monthIndex) {
             const container = document.getElementById(`calendar-container-${monthIndex}`);
             if (!container) return;
@@ -1117,16 +1129,16 @@ const App = {
             App.state.chartInstances.goals = new Chart(document.getElementById(`budgetGoalsChart-${m}`).getContext('2d'), { type: 'bar', data: { labels: App.state.categories.map(c => c.name), datasets: [{ label: 'Gasto', data: spentData, backgroundColor: barColors }, { label: 'Meta', data: budgetData, backgroundColor: '#2997ff' }] }, options: {...barOptions, indexAxis: 'y' } });
         },
         renderBalanceSummary: () => { let totals = { pj: 0, pf: 0, personal: 0, business: 0 }; let monthlyPerformance = { gains: [], expenses: [] }; let allPersonalSpends = []; for (let i = 0; i < 12; i++) { if (!App.state.monthlyData[i]) { monthlyPerformance.gains.push(0); monthlyPerformance.expenses.push(0); continue; }; const monthData = App.state.monthlyData[i]; let monthGains = 0; let monthExpenses = 0;
-                monthData.pjEntries.forEach(e => { totals.pj += e.amount;
-                    monthGains += e.amount; });
-                monthData.pfEntries.forEach(e => { totals.pf += e.amount;
-                    monthGains += e.amount; });
-                monthData.expenses.forEach(day => { day.personalEntries.forEach(e => { totals.personal += e.amount;
-                        monthExpenses += e.amount; if (e.amount > 0) allPersonalSpends.push({...e, month: i }); });
-                    day.businessEntries.forEach(e => { totals.business += e.amount;
-                        monthExpenses += e.amount; }); });
-                monthlyPerformance.gains.push(monthGains);
-                monthlyPerformance.expenses.push(monthExpenses); } const balance = (totals.pj + totals.pf) - (totals.personal + totals.business);
+            monthData.pjEntries.forEach(e => { totals.pj += e.amount;
+                monthGains += e.amount; });
+            monthData.pfEntries.forEach(e => { totals.pf += e.amount;
+                monthGains += e.amount; });
+            monthData.expenses.forEach(day => { day.personalEntries.forEach(e => { totals.personal += e.amount;
+                    monthExpenses += e.amount; if (e.amount > 0) allPersonalSpends.push({...e, month: i }); });
+                day.businessEntries.forEach(e => { totals.business += e.amount;
+                    monthExpenses += e.amount; }); });
+            monthlyPerformance.gains.push(monthGains);
+            monthlyPerformance.expenses.push(monthExpenses); } const balance = (totals.pj + totals.pf) - (totals.personal + totals.business);
             document.getElementById('totalAnnualPJ').textContent = App.helpers.formatCurrency(totals.pj);
             document.getElementById('totalAnnualPF').textContent = App.helpers.formatCurrency(totals.pf);
             document.getElementById('totalAnnualExpenses').textContent = App.helpers.formatCurrency(totals.personal + totals.business);
@@ -1140,27 +1152,23 @@ const App = {
         renderCardList: () => { App.ui.cardListContainer.innerHTML = App.state.creditCards.map(c => `<div class="flex items-center justify-between p-2 rounded-lg" style="background-color: var(--input-bg);"><span class="text-color">${c}</span><button class="remove-card-btn text-red-500 hover:text-red-700" data-card-name="${c}">×</button></div>`).join(''); },
         renderCategoryList: () => { App.ui.categoryListContainer.innerHTML = App.state.categories.map(c => `<div class="flex items-center justify-between p-2 rounded-lg gap-2" style="background-color: var(--input-bg);"><input type="text" value="${c.name}" class="category-name-input flex-grow p-1 input-field" data-old-name="${c.name}"><input type="number" value="${c.budget}" min="0" class="category-budget-input w-24 p-1 input-field" data-category-name="${c.name}"><button class="remove-category-btn text-red-500 hover:text-red-700" data-category-name="${c.name}">×</button></div>`).join(''); },
         renderRecurringList: () => { App.ui.recurringListContainer.innerHTML = App.state.recurringEntries.map((r, i) => `<div class="text-xs p-2 rounded-lg flex justify-between items-center" style="background-color: var(--input-bg);"><div><p class="font-bold text-color">${r.description} (${App.helpers.formatCurrency(r.amount)})</p><p class="muted-text">Todo dia ${r.dayOfMonth} - ${r.type}</p></div><button class="remove-recurring-btn text-red-500 hover:text-red-700 font-bold" data-index="${i}">×</button></div>`).join(''); },
-        renderSettingsModal: () => { App.render.renderCardList(); App.render.renderCategoryList(); App.render.renderRecurringList();
+        
+        // CORREÇÃO: Função 'renderSettingsModal' estava duplicada. Esta é a versão correta e unificada.
+        renderSettingsModal: () => {
+            App.render.renderCardList();
+            App.render.renderCategoryList();
+            App.render.renderRecurringList();
+
+            const recurringTypes = ['Ganho PF', 'Ganho PJ', 'Gasto Pessoal', 'Gasto Empresa'];
+            document.getElementById('recurring-type').innerHTML = recurringTypes.map(type => `<option value="${type}">${type}</option>`).join('');
+
             document.getElementById('recurring-category').innerHTML = App.state.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
             document.getElementById('recurring-payment').innerHTML = App.constants.basePaymentMethods.map(m => `<option value="${m}">${m}</option>`).join('');
             document.getElementById('recurring-card').innerHTML = App.state.creditCards.map(c => `<option value="${c}">${c}</option>`).join('');
+            
             App.ui.settingsModal.classList.remove('hidden');
-            setTimeout(() => App.ui.settingsModal.querySelector('.modal-content').classList.remove('scale-95'), 10); },
-        renderSettingsModal: () => {
-    App.render.renderCardList();
-    App.render.renderCategoryList();
-    App.render.renderRecurringList();
-
-    const recurringTypes = ['Ganho PF', 'Ganho PJ', 'Gasto Pessoal', 'Gasto Empresa'];
-    document.getElementById('recurring-type').innerHTML = recurringTypes.map(type => `<option value="${type}">${type}</option>`).join('');
-
-    document.getElementById('recurring-category').innerHTML = App.state.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-    document.getElementById('recurring-payment').innerHTML = App.constants.basePaymentMethods.map(m => `<option value="${m}">${m}</option>`).join('');
-    document.getElementById('recurring-card').innerHTML = App.state.creditCards.map(c => `<option value="${c}">${c}</option>`).join('');
-    
-    App.ui.settingsModal.classList.remove('hidden');
-    setTimeout(() => App.ui.settingsModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
-},
+            setTimeout(() => App.ui.settingsModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+        },
         renderAccountModal: () => {
             const user = auth.currentUser;
             if (user) {
