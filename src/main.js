@@ -240,22 +240,6 @@ const App = {
                 this.render.renderPFEntries(monthIndex);
                 this.render.renderExpenseTable(monthIndex);
                 this.recalculateAndDisplayTotals(monthIndex);
-                if (contentEl) {
-    contentEl.classList.add('active');
-    if (monthIndex < 12) {
-        this.render.renderCalendarView(monthIndex);
-        this.render.renderPJEntries(monthIndex);
-        this.render.renderPFEntries(monthIndex);
-        this.render.renderExpenseTable(monthIndex);
-        this.recalculateAndDisplayTotals(monthIndex);
-        
-        // 👇 ADICIONE ESTA LINHA PARA ATUALIZAR OS CARDS 👇
-        this.render.updateStatCards(monthIndex);
-        
-    } else {
-        this.render.renderBalanceSummary();
-    }
-}
             } else {
                 this.render.renderBalanceSummary();
             }
@@ -928,31 +912,6 @@ const App = {
             const avatarUrl = App.state.profile.avatarUrl || 'images/default-avatar.svg';
             document.getElementById('user-avatar').src = avatarUrl;
         },
-        updateStatCards(monthIndex) {
-    const monthData = App.state.monthlyData[monthIndex];
-    if (!monthData) return;
-
-    // Calcula os totais do mês
-    const totalIncome = monthData.pjEntries.reduce((sum, entry) => sum + entry.amount, 0) +
-                        monthData.pfEntries.reduce((sum, entry) => sum + entry.amount, 0);
-
-    const totalExpense = monthData.expenses.flat().reduce((acc, day) => 
-        acc + 
-        day.personalEntries.reduce((sum, entry) => sum + entry.amount, 0) +
-        day.businessEntries.reduce((sum, entry) => sum + entry.amount, 0), 0);
-
-    const balance = totalIncome - totalExpense;
-
-    // Pega os elementos do HTML que criamos no Passo 1
-    const balanceEl = document.getElementById('stat-balance');
-    const incomeEl = document.getElementById('stat-income');
-    const expenseEl = document.getElementById('stat-expense');
-
-    // Atualiza o texto de cada card com o valor formatado
-    if (balanceEl) balanceEl.textContent = App.helpers.formatCurrency(balance);
-    if (incomeEl) incomeEl.textContent = App.helpers.formatCurrency(totalIncome);
-    if (expenseEl) expenseEl.textContent = App.helpers.formatCurrency(totalExpense);
-},
         renderCalendarView(monthIndex) {
             const container = document.getElementById(`calendar-container-${monthIndex}`);
             if (!container) return;
