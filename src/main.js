@@ -425,36 +425,7 @@ const App = {
         doc.save(`relatorio_${monthName}.pdf`);
     },
     bindGlobalEventListeners() {
-        document.getElementById('fix-fevereiro-btn').addEventListener('click', () => {
-    console.log("Iniciando correção de dados para Fevereiro...");
-
-    // Pega os dados do mês de Fevereiro (índice 1)
-    const dadosFevereiro = App.state.monthlyData[1];
-
-    if (dadosFevereiro && dadosFevereiro.expenses.length > 29) {
-        // Pega o ano atual para saber se é bissexto
-        const year = new Date().getFullYear();
-        const daysInFebruary = new Date(year, 2, 0).getDate(); // 28 ou 29
-
-        console.log(`Fevereiro tem ${daysInFebruary} dias. A lista de despesas atual tem ${dadosFevereiro.expenses.length} dias.`);
         
-        // TRUNCA a lista de despesas para o tamanho correto, removendo os dias "fantasmas"
-        dadosFevereiro.expenses.length = daysInFebruary;
-
-        console.log("Lista de despesas corrigida. Salvando no Firebase...");
-
-        // Salva os dados corrigidos no Firebase
-        App.saveDataToFirestore().then(() => {
-            alert('Correção aplicada! Os dados de Fevereiro foram limpos. A página será recarregada.');
-            // Recarrega a página para mostrar o resultado final
-            window.location.reload();
-        });
-
-    } else {
-        alert('Nenhum dado corrompido encontrado em Fevereiro.');
-        console.log("Dados de Fevereiro parecem estar corretos.");
-    }
-});
         this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
         const chatbotModal = document.getElementById('chatbot-modal');
         const chatbotModalContent = chatbotModal.querySelector('.modal-content');
