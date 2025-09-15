@@ -47,8 +47,23 @@ mainAuthBtn.addEventListener('click', () => {
     mainAuthBtn.textContent = 'Aguarde...';
     const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; };
     if (isLoginMode) {
-        signInWithEmailAndPassword(auth, email, password).catch(error => { showError('Email ou senha inválidos.'); restoreBtn(); });
-    } else {
+    signInWithEmailAndPassword(auth, email, password)
+        .catch(error => {
+            console.error("Firebase Login Error:", error); // Loga o objeto de erro completo
+            const errorCode = error.code;
+            console.log(`Código do Erro: ${errorCode}`); // Loga o código específico
+
+            if (errorCode === 'auth/wrong-password' || errorCode === 'auth/user-not-found' || errorCode === 'auth/invalid-credential') {
+                showError('Email ou senha inválidos.');
+            } else if (errorCode === 'auth/operation-not-allowed') {
+                showError('Login por email/senha não está ativado no Firebase.');
+            } else {
+                showError('Ocorreu um erro ao tentar entrar.');
+            }
+            restoreBtn();
+        });
+}
+else {
         const confirmPassword = document.getElementById('confirm-password-input').value;
         if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; }
         createUserWithEmailAndPassword(auth, email, password).catch(error => {
