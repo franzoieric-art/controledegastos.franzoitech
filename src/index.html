@@ -202,13 +202,16 @@
                     <input type="file" id="avatar-upload-input" class="hidden" accept="image/png, image/jpeg">
                     <div><p id="time-greeting" class="text-sm muted-text">Boa tarde!</p><h2 id="greeting-text" class="text-2xl font-bold leading-tight">Olá, Eric</h2></div>
                 </div>
-                <div class="flex items-center gap-2">
-    <div class="action-buttons"> 
-    <button id="manage-account-btn" ...>Conta</button>
-    <button id="manage-settings-btn" ...>Gerenciar</button>
-    <button id="logout-btn" ...>Sair</button>
-</div>
-    <button id="theme-toggle-btn" class="p-2 rounded-full text-lg self-start" style="background-color: var(--secondary-bg); color: var(--secondary-text);">🌙</button>
+                <div class="button-group-container">
+    <div class="action-buttons">
+        <button id="manage-account-btn" class="apple-style-button">Conta</button>
+        <div class="separator"></div>
+        <button id="manage-settings-btn" class="apple-style-button">Gerenciar</button>
+        <div class="separator"></div>
+        <button id="logout-btn" class="apple-style-button apple-style-button-destructive">Sair</button>
+    </div>
+    <div class="separator"></div>
+    <button id="theme-toggle-btn" class="apple-style-button theme-toggle">☀️</button>
 </div>
             </div>
             <div class="text-center mb-8 space-y-2">
