@@ -20,144 +20,80 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
-            --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
-            --secondary-bg: #e8e8ed; --secondary-text: #1d1d1f; --border-color: #d2d2d7;
-            --green-color: #30a14f; --red-color: #d82c0d;
-        }
-        html.dark {
-            --bg-color: #000000; --card-bg: #1d1d1f; --text-color: #f5f5f7; --muted-text: #86868b;
-            --input-bg: #3a3a3c; --input-border: #545458; --primary-color: #2997ff; --primary-color-hover: #53b0ff;
-            --secondary-bg: #3a3a3c; --secondary-text: #f5f5f7; --border-color: #424245;
-            --green-color: #32d74b; --red-color: #ff453a;
-        }
+    --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
+    --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
+    --secondary-bg: #e8e8ed; --secondary-text: #1d1d1f; --border-color: #d2d2d7;
+    --green-color: #30a14f; --red-color: #d82c0d;
+}
+html.dark {
+    --bg-color: #000000; --card-bg: #1d1d1f; --text-color: #f5f5f7; --muted-text: #86868b;
+    --input-bg: #3a3a3c; --input-border: #545458; --primary-color: #2997ff; --primary-color-hover: #53b0ff;
+    --secondary-bg: #3a3a3c; --secondary-text: #f5f5f7; --border-color: #424245;
+    --green-color: #32d74b; --red-color: #ff453a;
+}
+body { 
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background-color: var(--bg-color); 
+    color: var(--text-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
+.input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
+.input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
+.muted-text { color: var(--muted-text); }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: none; }
+.remove-btn { background-color: var(--secondary-bg); color: var(--muted-text); border-radius: 9999px; width: 1.75rem; height: 1.75rem; font-weight: 500; transition: background-color 0.2s, color 0.2s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+.remove-btn:hover { background-color: var(--red-color); color: white; }
+.month-content { display: none; } .month-content.active { display: block; }
+#save-feedback { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background-color: var(--green-color); color: white; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500; z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
+#save-feedback.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-10px); }
+.accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; padding: 0 1.5rem; border-top: 1px solid var(--border-color); }
+.accordion-item.active .accordion-content { max-height: 1000px; padding: 1.5rem; }
+.accordion-trigger .arrow { transition: transform 0.3s ease-out; }
+.accordion-item.active .accordion-trigger .arrow { transform: rotate(180deg); }
+.prose { color: var(--text-color); } .prose h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5em; }
+.prose p { margin-bottom: 1em; line-height: 1.6; } .prose ul { list-style-position: inside; margin-bottom: 1em; padding-left: 1em; }
+.prose li { margin-bottom: 0.5em; }
+.tooltip-container { position: relative; display: inline-flex; align-items: center; }
+.tooltip-text { visibility: hidden; width: 160px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -80px; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem; pointer-events: none; }
+.tooltip-container:focus .tooltip-text { visibility: visible; opacity: 1; }
+.action-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
+@media (min-width: 640px) { .action-buttons { flex-direction: row; } }
+#theme-toggle-btn { font-size: 1.25rem !important; color: var(--text-color) !important; background-image: none !important; line-height: 1; }
+#theme-toggle-btn::before, #theme-toggle-btn::after { content: none !important; display: none !important; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; border: 1px solid var(--border-color); padding: 1rem; border-radius: 1.5rem; }
+.calendar-header { text-align: center; font-weight: 600; color: var(--muted-text); padding-bottom: 0.5rem; font-size: 0.875rem; }
+.calendar-day { display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s, color 0.2s; position: relative; }
+.calendar-day.not-current-month { color: var(--muted-text); opacity: 0.5; cursor: default; }
+.calendar-day.current-month:hover { background-color: var(--secondary-bg); }
+.calendar-day.active { background-color: var(--primary-color); color: white; font-weight: 600; }
+.calendar-day.has-entries::after { content: ''; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background-color: var(--red-color); }
+.calendar-day.active.has-entries::after { background-color: white; }
+[id^="expense-section-wrapper-"] .accordion-item { display: none; }
+[id^="expense-section-wrapper-"] .accordion-item.active { display: block; }
+.calendar-nav-header { border: 1px solid var(--border-color); }
+.calendar-nav-btn { font-size: 1.75rem; font-weight: 300; color: var(--primary-color); width: 2.5rem; height: 2.5rem; border-radius: 9999px; transition: background-color 0.2s, color 0.2s, transform 0.2s; display: flex; align-items: center; justify-content: center; line-height: 1; background-color: transparent; border: none; cursor: pointer; }
+.calendar-nav-btn:hover { background-color: var(--secondary-bg); color: var(--primary-color); transform: scale(1.1); }
+.calendar-nav-btn:active { transform: scale(0.95); }
 
-        .button-group-container {
-            display: flex;
-            align-items: center;
-            background-color: rgba(128, 128, 128, 0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 9999px;
-            padding: 4px;
-            border: 1px solid rgba(128, 128, 128, 0.1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .action-buttons {
-            display: flex;
-            align-items: center;
-        }
-        .apple-style-button {
-            background-color: transparent;
-            border: none;
-            color: var(--muted-text);
-            font-size: 0.875rem;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 9999px;
-            cursor: pointer;
-            transition: background-color 0.2s ease, color 0.2s ease;
-            white-space: nowrap;
-        }
-        .apple-style-button:hover {
-            background-color: rgba(128, 128, 128, 0.15);
-            color: var(--text-color);
-        }
-        .apple-style-button:active {
-            background-color: rgba(128, 128, 128, 0.25);
-        }
-        .apple-style-button-destructive:hover {
-            color: var(--red-color);
-        }
-        .separator {
-            width: 1px;
-            height: 16px;
-            background-color: rgba(128, 128, 128, 0.2);
-        }
-        .theme-toggle {
-            font-size: 1rem !important;
-            padding: 8px !important;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+/* ESTILOS PARA BOTÕES - APPLE STYLE */
+.button-group-container { display: flex; align-items: center; background-color: rgba(128, 128, 128, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 9999px; padding: 4px; border: 1px solid rgba(128, 128, 128, 0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.apple-style-button { background-color: transparent; border: none; color: var(--muted-text); font-size: 0.875rem; font-weight: 500; padding: 8px 16px; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease; white-space: nowrap; }
+.apple-style-button:hover { background-color: rgba(128, 128, 128, 0.15); color: var(--text-color); }
+.apple-style-button:active { background-color: rgba(128, 128, 128, 0.25); }
+.apple-style-button-destructive:hover { color: var(--red-color); }
+.separator { width: 1px; height: 16px; background-color: rgba(128, 128, 128, 0.2); }
+.theme-toggle { font-size: 1rem !important; padding: 8px !important; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
 
-        .button-icon {
-            display: none;
-            width: 1.25rem; /* 20px */
-            height: 1.25rem; /* 20px */
-        }
-
-        /* Regras para telas pequenas (mobile) */
-        @media (max-width: 640px) {
-            /* Esconde o texto */
-            .button-text {
-                display: none;
-            }
-            /* Mostra o ícone */
-            .button-icon {
-                display: block;
-            }
-            /* Ajusta o padding para botões de ícone */
-            .apple-style-button {
-                padding: 8px;
-            }
-        }
-
-    </style> </head>
-        
-        body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-color);
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
-        .input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
-        .input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
-        .muted-text { color: var(--muted-text); }
-        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; appearance: none; }
-        .remove-btn { background-color: var(--secondary-bg); color: var(--muted-text); border-radius: 9999px; width: 1.75rem; height: 1.75rem; font-weight: 500; transition: background-color 0.2s, color 0.2s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
-        .remove-btn:hover { background-color: var(--red-color); color: white; }
-        .month-content { display: none; } .month-content.active { display: block; }
-        #save-feedback { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background-color: var(--green-color); color: white; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500; z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
-        #save-feedback.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-10px); }
-        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; padding: 0 1.5rem; border-top: 1px solid var(--border-color); }
-        .accordion-item.active .accordion-content { max-height: 1000px; padding: 1.5rem; }
-        .accordion-trigger .arrow { transition: transform 0.3s ease-out; }
-        .accordion-item.active .accordion-trigger .arrow { transform: rotate(180deg); }
-        .prose { color: var(--text-color); } .prose h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5em; }
-        .prose p { margin-bottom: 1em; line-height: 1.6; } .prose ul { list-style-position: inside; margin-bottom: 1em; padding-left: 1em; }
-        .prose li { margin-bottom: 0.5em; }
-        .tooltip-container { position: relative; display: inline-flex; align-items: center; }
-        .tooltip-text { visibility: hidden; width: 160px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -80px; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem; pointer-events: none; }
-        .tooltip-container:focus .tooltip-text { visibility: visible; opacity: 1; }
-        .action-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
-        @media (min-width: 640px) { .action-buttons { flex-direction: row; } }
-        #theme-toggle-btn { font-size: 1.25rem !important; color: var(--text-color) !important; background-image: none !important; line-height: 1; }
-        #theme-toggle-btn::before, #theme-toggle-btn::after { content: none !important; display: none !important; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; border: 1px solid var(--border-color); padding: 1rem; border-radius: 1.5rem; }
-        .calendar-header { text-align: center; font-weight: 600; color: var(--muted-text); padding-bottom: 0.5rem; font-size: 0.875rem; }
-        .calendar-day { display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s, color 0.2s; position: relative; }
-        .calendar-day.not-current-month { color: var(--muted-text); opacity: 0.5; cursor: default; }
-        .calendar-day.current-month:hover { background-color: var(--secondary-bg); }
-        .calendar-day.active { background-color: var(--primary-color); color: white; font-weight: 600; }
-        .calendar-day.has-entries::after { content: ''; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background-color: var(--red-color); }
-        .calendar-day.active.has-entries::after { background-color: white; }
-        [id^="expense-section-wrapper-"] .accordion-item { display: none; }
-        [id^="expense-section-wrapper-"] .accordion-item.active { display: block; }
-        .calendar-nav-header { border: 1px solid var(--border-color); }
-        .calendar-nav-btn { font-size: 1.75rem; font-weight: 300; color: var(--primary-color); width: 2.5rem; height: 2.5rem; border-radius: 9999px; transition: background-color 0.2s, color 0.2s, transform 0.2s; display: flex; align-items: center; justify-content: center; line-height: 1; background-color: transparent; border: none; cursor: pointer; }
-        .calendar-nav-btn:hover { background-color: var(--secondary-bg); color: var(--primary-color); transform: scale(1.1); }
-        .calendar-nav-btn:active { transform: scale(0.95); }
+/* ESTILOS RESPONSIVOS PARA BOTÕES */
+.button-icon { display: none; width: 1.25rem; height: 1.25rem; }
+@media (max-width: 640px) {
+    .button-text { display: none; }
+    .button-icon { display: block; }
+    .apple-style-button { padding: 8px; }
+}
     </style>
 </head>
 <body class="p-2 sm:p-4">
