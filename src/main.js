@@ -192,6 +192,10 @@ const App = {
         this.render.updateHeader();
     },
      handleRecurringDeletion(recurringId, startingMonthIndex = 0) {
+          console.log(`--- INICIANDO REMOÇÃO ---
+    ID da Recorrência: ${recurringId}
+    A partir do Mês (índice): ${startingMonthIndex}
+    -------------------------`);
     // Itera por todos os meses a partir do mês inicial definido
     for (let i = startingMonthIndex; i < 12; i++) {
         const monthData = this.state.monthlyData[i];
@@ -714,6 +718,9 @@ const App = {
         document.getElementById('delete-all-recurring-btn').addEventListener('click', () => {
             const id = parseFloat(confirmModal.dataset.recurringId);
             const index = parseInt(confirmModal.dataset.recurringIndex);
+            console.log(`Botão "Remover Todos" clicado. Tentando remover ID: ${id}`);
+    // 1. Limpa os lançamentos de TODOS os meses
+    App.handleRecurringDeletion(id, 0);
             App.handleRecurringDeletion(id, 0); 
             App.state.recurringEntries.splice(index, 1);
             App.render.renderRecurringList();
