@@ -171,6 +171,25 @@
                 </div>
             </div>
         </div>
+        <div id="confirm-recurring-delete-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-lg p-6 transform scale-95">
+        <h2 class="text-xl font-bold mb-4">Confirmar Remoção</h2>
+        <p class="text-[var(--muted-text)] mb-6">
+            Você está prestes a remover um lançamento recorrente. O que você deseja fazer com os lançamentos que já foram criados nos meses anteriores?
+        </p>
+        <div class="space-y-3">
+            <button id="delete-future-recurring-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors bg-[var(--primary-color)] hover:bg-[var(--primary-color-hover)]">
+                Remover a partir do mês atual
+            </button>
+            <button id="delete-all-recurring-btn" class="w-full px-6 py-3 font-semibold rounded-xl transition-colors bg-[var(--secondary-bg)] hover:bg-[var(--red-color)] hover:text-white">
+                Remover todos os lançamentos (histórico completo)
+            </button>
+        </div>
+        <div class="mt-6 text-center">
+            <button id="cancel-delete-recurring-btn" class="text-sm text-[var(--muted-text)] hover:underline">Cancelar</button>
+        </div>
+    </div>
+</div>
         <div id="ai-analysis-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50"><div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]"><div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 class="text-2xl font-bold">Análise Financeira com IA</h2><button id="close-ai-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div><div id="ai-analysis-result" class="overflow-y-auto prose dark:prose-invert"><p class="muted-text">Analisando seus dados...</p></div></div></div>
         <div class="container mx-auto card p-4 md:p-8 rounded-2xl relative">
             <div id="save-feedback">Salvo ✓</div>

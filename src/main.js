@@ -191,6 +191,28 @@ const App = {
         loadingOverlay.classList.add('hidden');
         this.render.updateHeader();
     },
+     handleRecurringDeletion(recurringId, startingMonthIndex = 0) {
+        // Itera por todos os meses a partir do mês inicial definido
+        for (let i = startingMonthIndex; i < 12; i++) {
+            const monthData = this.state.monthlyData[i];
+            if (!monthData) continue;
+    
+            // Filtra para remover a recorrência dos Ganhos PJ e PF
+            monthData.pjEntries = monthData.pjEntries.filter(entry => entry.recurringId !== recurringId);
+            monthData.pfEntries = month.pfEntries.filter(entry => entry.recurringId !== recurringId);
+    
+            // Filtra para remover a recorrência dos Gastos (Pessoais e Empresa)
+            monthData.expenses.forEach(day => {
+                if (day.personalEntries) {
+                    day.personalEntries = day.personalEntries.filter(entry => entry.recurringId !== recurringId);
+                }
+                if (day.businessEntries) {
+                    day.businessEntries = day.businessEntries.filter(entry => entry.recurringId !== recurringId);
+                }
+            });
+        }
+        console.log(`Lançamentos com recurringId=${recurringId} removidos a partir do mês ${startingMonthIndex}.`);
+    },
     showMonth(monthIndex) {
         if (this.state.activeMonthIndex !== monthIndex && this.state.saveTimeout) {
             clearTimeout(this.state.saveTimeout);
@@ -596,11 +618,22 @@ const App = {
                 this.saveDataToFirestore();
             }
             if (t.matches('.remove-recurring-btn')) {
-                const index = parseInt(t.dataset.index);
-                this.state.recurringEntries.splice(index, 1);
-                this.render.renderRecurringList();
-                this.saveDataToFirestore();
-            }
+    const index = parseInt(t.dataset.index);
+    const entryToDelete = App.state.recurringEntries[index];
+    
+    if (entryToDelete && entryToDelete.id) {
+        const modal = document.getElementById('confirm-recurring-delete-modal');
+        // Armazena o ID e o índice no próprio modal para uso posterior
+        modal.dataset.recurringId = entryToDelete.id;
+        modal.dataset.recurringIndex = index;
+        
+        const futureBtn = document.getElementById('delete-future-recurring-btn');
+        const activeMonthName = App.constants.monthNames[App.state.activeMonthIndex];
+        futureBtn.textContent = `Remover de ${activeMonthName} em diante`;
+        
+        modal.classList.remove('hidden');
+    }
+}
             if (t.matches('[data-action="back-to-months"]')) {
                 const lastMonth = App.state.lastViewedMonthIndex;
                 if (typeof lastMonth === 'number') {
@@ -654,7 +687,40 @@ const App = {
                 }
             }
         });
-    },
+
+        const confirmModal = document.getElementById('confirm-recurring-delete-modal');
+
+        // Botão "Remover todos"
+        document.getElementById('delete-all-recurring-btn').addEventListener('click', () => {
+            const id = parseFloat(confirmModal.dataset.recurringId);
+            const index = parseInt(confirmModal.dataset.recurringIndex);
+            App.handleRecurringDeletion(id, 0); 
+            App.state.recurringEntries.splice(index, 1);
+            App.render.renderRecurringList();
+            App.showMonth(App.state.activeMonthIndex);
+            App.saveDataToFirestore();
+            confirmModal.classList.add('hidden');
+        });
+
+        // Botão "Remover a partir do mês atual"
+        document.getElementById('delete-future-recurring-btn').addEventListener('click', () => {
+            const id = parseFloat(confirmModal.dataset.recurringId);
+            const index = parseInt(confirmModal.dataset.recurringIndex);
+            App.handleRecurringDeletion(id, App.state.activeMonthIndex);
+            App.state.recurringEntries.splice(index, 1);
+            App.render.renderRecurringList();
+            App.showMonth(App.state.activeMonthIndex);
+            App.saveDataToFirestore();
+            confirmModal.classList.add('hidden');
+        });
+
+        // Botão "Cancelar"
+        document.getElementById('cancel-delete-recurring-btn').addEventListener('click', () => {
+            confirmModal.classList.add('hidden');
+        });
+
+    }, // <--- ESTA É A CHAVE E VÍRGULA QUE TERMINAM A FUNÇÃO
+
     ai: {
         async getFinancialAnalysis(monthIndex) {
             App.ui.aiAnalysisModal.classList.remove('hidden');
