@@ -4,6 +4,7 @@ import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/fireb
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
 
 // Carrega as chaves de forma segura a partir do arquivo .env (gerenciado pelo Vite)
+/* // COMENTE ESTE BLOCO POR ENQUANTO
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -11,6 +12,16 @@ const firebaseConfig = {
     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: import.meta.env.VITE_FIREBASE_APP_ID
+};
+*/
+// COLE ESTE BLOCO PARA TESTAR
+const firebaseConfig = {
+    apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0",
+    authDomain: "controle-de-gastos-74daf.firebaseapp.com",
+    projectId: "controle-de-gastos-74daf",
+    storageBucket: "controle-de-gastos-74daf.firebasestorage.app",
+    messagingSenderId: "331667008487",
+    appId: "1:331667008487:web:c5200f64ac27d0c32feb42"
 };
 
 const app = initializeApp(firebaseConfig);
