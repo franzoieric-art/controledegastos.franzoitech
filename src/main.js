@@ -231,32 +231,22 @@ const App = {
         Object.values(this.state.chartInstances).forEach(c => c?.destroy());
         document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
         if (monthIndex < 12) { this.applyRecurringEntries(monthIndex); }
+        
         const contentEl = document.getElementById(`month-${monthIndex}-content`);
         if (contentEl) {
             contentEl.classList.add('active');
+            
+            // Lógica unificada e correta
             if (monthIndex < 12) {
+                // Renderiza tudo para a visualização de um mês específico (0-11)
                 this.render.renderCalendarView(monthIndex);
                 this.render.renderPJEntries(monthIndex);
                 this.render.renderPFEntries(monthIndex);
                 this.render.renderExpenseTable(monthIndex);
                 this.recalculateAndDisplayTotals(monthIndex);
-                if (contentEl) {
-    contentEl.classList.add('active');
-    if (monthIndex < 12) {
-        this.render.renderCalendarView(monthIndex);
-        this.render.renderPJEntries(monthIndex);
-        this.render.renderPFEntries(monthIndex);
-        this.render.renderExpenseTable(monthIndex);
-        this.recalculateAndDisplayTotals(monthIndex);
-        
-        // 👇 ADICIONE ESTA LINHA PARA ATUALIZAR OS CARDS 👇
-        this.render.updateStatCards(monthIndex);
-        
-    } else {
-        this.render.renderBalanceSummary();
-    }
-}
+                this.render.updateStatCards(monthIndex); 
             } else {
+                // Renderiza o balanço anual (quando monthIndex for 12)
                 this.render.renderBalanceSummary();
             }
         }
