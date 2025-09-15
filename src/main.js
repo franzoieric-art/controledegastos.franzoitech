@@ -979,7 +979,7 @@ const App = {
             gridHTML += '</div>';
             container.innerHTML = headerHTML + gridHTML;
         },
-        createMonthContentHTML: (monthIndex) => `<div id="month-${monthIndex}-content" class="month-content">
+        createMonthContentHTML: (monthIndex) => `<div id="month-${monthIndex}-content" class="month-content w-full">
             <div class="flex justify-end gap-2 mb-4">
                 <button class="export-csv-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar CSV</button>
                 <button class="export-pdf-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar PDF</button>
