@@ -270,46 +270,65 @@ const App = {
         this.render.updateAllCharts(m, { totalPersonal: t.personal, totalBusiness: t.business, remainingBudget: t.remainingTotal });
     },
     applyRecurringEntries(monthIndex) {
-        if (!this.state.monthlyData[monthIndex]) return;
-        let wasModified = false;
-        const appliedRecurringIds = new Set();
-        const month = this.state.monthlyData[monthIndex];
-        month.pfEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
-        month.pjEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
-        month.expenses.forEach(day => {
-            day.personalEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
-            day.businessEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId) });
-        });
-        this.state.recurringEntries.forEach(r => {
-            if (r.id && !appliedRecurringIds.has(r.id)) {
-                const dayIndex = r.dayOfMonth - 1;
-                if (dayIndex < 0 || dayIndex > 30) return;
-                const newEntry = {
-                    id: Date.now() + Math.random(),
-                    description: r.description || 'Lançamento recorrente',
-                    amount: r.amount,
-                    isRecurring: true,
-                    recurringId: r.id
-                };
-                if (r.type === "Ganho PF") {
-                    month.pfEntries.push(newEntry);
-                    wasModified = true;
-                } else if (r.type === "Ganho PJ") {
-                    month.pjEntries.push(newEntry);
-                    wasModified = true;
-                } else if (r.type === "Gasto Pessoal") {
-                    Object.assign(newEntry, { category: r.category, paymentMethod: r.paymentMethod, card: r.card });
-                    month.expenses[dayIndex].personalEntries.push(newEntry);
-                    wasModified = true;
-                } else if (r.type === "Gasto Empresa") {
-                    Object.assign(newEntry, { category: 'N/A', paymentMethod: r.paymentMethod, card: r.card });
-                    month.expenses[dayIndex].businessEntries.push(newEntry);
-                    wasModified = true;
-                }
+    if (!this.state.monthlyData[monthIndex]) return;
+
+    let wasModified = false;
+    const appliedRecurringIds = new Set();
+    const month = this.state.monthlyData[monthIndex];
+
+    // Cria um conjunto de IDs já aplicados para evitar duplicatas
+    month.pfEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
+    month.pjEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
+    month.expenses.forEach(day => {
+        day.personalEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
+        day.businessEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
+    });
+
+    // Pega o ano atual para calcular os dias do mês corretamente
+    const currentYear = new Date().getFullYear();
+    const daysInCurrentMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
+
+    this.state.recurringEntries.forEach(r => {
+        if (r.id && !appliedRecurringIds.has(r.id)) {
+            
+            // --- LÓGICA CORRIGIDA AQUI ---
+            // Ajusta o dia do lançamento para o último dia do mês, se necessário
+            const effectiveDay = Math.min(r.dayOfMonth, daysInCurrentMonth);
+            const dayIndex = effectiveDay - 1;
+            // -----------------------------
+
+            if (dayIndex < 0 || dayIndex >= daysInCurrentMonth) return; // Checagem de segurança
+
+            const newEntry = {
+                id: Date.now() + Math.random(),
+                description: r.description || 'Lançamento recorrente',
+                amount: r.amount,
+                isRecurring: true,
+                recurringId: r.id
+            };
+
+            if (r.type === "Ganho PF") {
+                month.pfEntries.push(newEntry);
+                wasModified = true;
+            } else if (r.type === "Ganho PJ") {
+                month.pjEntries.push(newEntry);
+                wasModified = true;
+            } else if (r.type === "Gasto Pessoal") {
+                Object.assign(newEntry, { category: r.category, paymentMethod: r.paymentMethod, card: r.card });
+                month.expenses[dayIndex].personalEntries.push(newEntry);
+                wasModified = true;
+            } else if (r.type === "Gasto Empresa") {
+                Object.assign(newEntry, { category: 'N/A', paymentMethod: r.paymentMethod, card: r.card });
+                month.expenses[dayIndex].businessEntries.push(newEntry);
+                wasModified = true;
             }
-        });
-        if (wasModified) { this.saveDataToFirestore(); }
-    },
+        }
+    });
+
+    if (wasModified) { 
+        this.saveDataToFirestore(); 
+    }
+},
     exportMonthToCSV(monthIndex) {
         const monthData = this.state.monthlyData[monthIndex];
         if (!monthData) { return; }
