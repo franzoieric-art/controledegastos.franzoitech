@@ -1,398 +1,355 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="scroll-smooth">
+<html lang="pt-BR" class="">
 <head>
-    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guia de Comandos Git e Otimização de Código</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Painel Financeiro - Franzoi Tech</title>
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="apple-mobile-web-app-title" content="FranzoiTech">
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .command-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        .command-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-        }
+       :root {
+    --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
+    --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
+    --secondary-bg: #e8e8ed; --secondary-text: #1d1d1f; --border-color: #d2d2d7;
+    --green-color: #30a14f; --red-color: #d82c0d;
+}
+html.dark {
+    --bg-color: #000000; --card-bg: #1d1d1f; --text-color: #f5f5f7; --muted-text: #86868b;
+    --input-bg: #3a3a3c; --input-border: #545458; --primary-color: #2997ff; --primary-color-hover: #53b0ff;
+    --secondary-bg: #3a3a3c; --secondary-text: #f5f5f7; --border-color: #424245;
+    --green-color: #32d74b; --red-color: #ff453a;
+}
+body { 
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background-color: var(--bg-color); 
+    color: var(--text-color);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+.card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
+.input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
+.input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
+.muted-text { color: var(--muted-text); }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: none; }
+.remove-btn { background-color: var(--secondary-bg); color: var(--muted-text); border-radius: 9999px; width: 1.75rem; height: 1.75rem; font-weight: 500; transition: background-color 0.2s, color 0.2s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
+.remove-btn:hover { background-color: var(--red-color); color: white; }
+.month-content { display: none; } .month-content.active { display: block; }
+#save-feedback { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background-color: var(--green-color); color: white; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500; z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
+#save-feedback.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-10px); }
+.accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; padding: 0 1.5rem; border-top: 1px solid var(--border-color); }
+.accordion-item.active .accordion-content { max-height: 1000px; padding: 1.5rem; }
+.accordion-trigger .arrow { transition: transform 0.3s ease-out; }
+.accordion-item.active .accordion-trigger .arrow { transform: rotate(180deg); }
+.prose { color: var(--text-color); } .prose h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5em; }
+.prose p { margin-bottom: 1em; line-height: 1.6; } .prose ul { list-style-position: inside; margin-bottom: 1em; padding-left: 1em; }
+.prose li { margin-bottom: 0.5em; }
+.tooltip-container { position: relative; display: inline-flex; align-items: center; }
+.tooltip-text { visibility: hidden; width: 160px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -80px; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem; pointer-events: none; }
+.tooltip-container:focus .tooltip-text { visibility: visible; opacity: 1; }
+.action-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
+@media (min-width: 640px) { .action-buttons { flex-direction: row; } }
+#theme-toggle-btn { font-size: 1.25rem !important; color: var(--text-color) !important; background-image: none !important; line-height: 1; }
+#theme-toggle-btn::before, #theme-toggle-btn::after { content: none !important; display: none !important; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; border: 1px solid var(--border-color); padding: 1rem; border-radius: 1.5rem; width: 100%; }
+.calendar-header { text-align: center; font-weight: 600; color: var(--muted-text); padding-bottom: 0.5rem; font-size: 0.875rem; }
+.calendar-day { display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s, color 0.2s; position: relative; }
+.calendar-day.not-current-month { color: var(--muted-text); opacity: 0.5; cursor: default; }
+.calendar-day.current-month:hover { background-color: var(--secondary-bg); }
+.calendar-day.active { background-color: var(--primary-color); color: white; font-weight: 600; }
+.calendar-day.has-entries::after { content: ''; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background-color: var(--red-color); }
+.calendar-day.active.has-entries::after { background-color: white; }
+[id^="expense-section-wrapper-"] .accordion-item { display: none; }
+[id^="expense-section-wrapper-"] .accordion-item.active { display: block; }
+.calendar-nav-header { border: 1px solid var(--border-color); }
+.calendar-nav-btn { font-size: 1.75rem; font-weight: 300; color: var(--primary-color); width: 2.5rem; height: 2.5rem; border-radius: 9999px; transition: background-color 0.2s, color 0.2s, transform 0.2s; display: flex; align-items: center; justify-content: center; line-height: 1; background-color: transparent; border: none; cursor: pointer; }
+.calendar-nav-btn:hover { background-color: var(--secondary-bg); color: var(--primary-color); transform: scale(1.1); }
+.calendar-nav-btn:active { transform: scale(0.95); }
+
+/*
+ * =========================================
+ * ESTILOS PARA BOTÕES - APPLE STYLE (ATUALIZADO)
+ * =========================================
+ */
+.button-group-container {
+    display: flex;
+    align-items: center;
+    background-color: rgba(128, 128, 128, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 9999px;
+    padding: 4px;
+    border: 1px solid rgba(128, 128, 128, 0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    gap: 4px; /* Pequeno espaço entre os botões */
+}
+
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 0; /* Botões de ação ficam colados */
+}
+
+.apple-style-button {
+    background-color: transparent;
+    border: none;
+    color: var(--muted-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.apple-style-button:hover {
+    background-color: rgba(128, 128, 128, 0.15);
+    color: var(--text-color);
+}
+
+.apple-style-button:active {
+    background-color: rgba(128, 128, 128, 0.25);
+}
+
+.apple-style-button-destructive:hover {
+    color: var(--red-color);
+}
+
+.theme-toggle {
+    font-size: 1rem !important;
+    padding: 8px !important;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+
+/*
+ * =========================================
+ * ESTILOS RESPONSIVOS PARA BOTÕES (ATUALIZADO)
+ * =========================================
+ */
+
+.button-icon {
+    display: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .button-group-container {
+        flex-direction: column;
+        border-radius: 20px; /* Um pouco mais arredondado */
+        width: auto; /* Deixa a largura ser automática */
+        padding: 6px;
+        gap: 6px; /* Espaço entre a fileira de cima e o botão de tema */
+    }
+
+    .action-buttons {
+        gap: 0;
+    }
+
+    .button-text {
+        display: none;
+    }
+
+    .button-icon {
+        display: block;
+    }
+
+    .apple-style-button {
+        padding: 10px; /* Padding igual em todos os lados para um círculo perfeito */
+        width: 44px; /* Tamanho padrão de toque Apple */
+        height: 44px;
+    }
+    
+    .theme-toggle {
+        padding: 10px !important;
+        width: 44px;
+        height: 44px;
+    }
+}
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="p-2 sm:p-4">
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
 
-    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-10">
-        <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <span class="font-bold text-xl text-indigo-600">Git & Terser Cheatsheet</span>
+    <div id="auth-screen" class="w-full max-w-md">
+        <div class="bg-[var(--card-bg)] p-8 sm:p-10 rounded-2xl shadow-sm border border-[var(--border-color)]">
+            <div class="text-center mb-8">
+                <div class="flex justify-center mb-4">
+                    <img src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/30cd2b50cb7d032f5820b3d601e7601d61ce275a/ricoplus-landing-page/logoricoplus.png" alt="Logo Rico Plus" class="h-20 w-auto">
                 </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#essenciais" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Essenciais</a>
-                        <a href="#fluxo" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Fluxo de Trabalho</a>
-                        <a href="#dicas" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dicas e Soluções</a>
-                        <a href="#automacao" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Automação</a>
-                        <a href="#minificacao" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Minificação</a>
-                        <a href="#ia-assistant" class="text-slate-600 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Assistente IA</a>
-                    </div>
-                </div>
+                <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-[var(--text-color)]">Acesso ao Painel</h1>
+                <p class="text-[var(--muted-text)] mt-2">Exclusivo para membros Rico Plus.</p>
             </div>
-        </nav>
-    </header>
+            
+            <div class="space-y-4">
+                <input type="email" id="email-input" placeholder="Email" class="w-full p-3 rounded-xl border bg-[var(--input-bg)] border-[var(--input-border)] focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-50 outline-none transition-all">
+                <input type="password" id="password-input" placeholder="Senha" class="w-full p-3 rounded-xl border bg-[var(--input-bg)] border-[var(--input-border)] focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-50 outline-none transition-all">
+                <input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 rounded-xl border bg-[var(--input-bg)] border-[var(--input-border)] hidden">
+            </div>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">Guia Completo de Comandos Git</h1>
-            <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500">Uma referência interativa para os comandos mais úteis do Git no seu dia a dia.</p>
+            <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
+
+            <div class="mt-6">
+                <button id="main-auth-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors disabled:opacity-50 bg-[var(--primary-color)] hover:bg-[var(--primary-color-hover)]">Entrar</button>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <a href="#" id="forgot-password-link" class="text-sm text-[var(--primary-color)] hover:underline">Esqueceu a senha?</a>
+            </div>
         </div>
+    </div>
 
-        <section id="essenciais" class="mb-16 scroll-mt-20">
-            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-indigo-500 pb-2 mb-8">1. Comandos Essenciais para Iniciar um Projeto</h2>
-             <p class="text-lg text-slate-600 mb-8">Esta seção cobre os primeiros passos indispensáveis para transformar uma pasta local em um repositório Git e enviar seu projeto para o GitHub. São os comandos fundamentais que formam a base para todo o controle de versão.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git init</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Inicia um novo repositório Git na sua pasta local.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
+    <div id="app-screen" class="hidden">
+        <div id="chatbot-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end justify-end p-4 hidden z-50 transition-opacity">
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-md h-2/3 flex flex-col transform translate-y-8 transition-transform">
+                <div class="flex justify-between items-center p-4 border-b flex-shrink-0" style="border-color: var(--border-color);"><h2 class="text-xl font-bold">Assistente IA</h2><button id="close-chatbot-modal-btn" class="px-3 py-1 rounded-lg" style="background-color: var(--secondary-bg);">&times;</button></div>
+                <div id="chatbot-messages" class="flex-grow p-4 overflow-y-auto space-y-4">
+                    <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);"><p class="font-bold mb-1">Assistente</p><p>Olá! Como posso ajudar com suas finanças hoje?</p></div>
                 </div>
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git add .</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Adiciona todos os arquivos modificados para a área de "stage", preparando-os para o próximo commit.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
-                </div>
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                       <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git commit -m "Sua mensagem"</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Salva as mudanças que estão na área de "stage" no seu histórico local do Git.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
-                </div>
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git remote add origin &lt;URL&gt;</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Conecta o seu repositório local a um repositório remoto no GitHub.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
-                </div>
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git push -u origin main</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Envia as suas alterações locais para o GitHub pela primeira vez.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-indigo-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-600 transition-colors">Copiar</button>
-                </div>
+                <div class="p-4 border-t flex gap-2 flex-shrink-0" style="border-color: var(--border-color);"><input type="text" id="chatbot-input" placeholder="Ex: Qual foi meu maior gasto em Setembro?" class="flex-grow p-3 input-field"><button id="chatbot-send-btn" class="px-5 py-3 text-white font-semibold rounded-xl" style="background-color: var(--primary-color);">Enviar</button></div>
             </div>
-        </section>
-
-        <section id="fluxo" class="mb-16 scroll-mt-20">
-            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-teal-500 pb-2 mb-8">2. Comandos para Fluxo de Trabalho e Branches</h2>
-             <p class="text-lg text-slate-600 mb-8">Depois que seu projeto está configurado, estes comandos se tornam parte da sua rotina. Eles permitem que você gerencie diferentes linhas de desenvolvimento (branches), sincronize com o repositório remoto e lide com alterações de forma segura e organizada.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git branch -a</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Lista todas as branches do seu projeto, tanto as locais quanto as remotas.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
-                </div>
-                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git fetch</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Baixa as informações mais recentes do repositório remoto sem alterar seus arquivos locais.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
-                </div>
-                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git checkout &lt;nome-da-branch&gt;</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Troca para uma branch existente no seu projeto.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
-                </div>
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                       <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git checkout -b &lt;nova-branch&gt;</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Cria uma nova branch e já troca para ela em um único comando.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
-                </div>
-                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git stash</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Guarda temporariamente as alterações não salvas, permitindo que você troque de branch sem perder o trabalho.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
-                </div>
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">git stash pop</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Aplica de volta as mudanças que foram guardadas com git stash.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-teal-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-600 transition-colors">Copiar</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="automacao" class="mb-16 scroll-mt-20">
-            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-green-500 pb-2 mb-8">3. Automação e Deploy com npm e Firebase</h2>
-            <p class="text-lg text-slate-600 mb-8">Após as alterações no código, é preciso preparar os arquivos (`build`) e enviá-los para o servidor (`deploy`). Automatizar essas etapas com scripts do npm e Firebase simplifica seu fluxo de trabalho, garantindo que o seu site seja publicado de forma rápida e eficiente.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npm run build</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Executa a etapa de **construção** do seu projeto. Ele pega o código-fonte e o otimiza para produção, gerando a pasta `dist`.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors">Copiar</button>
-                </div>
-                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">firebase deploy</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Faz o **deploy** do seu projeto. Pega os arquivos da pasta `dist` e os publica no Firebase Hosting.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors">Copiar</button>
-                </div>
-                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npm run deploy</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Executa a **construção** e, se não houver erros, faz o **deploy** para o Firebase automaticamente. Simplifica o processo em um único comando.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition-colors">Copiar</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="dicas" class="scroll-mt-20">
-            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-amber-500 pb-2 mb-8">4. Dicas e Soluções de Problemas</h2>
-            <p class="text-lg text-slate-600 mb-8">Todo desenvolvedor encontra pequenos desafios ao usar o Git. Esta seção oferece soluções para problemas comuns e dicas para otimizar seu ambiente de trabalho, como ignorar arquivos desnecessários e gerenciar múltiplos projetos de forma eficiente no VS Code.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 <div class="command-card bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-xl font-bold mb-4">Como lidar com arquivos temporários como o .DS_Store</h3>
-                    <p class="text-slate-600 mb-4">Para evitar que o Git rastreie arquivos de sistema ou pastas de dependências (como `node_modules`), use um arquivo `.gitignore`.</p>
-                    <ol class="list-decimal list-inside text-slate-600 space-y-2">
-                        <li>Crie um arquivo chamado <strong>.gitignore</strong> na pasta principal do seu projeto.</li>
-                        <li>Dentro dele, adicione o nome do arquivo ou pasta que você quer ignorar. Por exemplo:</li>
-                    </ol>
-                    <pre class="bg-slate-100 rounded p-3 my-4 overflow-x-auto"><code class="text-sm font-mono">.DS_Store
-node_modules/
-.env</code></pre>
-                    <p class="text-slate-600">Salve o arquivo. O Git não vai mais se preocupar com eles. Lembre-se de fazer um commit do arquivo `.gitignore`!</p>
-                </div>
-
-                <div class="command-card bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-xl font-bold mb-4">Como trabalhar com vários projetos na mesma janela</h3>
-                    <p class="text-slate-600 mb-4">Para gerenciar múltiplos projetos relacionados sem ter que abrir várias janelas do VS Code, utilize o recurso de <strong>Workspace</strong>.</p>
-                     <ol class="list-decimal list-inside text-slate-600 space-y-2">
-                        <li>Com um projeto já aberto, vá em <strong>File > Add Folder to Workspace...</strong></li>
-                        <li>Selecione a outra pasta de projeto que deseja adicionar.</li>
-                        <li>Repita para quantos projetos precisar.</li>
-                        <li>Vá em <strong>File > Save Workspace As...</strong> para salvar a configuração.</li>
-                    </ol>
-                    <p class="text-slate-600 mt-4">Agora, basta abrir o arquivo `.code-workspace` para carregar todos os seus projetos de uma vez, cada um com seu próprio controle Git independente.</p>
-                </div>
-            </div>
-        </section>
-        
-        <section id="minificacao" class="mt-16 scroll-mt-20">
-            <h2 class="text-3xl font-bold text-slate-900 border-b-2 border-orange-500 pb-2 mb-8">5. Minificação e Ofuscação com Terser</h2>
-            <p class="text-lg text-slate-600 mb-8">A minificação e ofuscação são processos para diminuir o tamanho do seu código e dificultar sua leitura, tornando sua página mais leve e segura. A ferramenta mais comum para isso, principalmente para JavaScript, é o Terser.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npm install html-minifier-terser</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Instala a ferramenta de minificação localmente no seu projeto.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
-                </div>
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx html-minifier-terser --collapse-whitespace --remove-comments --minify-js true index.html -o index.min.html</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Executa a minificação completa (HTML, CSS e JS) e salva no arquivo `index.min.html`.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
-                </div>
-                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx html-minifier-terser index.html > index.min.html</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Uma alternativa simples que minifica apenas o HTML e o CSS, criando um novo arquivo.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
-                </div>
-            </div>
-
-            <h3 class="text-2xl font-bold text-slate-900 border-b-2 border-slate-300 pb-2 mt-12 mb-8">Opções Avançadas e Outros Usos</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx terser app.js -o app.min.js --compress --mangle</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Minifica e ofusca um arquivo JavaScript externo, salvando-o com um novo nome.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
-                </div>
-                <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx html-minifier-terser --minify-js true --source-map index.html -o index.min.html</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Cria um arquivo `.map` que ajuda a depurar o código original no navegador.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
-                </div>
-                 <div class="command-card bg-white rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <pre class="bg-slate-100 rounded p-3 mb-2 overflow-x-auto"><code class="text-sm text-pink-600 font-mono command-text">npx terser --compress --mangle --output dist/bundle.min.js src/main.js src/utils.js</code></pre>
-                        <p class="text-slate-600"><strong>Para que serve:</strong> Combina e minifica múltiplos arquivos JavaScript de uma vez, de forma avançada.</p>
-                    </div>
-                    <button class="copy-btn mt-4 w-full bg-orange-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors">Copiar</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="ia-assistant" class="mt-16 scroll-mt-20">
-            <div class="bg-white rounded-lg shadow-lg p-8 border-t-4 border-indigo-500">
-                <div class="flex items-start sm:items-center mb-4">
-                    <div class="flex-shrink-0">
-                         <svg class="h-10 w-10 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V7.5a2.25 2.25 0 00-2.25-2.25H7.5A2.25 2.25 0 005.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Ainda com dúvidas?</h2>
-                        <p class="text-lg text-slate-600 mt-1">Pergunte ao nosso assistente de IA sobre Git, GitHub e otimização de código.</p>
-                    </div>
-                </div>
-               
-                <div class="space-y-4 mt-6">
-                    <div>
-                        <label for="ai-question" class="sr-only">Sua pergunta</label>
-                        <input type="text" id="ai-question" placeholder="Ex: Como desfaço o último commit? ou O que é ofuscação de código?" class="w-full px-4 py-3 border border-slate-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition-shadow duration-200">
-                    </div>
-                    <button id="ask-ai-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors flex items-center justify-center disabled:bg-indigo-400 disabled:cursor-not-allowed">
-                        <span id="ai-btn-text">Perguntar à IA</span>
-                        <svg id="ai-spinner" class="animate-spin ml-2 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </button>
-                    <div id="ai-response-container" class="mt-4 p-5 bg-slate-100 rounded-md border border-slate-200 min-h-[50pxçç text-slate-700 leading-relaxed hidden">
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-    </main>
-
-    <footer class="bg-white mt-16 border-t">
-        <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-slate-500">
-            <p>&copy; 2025 Guia Interativo Git. Criado para facilitar seu dia a dia.</p>
         </div>
-    </footer>
+        <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-6 flex-shrink-0"><h2 class="text-2xl font-bold">Minha Conta</h2><button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div>
+                <div class="overflow-y-auto space-y-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Informações do Perfil</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label><input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field"></div>
+                            <div><label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label><input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;"></div>
+                        </div>
+                        <button id="save-profile-btn" class="mt-4 w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações do Perfil</button>
+                    </div>
+                    <div class="border-t pt-6" style="border-color: var(--border-color);">
+                        <h3 class="text-xl font-bold mb-1">Conectar Assistente IA via WhatsApp</h3>
+                        <p class="muted-text text-sm mb-4">Configure a integração para lançar despesas e interagir com seu painel diretamente do WhatsApp.</p>
+                        <div class="p-3 mb-4 rounded-xl text-center text-sm" style="background-color: var(--secondary-bg);">✨ <span class="font-semibold">Funcionalidade em desenvolvimento.</span> Disponível em breve!</div>
+                        <div class="space-y-4 opacity-60">
+                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);"><h4 class="font-semibold">Passo 1: Suas Credenciais da Meta</h4><p class="text-xs muted-text -mt-3">Insira as credenciais da sua API encontradas no <a href="#" class="underline" style="color: var(--primary-color);">Painel de Desenvolvedores</a>.</p><div><label for="whatsapp-phone-id" class="block text-sm font-medium muted-text mb-1">ID do Número de Telefone</label><input type="text" id="whatsapp-phone-id" placeholder="Ex: 102030405060708" class="w-full p-3 input-field" disabled></div><div><label for="whatsapp-token" class="block text-sm font-medium muted-text mb-1">Token de Acesso da API</label><input type="password" id="whatsapp-token" placeholder="Cole seu token permanente aqui" class="w-full p-3 input-field" disabled></div></div>
+                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);"><h4 class="font-semibold">Passo 2: Configurar Webhook na Meta</h4><p class="text-xs muted-text -mt-3">Copie os valores abaixo e cole-os na seção "Webhook" da sua aplicação na Meta.</p><div><label class="block text-sm font-medium muted-text mb-1">URL do Webhook (para colar na Meta)</label><div class="flex gap-2"><input type="text" id="whatsapp-webhook-url" class="w-full p-3 input-field" readonly disabled><button id="copy-webhook-url-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Copiar</button></div></div><div><label class="block text-sm font-medium muted-text mb-1">Token de Verificação do Webhook (para colar na Meta)</label><div class="flex gap-2"><input type="text" id="whatsapp-verify-token" class="w-full p-3 input-field" readonly disabled><button id="generate-verify-token-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Gerar</button></div></div></div>
+                            <div class="mt-4 flex items-center justify-between"><div class="text-sm muted-text">Status: <span id="whatsapp-status" class="font-semibold" style="color: var(--primary-color);">Indisponível</span></div><button id="save-integration-btn" class="px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);" disabled>Salvar Configuração</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-6 flex-shrink-0"><h2 class="text-2xl font-bold">Gerenciar</h2><button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Cartões de Crédito</h3>
+                        <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+                        <div id="card-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Categorias e Metas</h3>
+                        <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+                        <div id="category-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-3">Lançamentos Recorrentes</h3>
+                        <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);"><input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field"><div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field"></div><select id="recurring-type" class="w-full p-2 input-field"></select><div id="recurring-expense-fields" class="space-y-2 hidden"><select id="recurring-category" class="w-full p-2 input-field"></select><select id="recurring-payment" class="w-full p-2 input-field"></select><select id="recurring-card" class="w-full p-2 input-field hidden"></select></div><button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button></div>
+                        <div id="recurring-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="confirm-recurring-delete-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-lg p-6 transform scale-95">
+        <h2 class="text-xl font-bold mb-4">Confirmar Remoção</h2>
+        <p class="text-[var(--muted-text)] mb-6">
+            Você está prestes a remover um lançamento recorrente. O que você deseja fazer com os lançamentos que já foram criados nos meses anteriores?
+        </p>
+        <div class="space-y-3">
+            <button id="delete-future-recurring-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors bg-[var(--primary-color)] hover:bg-[var(--primary-color-hover)]">
+                Remover a partir do mês atual
+            </button>
+            <button id="delete-all-recurring-btn" class="w-full px-6 py-3 font-semibold rounded-xl transition-colors bg-[var(--secondary-bg)] hover:bg-[var(--red-color)] hover:text-white">
+                Remover todos os lançamentos (histórico completo)
+            </button>
+        </div>
+        <div class="mt-6 text-center">
+            <button id="cancel-delete-recurring-btn" class="text-sm text-[var(--muted-text)] hover:underline">Cancelar</button>
+        </div>
+    </div>
+</div>
+        <div id="ai-analysis-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50"><div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]"><div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 class="text-2xl font-bold">Análise Financeira com IA</h2><button id="close-ai-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div><div id="ai-analysis-result" class="overflow-y-auto prose dark:prose-invert"><p class="muted-text">Analisando seus dados...</p></div></div></div>
+        <div class="w-full max-w-7xl mx-auto card p-4 md:p-8 rounded-2xl relative">
+            <div id="save-feedback">Salvo ✓</div>
+            <div id="user-header" class="flex items-start justify-between mb-8 pb-8 border-b" style="border-color: var(--border-color);">
+                <div class="flex items-center space-x-4">
+                    <label for="avatar-upload-input" class="cursor-pointer group relative">
+                        <img id="user-avatar" src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/main/ricoplus-landing-page/images/default-avatar.svg" class="w-14 h-14 rounded-full object-cover border-2 transition-all group-hover:opacity-80" style="border-color: var(--border-color);">
+                        <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
+                    </label>
+                    <input type="file" id="avatar-upload-input" class="hidden" accept="image/png, image/jpeg">
+                    <div><p id="time-greeting" class="text-sm muted-text">Boa tarde!</p><h2 id="greeting-text" class="text-2xl font-bold leading-tight">Olá, Eric</h2></div>
+                </div>
+                <div class="button-group-container">
+    <div class="action-buttons">
+        <button id="manage-account-btn" class="apple-style-button">
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+            <span class="button-text">Conta</span>
+        </button>
+        <button id="manage-settings-btn" class="apple-style-button">
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.242 1.411l-1.086.954a.996.996 0 000 1.616l1.086.954a1.125 1.125 0 01.242 1.411l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.242-1.411l1.086-.954a.996.996 0 000-1.616l-1.086-.954a1.125 1.125 0 01-.242-1.411l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.213-1.28z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            <span class="button-text">Gerenciar</span>
+        </button>
+        <button id="logout-btn" class="apple-style-button apple-style-button-destructive">
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+            <span class="button-text">Sair</span>
+        </button>
+    </div>
+    <button id="theme-toggle-btn" class="apple-style-button theme-toggle">☀️</button>
+</div>
+            </div>
+            <div class="text-center mb-8 space-y-2">
+                <p class="text-xs font-semibold" style="color: var(--primary-color);">Rico Plus <span class="muted-text">by Franzoi Tech</span></p>
+                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Painel Financeiro</h1>
+                <p class="text-lg muted-text max-w-xs mx-auto">Mais que números, decisões inteligentes.</p>
+            </div>
+            <div id="monthContentContainer"></div>
+        </div> 
+        
+<footer class="mt-4 px-4 py-2 border-t text-center text-xs" style="border-color: var(--border-color);">
+    <p class="text-[var(--muted-text)]">
+        <span class="font-semibold" style="color: var(--primary-color);">Rico Plus</span> by Franzoi Tech | Versão 1.12 | Desenvolvido por <a href="#" target="_blank" class="underline" style="color: var(--muted-text);">Eric Franzoi</a>
+    </p>
+</footer>
+    <button id="floating-chatbot-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full text-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: var(--primary-color); color: white;">🤖</button>
+</div> 
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- Lógica existente para copiar comandos ---
-        const copyButtons = document.querySelectorAll('.copy-btn');
-        copyButtons.forEach(button => {
-            const commandText = button.closest('.command-card').querySelector('.command-text').innerText;
-            button.addEventListener('click', () => {
-                navigator.clipboard.writeText(commandText).then(() => {
-                    const originalText = button.innerText;
-                    button.innerText = 'Copiado!';
-                    setTimeout(() => {
-                        button.innerText = originalText;
-                    }, 1500);
-                });
-            });
-        });
+    <script type="module" src="/main.js"></script>
 
-        const navLinks = document.querySelectorAll('nav a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', (event) => {
-                event.preventDefault();
-                const targetId = event.target.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80, // Offset para o cabeçalho fixo
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-
-        // --- LÓGICA DO ASSISTENTE IA ---
-        const aiQuestionInput = document.getElementById('ai-question');
-        const askAiBtn = document.getElementById('ask-ai-btn');
-        const aiResponseContainer = document.getElementById('ai-response-container');
-        const aiBtnText = document.getElementById('ai-btn-text');
-        const aiSpinner = document.getElementById('ai-spinner');
-
-        const handleAIQuery = async () => {
-            const question = aiQuestionInput.value.trim();
-            if (!question) {
-                aiResponseContainer.innerHTML = '<p class="text-red-600 font-medium">Por favor, digite uma pergunta.</p>';
-                aiResponseContainer.classList.remove('hidden');
-                return;
-            }
-
-            aiBtnText.innerText = 'Pensando...';
-            aiSpinner.classList.remove('hidden');
-            askAiBtn.disabled = true;
-            aiResponseContainer.classList.remove('hidden');
-            aiResponseContainer.innerHTML = '<p class="text-slate-500">Conectando com a IA...</p>';
-
-            // AQUI ESTÁ O CONTEXTO DO PROMPT, ESSENCIAL PARA A AJUDA DA IA
-            const aiPrompt = `
-                Você é um assistente de programação especialista em Git, GitHub e na ferramenta de minificação e ofuscação Terser.
-                Sua tarefa é responder a uma pergunta do usuário sobre esses tópicos de forma clara e objetiva.
-
-                Contexto sobre as ferramentas:
-                - **Git/GitHub:** É um sistema de controle de versão. Comandos incluem 'git init', 'git add', 'git commit', 'git push', 'git branch', 'git fetch', 'git stash'.
-                - **Terser/Minificação:** A ferramenta 'html-minifier-terser' é usada para diminuir o tamanho do código HTML, CSS e JavaScript. Os principais comandos são 'npm install html-minifier-terser' e 'npx html-minifier-terser' com as opções '--collapse-whitespace', '--remove-comments' e '--minify-js true'.
-
-                Pergunta do usuário: "${question}"
-
-                Responda com base neste conhecimento.
-            `;
-
-            try {
-                const response = await fetch('/api/ask-ai', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: aiPrompt }),
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Houve um problema ao contatar a IA.');
-                }
-
-                const data = await response.json();
-                aiResponseContainer.innerHTML = `<p>${data.answer}</p>`;
-            } catch (error) {
-                aiResponseContainer.innerHTML = `<p class="text-red-600 font-medium">Erro: ${error.message}</p>`;
-            } finally {
-                aiBtnText.innerText = 'Perguntar à IA';
-                aiSpinner.classList.add('hidden');
-                askAiBtn.disabled = false;
-                aiQuestionInput.value = '';
-            }
-        };
-
-        if (askAiBtn) {
-            askAiBtn.addEventListener('click', handleAIQuery);
-        }
-
-        aiQuestionInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                handleAIQuery();
-            }
-        });
-    });
-</script>
 </body>
 </html>
