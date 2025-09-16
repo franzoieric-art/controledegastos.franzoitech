@@ -33,7 +33,7 @@ html.dark {
 }
 .painel-principal {
     width: 100%;
-    flex-grow: 1; /* Esta é a propriedade que resolve o problema */
+    flex-grow: 1;
 }
 body { 
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -47,7 +47,8 @@ body {
  * REGRAS PARA AS TELAS PRINCIPAIS
  * =========================================
  */
-#auth-screen {
+/* A CORREÇÃO ESTÁ AQUI: Adicionado o seletor :not(.hidden) */
+#auth-screen:not(.hidden) {
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -55,7 +56,6 @@ body {
     padding: 1rem;
 }
 
-/* A CORREÇÃO ESTÁ AQUI: A regra só se aplica quando #app-screen NÃO tem a classe .hidden */
 #app-screen:not(.hidden) {
     width: 100%;
     display: flex;
