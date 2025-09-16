@@ -344,28 +344,31 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
         <div class="painel-principal max-w-7xl mx-auto card p-4 md-p-8 rounded-2xl relative">
             <div id="save-feedback">Salvo ✓</div>
             <div id="user-header" class="flex items-start justify-between mb-8 pb-8 border-b" style="border-color: var(--border-color);">
-                <div class="flex items-center space-x-4">
-                    <label for="avatar-upload-input" class="cursor-pointer group relative">
-                        <img id="user-avatar" src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/main/ricoplus-landing-page/images/default-avatar.svg" class="w-14 h-14 rounded-full object-cover border-2 transition-all group-hover:opacity-80" style="border-color: var(--border-color);">
-                        <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
-                    </label>
-                    <input type="file" id="avatar-upload-input" class="hidden" accept="image/png, image/jpeg">
-                    <div><p id="time-greeting" class="text-sm muted-text">Boa tarde!</p><h2 id="greeting-text" class="text-2xl font-bold leading-tight">Olá, Eric</h2></div>
-                </div>
-                <div class="flex items-center gap-2">
-    <button id="theme-toggle-btn" class="apple-style-button theme-toggle">☀️</button>
-    <div id="action-menu-container" class="relative">
-        <button id="action-menu-btn" class="apple-style-button !p-2 !w-11 !h-11">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 13.5a.75.75 0 110-1.5.75.75 0 010 1.5zM12 20.25a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
-        </button>
-        <div id="action-menu-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 card rounded-xl shadow-lg p-2 z-20">
-            <a href="#" id="manage-account-btn" class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-[var(--secondary-bg)]">Conta</a>
-            <a href="#" id="manage-settings-btn" class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-[var(--secondary-bg)]">Gerenciar</a>
-            <div class="my-1 h-px bg-[var(--border-color)]"></div>
-            <a href="#" id="logout-btn" class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-[var(--red-color)] hover:bg-[var(--secondary-bg)]">Sair</a>
+    <div class="flex items-center space-x-4">
+        <label for="avatar-upload-input" class="cursor-pointer group relative">
+            <img id="user-avatar" src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/main/ricoplus-landing-page/images/default-avatar.svg" class="w-14 h-14 rounded-full object-cover border-2 transition-all group-hover:opacity-80" style="border-color: var(--border-color);">
+            <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
+        </label>
+        <input type="file" id="avatar-upload-input" class="hidden" accept="image/png, image/jpeg">
+        <div><p id="time-greeting" class="text-sm muted-text">Boa tarde!</p><h2 id="greeting-text" class="text-2xl font-bold leading-tight">Olá, Eric</h2></div>
+    </div>
+    <div class="flex items-center gap-2">
+        <button id="theme-toggle-btn" class="apple-style-button theme-toggle">☀️</button>
+        <div id="action-menu-container" class="relative">
+            <button id="action-menu-btn" class="apple-style-button !p-2 !w-11 !h-11">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 13.5a.75.75 0 110-1.5.75.75 0 010 1.5zM12 20.25a.75.75 0 110-1.5.75.75 0 010 1.5z"></path></svg>
+            </button>
+            <div id="action-menu-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 card rounded-xl shadow-lg p-2 z-20">
+                <a href="#" id="manage-account-btn" class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-[var(--secondary-bg)]">Conta</a>
+                <a href="#" id="manage-settings-btn" class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-[var(--secondary-bg)]">Gerenciar</a>
+                <div class="my-1 h-px bg-[var(--border-color)]"></div>
+                <a href="#" id="logout-btn" class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-[var(--red-color)] hover:bg-[var(--secondary-bg)]">Sair</a>
+            </div>
         </div>
     </div>
-</div>
+</div> ```
+
+Depois de substituir e **salvar o arquivo**, o layout voltará ao normal tanto no desktop quanto no mobile. Era um detalhe muito pequeno, mas com um impacto enorme. Agora tudo deve funcionar perfeitamente.
             <div class="text-center mb-8 space-y-2">
                 <p class="text-xs font-semibold" style="color: var(--primary-color);">Rico Plus <span class="muted-text">by Franzoi Tech</span></p>
                 <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Painel Financeiro</h1>
