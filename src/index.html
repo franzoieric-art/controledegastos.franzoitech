@@ -41,17 +41,22 @@ body {
     color: var(--text-color);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================
+ * REGRAS PARA AS TELAS PRINCIPAIS
+ * =========================================
+ */
+#auth-screen {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    padding: 1rem;
 }
 
-/* * =========================================
- * CÓDIGO ADICIONADO PARA CORRIGIR A COMPRESSÃO DA TELA
- * =========================================
- */
-#app-screen {
+/* A CORREÇÃO ESTÁ AQUI: A regra só se aplica quando #app-screen NÃO tem a classe .hidden */
+#app-screen:not(.hidden) {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -215,8 +220,8 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
 <body class="p-2 sm:p-4">
     <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
 
-    <div id="auth-screen" class="w-full max-w-md">
-        <div class="bg-[var(--card-bg)] p-8 sm:p-10 rounded-2xl shadow-sm border border-[var(--border-color)]">
+    <div id="auth-screen">
+        <div class="w-full max-w-md bg-[var(--card-bg)] p-8 sm:p-10 rounded-2xl shadow-sm border border-[var(--border-color)]">
             <div class="text-center mb-8">
                 <div class="flex justify-center mb-4">
                     <img src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/30cd2b50cb7d032f5820b3d601e7601d61ce275a/ricoplus-landing-page/logoricoplus.png" alt="Logo Rico Plus" class="h-20 w-auto">
