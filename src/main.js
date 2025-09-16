@@ -500,10 +500,37 @@ for (let i = 0; i < 12; i++) {
         });
         document.getElementById('avatar-upload-input').addEventListener('change', this.handleAvatarUpload.bind(this));
         themeToggleBtn.addEventListener('click', () => { const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark'; localStorage.setItem('theme', newTheme); applyTheme(newTheme); });
-        document.getElementById('manage-settings-btn').addEventListener('click', () => { this.render.renderSettingsModal(); });
-        document.getElementById('close-modal-btn').addEventListener('click', () => { this.ui.settingsModal.classList.add('hidden'); this.showMonth(this.state.activeMonthIndex); });
-        document.getElementById('manage-account-btn').addEventListener('click', () => { this.render.renderAccountModal(); });
-        document.getElementById('close-account-modal-btn').addEventListener('click', () => { this.ui.accountModal.classList.add('hidden'); });
+        const actionMenuBtn = document.getElementById('action-menu-btn');
+const actionMenuDropdown = document.getElementById('action-menu-dropdown');
+
+actionMenuBtn.addEventListener('click', (event) => {
+    event.stopPropagation(); // Impede que o clique feche o menu imediatamente
+    actionMenuDropdown.classList.toggle('hidden');
+});
+
+// Fecha o menu se clicar fora dele
+document.addEventListener('click', () => {
+    if (!actionMenuDropdown.classList.contains('hidden')) {
+        actionMenuDropdown.classList.add('hidden');
+    }
+});
+        document.getElementById('manage-settings-btn').addEventListener('click', () => {
+    document.body.classList.add('modal-open'); // ADICIONE ESTA LINHA
+    this.render.renderSettingsModal();
+});
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+    document.body.classList.remove('modal-open'); // ADICIONE ESTA LINHA
+    this.ui.settingsModal.classList.add('hidden');
+    this.showMonth(this.state.activeMonthIndex);
+});
+        document.getElementById('manage-account-btn').addEventListener('click', () => {
+    document.body.classList.add('modal-open'); // ADICIONE ESTA LINHA
+    this.render.renderAccountModal();
+});
+        document.getElementById('close-account-modal-btn').addEventListener('click', () => {
+    document.body.classList.remove('modal-open'); // ADICIONE ESTA LINHA
+    this.ui.accountModal.classList.add('hidden');
+});
         document.getElementById('save-profile-btn').addEventListener('click', () => {
             App.state.profile.name = App.ui.userNameInput.value;
             App.saveDataToFirestore();
