@@ -574,23 +574,31 @@ document.addEventListener('click', () => {
         document.getElementById('recurring-payment').addEventListener('change', (e) => { document.getElementById('recurring-card').classList.toggle('hidden', e.target.value !== 'Crédito'); });
         document.getElementById('add-recurring-btn').addEventListener('click', () => { const newRec = { id: Date.now(), description: document.getElementById('recurring-desc').value, amount: parseFloat(document.getElementById('recurring-amount').value) || 0, dayOfMonth: parseInt(document.getElementById('recurring-day').value) || 1, type: document.getElementById('recurring-type').value }; if (!newRec.description || newRec.amount <= 0) { alert('Preencha descrição e valor.'); return; } if (newRec.type.includes('Gasto')) { newRec.category = document.getElementById('recurring-category').value; newRec.paymentMethod = document.getElementById('recurring-payment').value; newRec.card = newRec.paymentMethod === 'Crédito' ? document.getElementById('recurring-card').value : ''; } this.state.recurringEntries.push(newRec); this.render.renderRecurringList(); this.saveDataToFirestore(); document.getElementById('recurring-form').querySelectorAll('input, select').forEach(el => el.value = ''); });
         document.body.addEventListener('click', (event) => {
-            const t = event.target;
-            const navBtn = t.closest('.calendar-nav-btn, [data-action="show-annual"]');
-            if (navBtn) {
-                const action = navBtn.dataset.action;
-                const currentMonth = App.state.activeMonthIndex;
-                if (action === 'show-annual') {
-                    App.state.lastViewedMonthIndex = currentMonth;
-                    App.showMonth(12);
-                } else if (action === 'prev-month') {
-                    const prevMonth = (currentMonth - 1 + 12) % 12;
-                    App.showMonth(prevMonth);
-                } else if (action === 'next-month') {
-                    const nextMonth = (currentMonth + 1) % 12;
-                    App.showMonth(nextMonth);
-                }
-                return;
-            }
+    const t = event.target;
+
+    const settingsAccordionTrigger = t.closest('.settings-accordion-trigger');
+    if (settingsAccordionTrigger) {
+        const parentItem = settingsAccordionTrigger.parentElement;
+        parentItem.classList.toggle('active');
+        return;
+    }
+
+    const navBtn = t.closest('.calendar-nav-btn, [data-action="show-annual"]');
+    if (navBtn) {
+        const action = navBtn.dataset.action;
+        const currentMonth = App.state.activeMonthIndex;
+        if (action === 'show-annual') {
+            App.state.lastViewedMonthIndex = currentMonth;
+            App.showMonth(12);
+        } else if (action === 'prev-month') {
+            const prevMonth = (currentMonth - 1 + 12) % 12;
+            App.showMonth(prevMonth);
+        } else if (action === 'next-month') {
+            const nextMonth = (currentMonth + 1) % 12;
+            App.showMonth(nextMonth);
+        }
+        return;
+    }
             const dayCell = t.closest('.calendar-day.current-month');
             if (dayCell) {
                 const dayIndex = parseInt(dayCell.dataset.day);
