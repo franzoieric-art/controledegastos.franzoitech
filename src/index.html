@@ -65,8 +65,12 @@ body.modal-open {
     align-items: center;
 }
 
-#settings-modal .overflow-y-auto {
-    flex-grow: 1;
+#settings-modal .modal-content {
+    overflow: hidden; /* Garante que o conteúdo não "vaze" para fora do card */
+}
+
+#settings-accordion-container {
+    flex-grow: 1; /* Força o container do accordion a crescer e ocupar o espaço */
 }
 
 /* =========================================

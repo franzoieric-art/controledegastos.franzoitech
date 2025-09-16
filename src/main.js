@@ -514,18 +514,20 @@ document.addEventListener('click', () => {
         actionMenuDropdown.classList.add('is-closed');
     }
 });
-        document.getElementById('manage-settings-btn').addEventListener('click', () => {
-    document.body.classList.add('modal-open'); // ADICIONE ESTA LINHA
-    this.render.renderSettingsModal();
+        document.getElementById('manage-settings-btn').addEventListener('click', (event) => { 
+    event.preventDefault(); // LINHA ADICIONADA
+    document.body.classList.add('modal-open');
+    this.render.renderSettingsModal(); 
 });
         document.getElementById('close-modal-btn').addEventListener('click', () => {
     document.body.classList.remove('modal-open'); // ADICIONE ESTA LINHA
     this.ui.settingsModal.classList.add('hidden');
     this.showMonth(this.state.activeMonthIndex);
 });
-        document.getElementById('manage-account-btn').addEventListener('click', () => {
-    document.body.classList.add('modal-open'); // ADICIONE ESTA LINHA
-    this.render.renderAccountModal();
+        document.getElementById('manage-account-btn').addEventListener('click', (event) => { 
+    event.preventDefault(); // LINHA ADICIONADA
+    document.body.classList.add('modal-open');
+    this.render.renderAccountModal(); 
 });
         document.getElementById('close-account-modal-btn').addEventListener('click', () => {
     document.body.classList.remove('modal-open'); // ADICIONE ESTA LINHA
