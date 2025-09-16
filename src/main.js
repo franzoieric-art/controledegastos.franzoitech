@@ -980,27 +980,34 @@ const App = {
             setTimeout(() => App.ui.settingsModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
         },
         
-        renderAccountModal: () => {
-            const user = auth.currentUser;
-            if (user) {
-                App.ui.userNameInput.value = App.state.profile.name || '';
-                App.ui.userEmailDisplay.value = user.email || '';
-                const wa = App.state.integrations.whatsapp;
-                App.ui.whatsappPhoneId.value = wa.phoneNumberId || '';
-                App.ui.whatsappToken.value = wa.accessToken || '';
-                App.ui.whatsappWebhookUrl.value = `${window.location.origin}/api/whatsapp-webhook`;
-                App.ui.whatsappVerifyToken.value = wa.webhookVerifyToken || '';
-                if (wa.phoneNumberId && wa.accessToken) {
-                    App.ui.whatsappStatus.textContent = 'Configurado';
-                    App.ui.whatsappStatus.style.color = 'var(--green-color)';
-                } else {
-                    App.ui.whatsappStatus.textContent = 'Não configurado';
-                    App.ui.whatsappStatus.style.color = 'var(--muted-text)';
-                }
-                App.ui.accountModal.classList.remove('hidden');
-                setTimeout(() => App.ui.accountModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
-            }
-        },
+        // CÓDIGO CORRIGIDO - APENAS A FUNÇÃO RELEVANTE
+
+renderAccountModal: () => {
+    const user = auth.currentUser;
+    if (user) {
+        App.ui.userNameInput.value = App.state.profile.name || '';
+        App.ui.userEmailDisplay.value = user.email || '';
+        
+        // LINHAS A SEREM COMENTADAS/REMOVIDAS
+        // const wa = App.state.integrations.whatsapp;
+        // App.ui.whatsappPhoneId.value = wa.phoneNumberId || '';
+        // App.ui.whatsappToken.value = wa.accessToken || '';
+        // App.ui.whatsappWebhookUrl.value = `${window.location.origin}/api/whatsapp-webhook`;
+        // App.ui.whatsappVerifyToken.value = wa.webhookVerifyToken || '';
+        
+        // O código abaixo não precisa ser comentado
+        // if (wa.phoneNumberId && wa.accessToken) {
+        //     App.ui.whatsappStatus.textContent = 'Configurado';
+        //     App.ui.whatsappStatus.style.color = 'var(--green-color)';
+        // } else {
+        //     App.ui.whatsappStatus.textContent = 'Não configurado';
+        //     App.ui.whatsappStatus.style.color = 'var(--muted-text)';
+        // }
+        
+        App.ui.accountModal.classList.remove('hidden');
+        setTimeout(() => App.ui.accountModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+    }
+},
     }
 };
 
