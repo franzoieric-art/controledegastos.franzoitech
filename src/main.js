@@ -504,14 +504,14 @@ for (let i = 0; i < 12; i++) {
 const actionMenuDropdown = document.getElementById('action-menu-dropdown');
 
 actionMenuBtn.addEventListener('click', (event) => {
-    event.stopPropagation(); // Impede que o clique feche o menu imediatamente
-    actionMenuDropdown.classList.toggle('hidden');
+    event.stopPropagation();
+    actionMenuDropdown.classList.toggle('is-closed');
 });
 
 // Fecha o menu se clicar fora dele
 document.addEventListener('click', () => {
-    if (!actionMenuDropdown.classList.contains('hidden')) {
-        actionMenuDropdown.classList.add('hidden');
+    if (!actionMenuDropdown.classList.contains('is-closed')) {
+        actionMenuDropdown.classList.add('is-closed');
     }
 });
         document.getElementById('manage-settings-btn').addEventListener('click', () => {
