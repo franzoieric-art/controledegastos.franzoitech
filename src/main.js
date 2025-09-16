@@ -1192,6 +1192,7 @@ document.addEventListener('click', () => {
 },
         renderAccountModal: () => {
             const user = auth.currentUser;
+            console.log("Dentro de renderAccountModal, o valor de 'user' é:", user); // <-- ADICIONE ESTA LINHA
             if (user) {
                 App.ui.userNameInput.value = App.state.profile.name || '';
                 App.ui.userEmailDisplay.value = user.email || '';
