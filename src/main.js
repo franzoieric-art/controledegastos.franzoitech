@@ -524,8 +524,9 @@ document.addEventListener('click', () => {
     this.ui.settingsModal.classList.add('hidden');
     this.showMonth(this.state.activeMonthIndex);
 });
-        document.getElementById('manage-account-btn').addEventListener('click', (event) => { 
-    event.preventDefault(); // LINHA ADICIONADA
+        document.getElementById('manage-account-btn').addEventListener('click', (event) => {
+    console.log("CLIQUE NO BOTÃO 'CONTA' FUNCIONOU!"); // <-- ADICIONE ESTA LINHA
+    event.preventDefault();
     document.body.classList.add('modal-open');
     this.render.renderAccountModal(); 
 });
