@@ -83,52 +83,66 @@ const App = {
         saveTimeout: null
     },
     ui: {
-        monthContentContainer: document.getElementById('monthContentContainer'),
-        settingsModal: document.getElementById('settings-modal'),
-        accountModal: document.getElementById('account-modal'),
-        userNameInput: document.getElementById('user-name-input'),
-        userEmailDisplay: document.getElementById('user-email-display'),
-        whatsappPhoneId: document.getElementById('whatsapp-phone-id'),
-        whatsappToken: document.getElementById('whatsapp-token'),
-        whatsappWebhookUrl: document.getElementById('whatsapp-webhook-url'),
-        whatsappVerifyToken: document.getElementById('whatsapp-verify-token'),
-        whatsappStatus: document.getElementById('whatsapp-status'),
-        newCardNameInput: document.getElementById('new-card-name'),
-        cardListContainer: document.getElementById('card-list'),
-        newCategoryNameInput: document.getElementById('new-category-name'),
-        categoryListContainer: document.getElementById('category-list'),
-        recurringListContainer: document.getElementById('recurring-list'),
-        saveFeedback: document.getElementById('save-feedback'),
-        aiAnalysisModal: document.getElementById('ai-analysis-modal'),
-        aiAnalysisResult: document.getElementById('ai-analysis-result'),
+        monthContentContainer: null, settingsModal: null, accountModal: null,
+        userNameInput: null, userEmailDisplay: null, whatsappPhoneId: null,
+        whatsappToken: null, whatsappWebhookUrl: null, whatsappVerifyToken: null,
+        whatsappStatus: null, newCardNameInput: null, cardListContainer: null,
+        newCategoryNameInput: null, categoryListContainer: null,
+        recurringListContainer: null, saveFeedback: null,
+        aiAnalysisModal: null, aiAnalysisResult: null
     },
     constants: {
         monthNames: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro", "Balanço Anual"],
         basePaymentMethods: ['Pix', 'Débito', 'Crédito', 'Dinheiro', 'Outro']
     },
-    init(userId) { this.state.currentUserId = userId; this.loadData(); this.bindGlobalEventListeners(); },
-    helpers: {
-        formatCurrency: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`,
-        debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
-        showSaveFeedback() { App.ui.saveFeedback.classList.add('show'); setTimeout(() => { App.ui.saveFeedback.classList.remove('show'); }, 2000); },
-        cleanAIResponse(text) {
-            if (typeof text !== 'string') return '';
-            let cleanedText = text.replace(/```html|```/g, '');
-            const firstTagIndex = cleanedText.indexOf('<');
-            if (firstTagIndex > -1) {
-                cleanedText = cleanedText.substring(firstTagIndex);
+    init(userId) {
+    this.state.currentUserId = userId;
+
+    // PREENCHE AS REFERÊNCIAS DA UI AQUI, QUANDO O DOM ESTÁ PRONTO
+    this.ui.monthContentContainer = document.getElementById('monthContentContainer');
+    this.ui.settingsModal = document.getElementById('settings-modal');
+    this.ui.accountModal = document.getElementById('account-modal');
+    this.ui.userNameInput = document.getElementById('user-name-input');
+    this.ui.userEmailDisplay = document.getElementById('user-email-display');
+    this.ui.whatsappPhoneId = document.getElementById('whatsapp-phone-id');
+    this.ui.whatsappToken = document.getElementById('whatsapp-token');
+    this.ui.whatsappWebhookUrl = document.getElementById('whatsapp-webhook-url');
+    this.ui.whatsappVerifyToken = document.getElementById('whatsapp-verify-token');
+    this.ui.whatsappStatus = document.getElementById('whatsapp-status');
+    this.ui.newCardNameInput = document.getElementById('new-card-name');
+    this.ui.cardListContainer = document.getElementById('card-list');
+    this.ui.newCategoryNameInput = document.getElementById('new-category-name');
+    this.ui.categoryListContainer = document.getElementById('category-list');
+    this.ui.recurringListContainer = document.getElementById('recurring-list');
+    this.ui.saveFeedback = document.getElementById('save-feedback');
+    this.ui.aiAnalysisModal = document.getElementById('ai-analysis-modal');
+    this.ui.aiAnalysisResult = document.getElementById('ai-analysis-result');
+    
+    this.loadData();
+    this.bindGlobalEventListeners();
+},
+helpers: {
+    formatCurrency: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`,
+    debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
+    showSaveFeedback() { App.ui.saveFeedback.classList.add('show'); setTimeout(() => { App.ui.saveFeedback.classList.remove('show'); }, 2000); },
+    cleanAIResponse(text) {
+        if (typeof text !== 'string') return '';
+        let cleanedText = text.replace(/```html|```/g, '');
+        const firstTagIndex = cleanedText.indexOf('<');
+        if (firstTagIndex > -1) {
+            cleanedText = cleanedText.substring(firstTagIndex);
+        }
+        const noiseKeywords = ["Observações:", "Como usar:", "Cálculo dos Totais:", "Formatação HTML:", "Personalização das Sugestões:"];
+        for (const keyword of noiseKeywords) {
+            const noiseIndex = cleanedText.indexOf(keyword);
+            if (noiseIndex > 50) {
+                cleanedText = cleanedText.substring(0, noiseIndex);
             }
-            const noiseKeywords = ["Observações:", "Como usar:", "Cálculo dos Totais:", "Formatação HTML:", "Personalização das Sugestões:"];
-            for (const keyword of noiseKeywords) {
-                const noiseIndex = cleanedText.indexOf(keyword);
-                if (noiseIndex > 50) {
-                    cleanedText = cleanedText.substring(0, noiseIndex);
-                }
-            }
-            return cleanedText.trim();
-        },
-        generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
+        }
+        return cleanedText.trim();
     },
+    generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
+},
     async handleAvatarUpload(event) {
         const file = event.target.files[0];
         if (!file) { return; }
