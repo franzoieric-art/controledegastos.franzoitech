@@ -512,19 +512,15 @@ const App = {
 });
 
 // CÓDIGO NOVO E CORRIGIDO
-document.getElementById('logout-btn').addEventListener('click', async (event) => {
+document.getElementById('logout-btn').addEventListener('click', (event) => {
     event.preventDefault();
+    console.log("--- Botão SAIR clicado. Chamando signOut... ---");
     
-    try {
-        // 1. Espere o Firebase confirmar o logout
-        await signOut(auth);
-        
-        // 2. Recarregue a página para um estado limpo
-        window.location.reload();
-
-    } catch (error) {
-        console.error("Erro ao fazer logout:", error);
-    }
+    signOut(auth).then(() => {
+        console.log("SUCESSO: Firebase signOut completado.");
+    }).catch(error => {
+        console.error("FALHA: Firebase signOut deu erro:", error);
+    });
 });
 
 // Lógica para FECHAR o modal "Gerenciar" - CORRIGIDO
@@ -1051,14 +1047,23 @@ renderAccountModal: () => {
 window.App = App;
 
 onAuthStateChanged(auth, user => {
+    console.log("--- onAuthStateChanged FOI ACIONADO ---");
+
     if (user) {
+        console.log("STATUS: Usuário está LOGADO.", user);
+        console.log("AÇÃO: Mostrando PAINEL, escondendo LOGIN.");
         authScreen.classList.add('hidden');
         appScreen.classList.remove('hidden');
+        
+        // O resto da sua lógica de inicialização
         loadingOverlay.classList.remove('hidden');
         App.init(user.uid);
     } else {
+        console.log("STATUS: Usuário está DESLOGADO.");
+        console.log("AÇÃO: Mostrando LOGIN, escondendo PAINEL.");
         App.state.currentUserId = null;
         authScreen.classList.remove('hidden');
         appScreen.classList.add('hidden');
     }
+    console.log("------------------------------------");
 });
