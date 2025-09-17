@@ -33,7 +33,7 @@ html.dark {
 }
 .painel-principal {
     width: 100%;
-    flex-grow: 1; /* Esta é a propriedade que resolve o problema */
+    flex-grow: 1;
 }
 body { 
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -41,11 +41,69 @@ body {
     color: var(--text-color);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+body.modal-open {
+    overflow: hidden;
+}
+
+/* =========================================
+ * REGRAS PARA AS TELAS PRINCIPAIS
+ * =========================================
+ */
+#auth-screen:not(.hidden) {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    padding: 1rem;
 }
+
+#app-screen:not(.hidden) {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#settings-modal .modal-content {
+    overflow: hidden; /* Garante que o conteúdo não "vaze" para fora do card */
+}
+
+#settings-accordion-container {
+    flex-grow: 1; /* Força o container do accordion a crescer e ocupar o espaço */
+}
+
+/* =========================================
+ * ESTILOS PARA O NOVO MENU DE AÇÕES (VERSÃO CORRIGIDA)
+ * =========================================
+ */
+.action-menu-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    width: 12rem;
+    z-index: 20;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    padding: 0.5rem;
+    
+    /* Animação */
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: auto;
+}
+
+.action-menu-dropdown.is-closed {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none; /* Impede cliques quando o menu estiver invisível */
+}
+
+
 .card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
 .input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
 .input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
@@ -154,16 +212,9 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
 
 /*
  * =========================================
- * ESTILOS RESPONSIVOS PARA BOTÕES (ATUALIZADO)
+ * ESTILOS RESPONSIVOS GERAIS
  * =========================================
  */
-
-.button-icon {
-    display: none;
-    width: 1.25rem;
-    height: 1.25rem;
-    flex-shrink: 0;
-}
 
 @media (max-width: 640px) {
     .button-group-container {
@@ -197,14 +248,83 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
         width: 44px;
         height: 44px;
     }
+
+    /* Estilos responsivos para Modais */
+    .modal-content {
+        width: calc(100% - 2rem); /* Ocupa a largura toda com 1rem de margem de cada lado */
+        max-height: 85vh; /* Limita a altura a 85% da tela */
+    }
+
+    #settings-modal .grid {
+        grid-template-columns: 1fr; /* Força o layout de 3 colunas a ser de 1 coluna */
+    }
 }
-    </style>
+
+/*
+ * =========================================
+ * ESTILOS PARA REPaginação DOS MODAIS (Apple Style)
+ * =========================================
+ */
+.settings-section-title {
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 600;
+    color: var(--muted-text);
+    padding: 0 1rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.settings-group {
+    background-color: var(--secondary-bg);
+    border-radius: 0.75rem; /* rounded-xl */
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Estilos para o novo Accordion do modal "Gerenciar" */
+.settings-accordion-item {
+    background-color: var(--secondary-bg);
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.settings-accordion-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.settings-accordion-content {
+    padding: 0 1rem 1rem 1rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+
+.settings-accordion-item.active .settings-accordion-content {
+    max-height: 1000px; /* Um valor alto para permitir expansão */
+    padding: 0 1rem 1rem 1rem;
+}
+
+.settings-accordion-trigger .arrow {
+    transition: transform 0.3s ease;
+}
+
+.settings-accordion-item.active .settings-accordion-trigger .arrow {
+    transform: rotate(180deg);
+}
+</style>
 </head>
 <body class="p-2 sm:p-4">
     <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
 
-    <div id="auth-screen" class="w-full max-w-md">
-        <div class="bg-[var(--card-bg)] p-8 sm:p-10 rounded-2xl shadow-sm border border-[var(--border-color)]">
+    <div id="auth-screen">
+        <div class="w-full max-w-md bg-[var(--card-bg)] p-8 sm:p-10 rounded-2xl shadow-sm border border-[var(--border-color)]">
             <div class="text-center mb-8">
                 <div class="flex justify-center mb-4">
                     <img src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/30cd2b50cb7d032f5820b3d601e7601d61ce275a/ricoplus-landing-page/logoricoplus.png" alt="Logo Rico Plus" class="h-20 w-auto">
@@ -242,52 +362,80 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
             </div>
         </div>
         <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
-                <div class="flex justify-between items-center mb-6 flex-shrink-0"><h2 class="text-2xl font-bold">Minha Conta</h2><button id="close-account-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div>
-                <div class="overflow-y-auto space-y-6">
+    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl transform flex flex-col max-h-[90vh] p-0">
+        <div class="flex justify-between items-center p-4 border-b flex-shrink-0" style="border-color: var(--border-color);">
+            <h2 class="text-xl font-bold">Minha Conta</h2>
+            <button id="close-account-modal-btn" class="px-3 py-1 rounded-lg text-sm font-semibold" style="background-color: var(--secondary-bg);">&times; Fechar</button>
+        </div>
+        <div class="overflow-y-auto p-4 sm:p-6">
+            <div>
+                <h3 class="settings-section-title">Perfil</h3>
+                <div class="settings-group space-y-4">
                     <div>
-                        <h3 class="text-lg font-semibold mb-3">Informações do Perfil</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label><input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field"></div>
-                            <div><label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label><input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;"></div>
-                        </div>
-                        <button id="save-profile-btn" class="mt-4 w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações do Perfil</button>
+                        <label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label>
+                        <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field">
                     </div>
-                    <div class="border-t pt-6" style="border-color: var(--border-color);">
-                        <h3 class="text-xl font-bold mb-1">Conectar Assistente IA via WhatsApp</h3>
-                        <p class="muted-text text-sm mb-4">Configure a integração para lançar despesas e interagir com seu painel diretamente do WhatsApp.</p>
-                        <div class="p-3 mb-4 rounded-xl text-center text-sm" style="background-color: var(--secondary-bg);">✨ <span class="font-semibold">Funcionalidade em desenvolvimento.</span> Disponível em breve!</div>
-                        <div class="space-y-4 opacity-60">
-                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);"><h4 class="font-semibold">Passo 1: Suas Credenciais da Meta</h4><p class="text-xs muted-text -mt-3">Insira as credenciais da sua API encontradas no <a href="#" class="underline" style="color: var(--primary-color);">Painel de Desenvolvedores</a>.</p><div><label for="whatsapp-phone-id" class="block text-sm font-medium muted-text mb-1">ID do Número de Telefone</label><input type="text" id="whatsapp-phone-id" placeholder="Ex: 102030405060708" class="w-full p-3 input-field" disabled></div><div><label for="whatsapp-token" class="block text-sm font-medium muted-text mb-1">Token de Acesso da API</label><input type="password" id="whatsapp-token" placeholder="Cole seu token permanente aqui" class="w-full p-3 input-field" disabled></div></div>
-                            <div class="p-4 rounded-xl space-y-4" style="background-color: var(--input-bg);"><h4 class="font-semibold">Passo 2: Configurar Webhook na Meta</h4><p class="text-xs muted-text -mt-3">Copie os valores abaixo e cole-os na seção "Webhook" da sua aplicação na Meta.</p><div><label class="block text-sm font-medium muted-text mb-1">URL do Webhook (para colar na Meta)</label><div class="flex gap-2"><input type="text" id="whatsapp-webhook-url" class="w-full p-3 input-field" readonly disabled><button id="copy-webhook-url-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Copiar</button></div></div><div><label class="block text-sm font-medium muted-text mb-1">Token de Verificação do Webhook (para colar na Meta)</label><div class="flex gap-2"><input type="text" id="whatsapp-verify-token" class="w-full p-3 input-field" readonly disabled><button id="generate-verify-token-btn" class="px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" disabled>Gerar</button></div></div></div>
-                            <div class="mt-4 flex items-center justify-between"><div class="text-sm muted-text">Status: <span id="whatsapp-status" class="font-semibold" style="color: var(--primary-color);">Indisponível</span></div><button id="save-integration-btn" class="px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);" disabled>Salvar Configuração</button></div>
-                        </div>
+                    <div>
+                        <label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label>
+                        <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled="" style="opacity: 0.7;">
                     </div>
                 </div>
+                <button id="save-profile-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações</button>
+            </div>
+            
+            <div class="mt-8">
+                <h3 class="settings-section-title">Integrações</h3>
+                <div class="settings-group">
+                    <h4 class="text-lg font-bold mb-1">Assistente IA via WhatsApp</h4>
+                    <p class="muted-text text-sm mb-4">Configure a integração para interagir com seu painel diretamente do WhatsApp.</p>
+                    <div class="p-3 mb-4 rounded-xl text-center text-sm" style="background-color: var(--input-bg);">✨ <span class="font-semibold">Funcionalidade em desenvolvimento.</span> Disponível em breve!</div>
+                    </div>
             </div>
         </div>
+    </div>
+</div>
         <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-6xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
-                <div class="flex justify-between items-center mb-6 flex-shrink-0"><h2 class="text-2xl font-bold">Gerenciar</h2><button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-y-auto">
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3">Cartões de Crédito</h3>
-                        <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
-                        <div id="card-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3">Categorias e Metas</h3>
-                        <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
-                        <div id="category-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-semibold mb-3">Lançamentos Recorrentes</h3>
-                        <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);"><input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field"><div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field"></div><select id="recurring-type" class="w-full p-2 input-field"></select><div id="recurring-expense-fields" class="space-y-2 hidden"><select id="recurring-category" class="w-full p-2 input-field"></select><select id="recurring-payment" class="w-full p-2 input-field"></select><select id="recurring-card" class="w-full p-2 input-field hidden"></select></div><button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button></div>
-                        <div id="recurring-list" class="flex flex-col gap-2 max-h-96 overflow-y-auto"></div>
-                    </div>
+    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl transform flex flex-col max-h-[90vh] p-0 sm:p-6">
+        <div class="flex justify-between items-center mb-6 flex-shrink-0 px-6 pt-6 sm:px-0 sm:pt-0">
+            <h2 class="text-2xl font-bold">Gerenciar</h2>
+            <button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
+        </div>
+        <div id="settings-accordion-container" class="overflow-y-auto px-6 pb-6 sm:px-0 sm:pb-0">
+            <div class="settings-accordion-item">
+                <div class="settings-accordion-trigger">
+                    <span>Cartões de Crédito</span>
+                    <span class="arrow muted-text">▼</span>
+                </div>
+                <div class="settings-accordion-content">
+                    <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+                    <div id="card-list" class="flex flex-col gap-2"></div>
+                </div>
+            </div>
+
+            <div class="settings-accordion-item">
+                <div class="settings-accordion-trigger">
+                    <span>Categorias e Metas</span>
+                    <span class="arrow muted-text">▼</span>
+                </div>
+                <div class="settings-accordion-content">
+                    <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+                    <div id="category-list" class="flex flex-col gap-2"></div>
+                </div>
+            </div>
+
+            <div class="settings-accordion-item">
+                <div class="settings-accordion-trigger">
+                    <span>Lançamentos Recorrentes</span>
+                    <span class="arrow muted-text">▼</span>
+                </div>
+                <div class="settings-accordion-content">
+                    <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);"><input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field"><div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field"></div><select id="recurring-type" class="w-full p-2 input-field"></select><div id="recurring-expense-fields" class="space-y-2 hidden"><select id="recurring-category" class="w-full p-2 input-field"></select><select id="recurring-payment" class="w-full p-2 input-field"></select><select id="recurring-card" class="w-full p-2 input-field hidden"></select></div><button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button></div>
+                    <div id="recurring-list" class="flex flex-col gap-2"></div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
         <div id="confirm-recurring-delete-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
     <div class="modal-content card rounded-2xl shadow-xl w-full max-w-lg p-6 transform scale-95">
         <h2 class="text-xl font-bold mb-4">Confirmar Remoção</h2>
@@ -311,32 +459,29 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
         <div class="painel-principal max-w-7xl mx-auto card p-4 md-p-8 rounded-2xl relative">
             <div id="save-feedback">Salvo ✓</div>
             <div id="user-header" class="flex items-start justify-between mb-8 pb-8 border-b" style="border-color: var(--border-color);">
-                <div class="flex items-center space-x-4">
-                    <label for="avatar-upload-input" class="cursor-pointer group relative">
-                        <img id="user-avatar" src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/main/ricoplus-landing-page/images/default-avatar.svg" class="w-14 h-14 rounded-full object-cover border-2 transition-all group-hover:opacity-80" style="border-color: var(--border-color);">
-                        <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
-                    </label>
-                    <input type="file" id="avatar-upload-input" class="hidden" accept="image/png, image/jpeg">
-                    <div><p id="time-greeting" class="text-sm muted-text">Boa tarde!</p><h2 id="greeting-text" class="text-2xl font-bold leading-tight">Olá, Eric</h2></div>
-                </div>
-                <div class="button-group-container">
-    <div class="action-buttons">
-        <button id="manage-account-btn" class="apple-style-button">
-            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-            <span class="button-text">Conta</span>
-        </button>
-        <button id="manage-settings-btn" class="apple-style-button">
-            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.242 1.411l-1.086.954a.996.996 0 000 1.616l1.086.954a1.125 1.125 0 01.242 1.411l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.242-1.411l1.086-.954a.996.996 0 000-1.616l-1.086-.954a1.125 1.125 0 01-.242-1.411l1.296-2.247a1.125 1.125 0 011.37-.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.213-1.28z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-            <span class="button-text">Gerenciar</span>
-        </button>
-        <button id="logout-btn" class="apple-style-button apple-style-button-destructive">
-            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
-            <span class="button-text">Sair</span>
-        </button>
+    <div class="flex items-center space-x-4">
+        <label for="avatar-upload-input" class="cursor-pointer group relative">
+            <img id="user-avatar" src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/main/ricoplus-landing-page/images/default-avatar.svg" class="w-14 h-14 rounded-full object-cover border-2 transition-all group-hover:opacity-80" style="border-color: var(--border-color);">
+            <div class="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 S0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>
+        </label>
+        <input type="file" id="avatar-upload-input" class="hidden" accept="image/png, image/jpeg">
+        <div><p id="time-greeting" class="text-sm muted-text">Boa tarde!</p><h2 id="greeting-text" class="text-2xl font-bold leading-tight">Olá, Eric</h2></div>
     </div>
-    <button id="theme-toggle-btn" class="apple-style-button theme-toggle">☀️</button>
-</div>
+    <div class="flex items-center gap-2">
+        <button id="theme-toggle-btn" class="apple-style-button theme-toggle">☀️</button>
+        <div id="action-menu-container" class="relative">
+            <button id="action-menu-btn" class="apple-style-button !p-2 !w-11 !h-11">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.242 1.411l-1.086.954a.996.996 0 000 1.616l1.086.954a1.125 1.125 0 01.242 1.411l-1.296 2.247a1.125 1.125 0 01-1.37.49l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.645-.87a6.52 6.52 0 01-.22-.127c-.324-.196-.72-.257-1.075-.124l-1.217.456a1.125 1.125 0 01-1.37-.49l-1.296-2.247a1.125 1.125 0 01.242-1.411l1.086-.954a.996.996 0 000-1.616l-1.086-.954a1.125 1.125 0 01-.242-1.411l1.296-2.247a1.125 1.125 0 011.37.49l1.217.456c.355.133.75.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.213-1.28z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </button>
+            <div id="action-menu-dropdown" class="action-menu-dropdown is-closed">
+                <a href="#" id="manage-account-btn" class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-[var(--secondary-bg)]">Conta</a>
+                <a href="#" id="manage-settings-btn" class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg hover:bg-[var(--secondary-bg)]">Gerenciar</a>
+                <div class="my-1 h-px bg-[var(--border-color)]"></div>
+                <a href="#" id="logout-btn" class="flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-[var(--red-color)] hover:bg-[var(--secondary-bg)]">Sair</a>
             </div>
+        </div>
+    </div>
+</div>
             <div class="text-center mb-8 space-y-2">
                 <p class="text-xs font-semibold" style="color: var(--primary-color);">Rico Plus <span class="muted-text">by Franzoi Tech</span></p>
                 <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Painel Financeiro</h1>
