@@ -408,16 +408,13 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
 </div>
         <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
     <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl transform flex flex-col max-h-[90vh] p-0">
-
         <div class="flex justify-between items-center p-4 sm:p-6 border-b flex-shrink-0" style="border-color: var(--border-color);">
             <h2 class="text-xl sm:text-2xl font-bold">Gerenciar</h2>
             <button id="close-modal-btn" class="px-3 py-1.5 rounded-lg text-sm font-semibold" style="background-color: var(--secondary-bg); color: var(--secondary-text);">
                 Fechar
             </button>
         </div>
-
         <div id="settings-accordion-container" class="overflow-y-auto p-4 sm:p-6">
-            
             <div class="settings-accordion-item">
                 <div class="settings-accordion-trigger">
                     <span>Cartões de Crédito</span>
@@ -431,7 +428,6 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
                     <div id="card-list" class="flex flex-col gap-2"></div>
                 </div>
             </div>
-
             <div class="settings-accordion-item">
                 <div class="settings-accordion-trigger">
                     <span>Categorias e Metas</span>
@@ -445,7 +441,6 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
                     <div id="category-list" class="flex flex-col gap-2"></div>
                 </div>
             </div>
-
             <div class="settings-accordion-item">
                 <div class="settings-accordion-trigger">
                     <span>Lançamentos Recorrentes</span>
@@ -454,21 +449,17 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
                 <div class="settings-accordion-content">
                     <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);">
                         <input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field">
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field">
-                            <input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field">
-                        </div>
+                        <div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field"></div>
                         <select id="recurring-type" class="w-full p-2 input-field"></select>
-                        <div id="recurring-expense-fields" class="space-y-2 hidden">
-                            <select id="recurring-category" class="w-full p-2 input-field"></select>
-                            <select id="recurring-payment" class="w-full p-2 input-field"></select>
-                            <select id="recurring-card" class="w-full p-2 input-field hidden"></select>
-                        </div>
+                        <div id="recurring-expense-fields" class="space-y-2 hidden"><select id="recurring-category" class="w-full p-2 input-field"></select><select id="recurring-payment" class="w-full p-2 input-field"></select><select id="recurring-card" class="w-full p-2 input-field hidden"></select></div>
                         <button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button>
                     </div>
                     <div id="recurring-list" class="flex flex-col gap-2"></div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
         </div> </div> </div>
         <div id="confirm-recurring-delete-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
