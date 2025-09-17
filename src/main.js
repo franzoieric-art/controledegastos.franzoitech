@@ -506,28 +506,22 @@ const App = {
         }
         
         document.getElementById('manage-settings-btn').addEventListener('click', (event) => {
-            event.preventDefault();
-            document.body.classList.add('modal-open');
-            this.render.renderSettingsModal();
-        });
-        document.getElementById('manage-account-btn').addEventListener('click', (event) => {
-            event.preventDefault();
-            document.body.classList.add('modal-open');
-            this.render.renderAccountModal();
-        });
-        document.getElementById('logout-btn').addEventListener('click', (event) => {
-            event.preventDefault();
-            signOut(auth);
-        });
+    event.preventDefault();
+    document.body.classList.add('modal-open'); // Trava o scroll da página
+    this.render.renderSettingsModal(); // Sua função que já preenche e mostra o modal
+});
 
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            document.body.classList.remove('modal-open');
-            this.ui.settingsModal.classList.add('hidden');
-        });
-        document.getElementById('close-account-modal-btn').addEventListener('click', () => {
-            document.body.classList.remove('modal-open');
-            this.ui.accountModal.classList.add('hidden');
-        });
+// Lógica para FECHAR o modal "Gerenciar"
+document.getElementById('close-modal-btn').addEventListener('click', () => {
+    document.body.classList.remove('modal-open'); // Libera o scroll da página
+    this.ui.settingsModal.classList.add('hidden');
+});
+
+// BÔNUS: Fechar o modal "Minha Conta" também deve liberar o scroll
+document.getElementById('close-account-modal-btn').addEventListener('click', () => {
+    document.body.classList.remove('modal-open'); // Libera o scroll da página
+    this.ui.accountModal.classList.add('hidden');
+});
         document.getElementById('save-profile-btn').addEventListener('click', () => {
             App.state.profile.name = App.ui.userNameInput.value;
             App.saveDataToFirestore();
