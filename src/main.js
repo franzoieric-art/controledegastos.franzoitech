@@ -1,3 +1,4 @@
+import './input.css';
 console.log('Verificando VITE_FIREBASE_API_KEY:', import.meta.env.VITE_FIREBASE_API_KEY);
 console.log('Todas as variáveis de ambiente do Vite:', import.meta.env);
 
