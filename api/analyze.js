@@ -1,7 +1,9 @@
 // api/analyze.js
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+import { GoogleGenerativeAI } from "@google/generative-ai"; // <-- MUDANÇA AQUI
 
-module.exports = async (req, res) => {
+export default async (req, res) => { // <-- MUDANÇA AQUI
+    // O RESTO DO SEU CÓDIGO CONTINUA EXATAMENTE O MESMO
+    
     // Cabeçalhos de CORS para permitir a comunicação com o front-end
     res.setHeader('Access-Control-Allow-Origin', 'https://www.franzoitech.com');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -21,13 +23,13 @@ module.exports = async (req, res) => {
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
         
-        // Mantendo o modelo original conforme solicitado.
+        // Mantendo o modelo que você estava usando
         const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         const { prompt } = req.body;
 
         if (!prompt) {
-            return res.status(400).json({ error: "O prompt não pode estar vazio." });
+            return res.status(400).json({ error: "O prompt не pode estar vazio." });
         }
 
         const result = await model.generateContent(prompt);
