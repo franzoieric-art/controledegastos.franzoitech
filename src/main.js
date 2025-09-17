@@ -511,15 +511,20 @@ const App = {
     App.render.renderSettingsModal(); // Correção: Usando "App"
 });
 
-document.getElementById('logout-btn').addEventListener('click', (event) => {
-    event.preventDefault(); // Impede a ação padrão do link
+// CÓDIGO NOVO E CORRIGIDO
+document.getElementById('logout-btn').addEventListener('click', async (event) => {
+    event.preventDefault();
+    
+    try {
+        // 1. Espere o Firebase confirmar o logout
+        await signOut(auth);
+        
+        // 2. Recarregue a página para um estado limpo
+        window.location.reload();
 
-    // 1. Diga ao Firebase para fazer o logout do usuário
-    signOut(auth);
-
-    // 2. Force a troca de telas imediatamente para o usuário ver
-    document.getElementById('app-screen').classList.add('hidden');
-    document.getElementById('auth-screen').classList.remove('hidden');
+    } catch (error) {
+        console.error("Erro ao fazer logout:", error);
+    }
 });
 
 // Lógica para FECHAR o modal "Gerenciar" - CORRIGIDO
