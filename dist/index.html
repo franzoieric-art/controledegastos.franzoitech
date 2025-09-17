@@ -293,11 +293,15 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
 }
 
 /* Estilos para o novo Accordion do modal "Gerenciar" */
+/* COLE ESTE CÓDIGO DENTRO DA SUA TAG <style> */
+
+/* Estilos para o novo Accordion do modal "Gerenciar" */
 .settings-accordion-item {
     background-color: var(--secondary-bg);
-    border-radius: 0.75rem;
+    border-radius: 0.75rem; /* rounded-xl */
     margin-bottom: 1rem;
-    overflow: hidden;
+    overflow: hidden; /* Importante para o efeito de abrir/fechar */
+    border: 1px solid var(--border-color);
 }
 
 .settings-accordion-trigger {
@@ -308,18 +312,22 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
     padding: 1rem;
     font-weight: 600;
     cursor: pointer;
+    background-color: transparent;
+    border: none;
+    text-align: left;
+    color: var(--text-color);
 }
 
 .settings-accordion-content {
-    padding: 0 1rem 1rem 1rem;
+    padding: 0 1rem; /* Padding horizontal, vertical é controlado pela animação */
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease-out, padding 0.3s ease-out;
 }
 
 .settings-accordion-item.active .settings-accordion-content {
-    max-height: 1000px; /* Um valor alto para permitir expansão */
-    padding: 0 1rem 1rem 1rem;
+    max-height: 1000px; /* Um valor alto para permitir a expansão total */
+    padding: 0 1rem 1rem 1rem; /* Adiciona padding inferior quando aberto */
 }
 
 .settings-accordion-trigger .arrow {
