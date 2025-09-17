@@ -16,6 +16,8 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+console.log("A CHAVE DE API QUE ESTÁ SENDO USADA É:", firebaseConfig.apiKey);
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
