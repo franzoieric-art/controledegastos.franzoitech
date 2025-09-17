@@ -507,47 +507,73 @@ const App = {
         
         document.getElementById('manage-settings-btn').addEventListener('click', (event) => {
     event.preventDefault();
-    document.body.classList.add('modal-open'); // Trava o scroll da página
-    this.render.renderSettingsModal(); // Sua função que já preenche e mostra o modal
+    document.body.classList.add('modal-open');
+    App.render.renderSettingsModal(); // Correção: Usando "App"
 });
 
-// Lógica para FECHAR o modal "Gerenciar"
+// Lógica para FECHAR o modal "Gerenciar" - CORRIGIDO
 document.getElementById('close-modal-btn').addEventListener('click', () => {
-    document.body.classList.remove('modal-open'); // Libera o scroll da página
-    this.ui.settingsModal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    App.ui.settingsModal.classList.add('hidden'); // Correção: Usando "App"
 });
 
-// BÔNUS: Fechar o modal "Minha Conta" também deve liberar o scroll
+// APROVEITE E CORRIJA OS OUTROS MODAIS TAMBÉM PARA GARANTIR
+
+// Lógica para ABRIR o modal "Minha Conta" - CORRIGIDO
+document.getElementById('manage-account-btn').addEventListener('click', (event) => {
+    event.preventDefault();
+    document.body.classList.add('modal-open');
+    App.render.renderAccountModal(); // Correção: Usando "App"
+});
+
+// Lógica para FECHAR o modal "Minha Conta" - CORRIGIDO
 document.getElementById('close-account-modal-btn').addEventListener('click', () => {
-    document.body.classList.remove('modal-open'); // Libera o scroll da página
-    this.ui.accountModal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    App.ui.accountModal.classList.add('hidden'); // Correção: Usando "App"
 });
         document.getElementById('save-profile-btn').addEventListener('click', () => {
-            App.state.profile.name = App.ui.userNameInput.value;
-            App.saveDataToFirestore();
-            App.ui.accountModal.classList.add('hidden');
-            document.body.classList.remove('modal-open');
-            App.helpers.showSaveFeedback();
-            App.render.updateHeader();
-        });
-        document.getElementById('save-integration-btn').addEventListener('click', () => {
-            const wa = App.state.integrations.whatsapp;
-            wa.phoneNumberId = App.ui.whatsappPhoneId.value;
-            wa.accessToken = App.ui.whatsappToken.value;
-            wa.webhookVerifyToken = App.ui.whatsappVerifyToken.value;
-            App.saveDataToFirestore();
-            App.ui.accountModal.classList.add('hidden');
-            App.helpers.showSaveFeedback();
-        });
-        document.getElementById('generate-verify-token-btn').addEventListener('click', () => {
-            const newToken = this.helpers.generateRandomToken();
-            App.ui.whatsappVerifyToken.value = newToken;
-        });
-        document.getElementById('copy-webhook-url-btn').addEventListener('click', (e) => {
-            navigator.clipboard.writeText(App.ui.whatsappWebhookUrl.value);
-            e.target.textContent = 'Copiado!';
-            setTimeout(() => { e.target.textContent = 'Copiar'; }, 2000);
-        });
+    App.state.profile.name = App.ui.userNameInput.value;
+    App.saveDataToFirestore();
+    App.ui.accountModal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    App.helpers.showSaveFeedback();
+    App.render.updateHeader();
+});
+
+/*
+====================================================================
+O CÓDIGO ABAIXO FOI DESATIVADO (COMENTADO)
+MOTIVO: Os botões 'save-integration-btn', 'generate-verify-token-btn',
+e 'copy-webhook-url-btn' não existem no seu HTML.
+Tentar adicionar um evento de clique a eles estava causando um erro
+fatal que quebrava todo o JavaScript da página.
+Quando essa funcionalidade de integração for implementada no HTML,
+você pode reativar este código.
+====================================================================
+
+document.getElementById('save-integration-btn').addEventListener('click', () => {
+    const wa = App.state.integrations.whatsapp;
+    wa.phoneNumberId = App.ui.whatsappPhoneId.value;
+    wa.accessToken = App.ui.whatsappToken.value;
+    wa.webhookVerifyToken = App.ui.whatsappVerifyToken.value;
+    App.saveDataToFirestore();
+    App.ui.accountModal.classList.add('hidden');
+    App.helpers.showSaveFeedback();
+});
+
+document.getElementById('generate-verify-token-btn').addEventListener('click', () => {
+    // A palavra 'this' aqui também causaria um erro. Deveria ser 'App.helpers...'
+    const newToken = App.helpers.generateRandomToken();
+    App.ui.whatsappVerifyToken.value = newToken;
+});
+
+document.getElementById('copy-webhook-url-btn').addEventListener('click', (e) => {
+    navigator.clipboard.writeText(App.ui.whatsappWebhookUrl.value);
+    e.target.textContent = 'Copiado!';
+    setTimeout(() => { e.target.textContent = 'Copiar'; }, 2000);
+});
+
+*/
         document.getElementById('close-ai-modal-btn').addEventListener('click', () => { this.ui.aiAnalysisModal.classList.add('hidden'); });
         document.getElementById('add-card-btn').addEventListener('click', () => { const n = this.ui.newCardNameInput.value.trim(); if (n && !this.state.creditCards.includes(n)) { this.state.creditCards.push(n); this.ui.newCardNameInput.value = ''; this.render.renderCardList(); this.saveDataToFirestore(); } });
         document.getElementById('add-category-btn').addEventListener('click', () => {
