@@ -3,17 +3,11 @@
     "origin": [
       "https://franzoitech.com",
       "https://www.franzoitech.com",
-      "https://franzoitech.com.br",
-      "https://www.franzoitech.com.br",
-      "http://localhost:8080",
-      "http://127.0.0.1:5500"
+      "http://localhost:5173",
+      "https://localhost:5175"
     ],
-    "method": [
-      "GET",
-      "POST",
-      "PUT",
-      "DELETE"
-    ],
+    "method": ["GET", "POST", "PUT", "HEAD"],
+    "responseHeader": ["Content-Type", "Authorization"],
     "maxAgeSeconds": 3600
   }
 ]
