@@ -15,3 +15,4 @@ build/
 *.zip
 *.rar
 .vercel
+.env
