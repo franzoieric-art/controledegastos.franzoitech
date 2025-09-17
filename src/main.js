@@ -8,12 +8,12 @@ import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/fireb
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
 
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID
+    apiKey: "AIzaSyDJRVR7AmVfkA_do8noL6S6J-Bgr5TD_LE", // A CHAVE NOVA E SEM RESTRIÇÕES
+    authDomain: "controle-de-gastos-7d4df.firebaseapp.com",
+    projectId: "controle-de-gastos-7d4df",
+    storageBucket: "controle-de-gastos-7d4df.appspot.com",
+    messagingSenderId: "331667004487",
+    appId: "1:331667004487:web:c1520f84ac27d0c32feb42"
 };
 
 console.log("A CHAVE DE API QUE ESTÁ SENDO USADA É:", firebaseConfig.apiKey);
