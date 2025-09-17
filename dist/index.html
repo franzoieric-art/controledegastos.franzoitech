@@ -45,6 +45,10 @@ body {
 body.modal-open {
     overflow: hidden;
 }
+.modal-overlay:not(.hidden) .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
 
 /* =========================================
  * REGRAS PARA AS TELAS PRINCIPAIS
@@ -126,7 +130,12 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
 .tooltip-text { visibility: hidden; width: 160px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -80px; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem; pointer-events: none; }
 .tooltip-container:focus .tooltip-text { visibility: visible; opacity: 1; }
 .action-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
-@media (min-width: 640px) { .action-buttons { flex-direction: row; } }
+@media (max-width: 640px) {
+    .modal-content {
+        width: calc(100% - 2rem); /* Ocupa a largura toda com 1rem de margem de cada lado */
+        max-height: 85vh; /* Limita a altura a 85% da tela */
+    }
+}
 #theme-toggle-btn { font-size: 1.25rem !important; color: var(--text-color) !important; background-image: none !important; line-height: 1; }
 #theme-toggle-btn::before, #theme-toggle-btn::after { content: none !important; display: none !important; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; border: 1px solid var(--border-color); padding: 1rem; border-radius: 1.5rem; width: 100%; }
@@ -251,9 +260,11 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
 
     /* Estilos responsivos para Modais */
     .modal-content {
-        width: calc(100% - 2rem); /* Ocupa a largura toda com 1rem de margem de cada lado */
-        max-height: 85vh; /* Limita a altura a 85% da tela */
-    }
+    /* Animação suave de entrada */
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
 
     #settings-modal .grid {
         grid-template-columns: 1fr; /* Força o layout de 3 colunas a ser de 1 coluna */
@@ -319,7 +330,7 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
     transform: rotate(180deg);
 }
 </style>
-  <script type="module" crossorigin src="/assets/index-CSQbAs6V.js"></script>
+  <script type="module" crossorigin src="/assets/index-CR-1buJ7.js"></script>
 </head>
 <body class="p-2 sm:p-4">
     <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
@@ -396,19 +407,27 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
     </div>
 </div>
         <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl transform flex flex-col max-h-[90vh] p-0 sm:p-6">
-        <div class="flex justify-between items-center mb-6 flex-shrink-0 px-6 pt-6 sm:px-0 sm:pt-0">
-            <h2 class="text-2xl font-bold">Gerenciar</h2>
-            <button id="close-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button>
+    <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl transform flex flex-col max-h-[90vh] p-0">
+
+        <div class="flex justify-between items-center p-4 sm:p-6 border-b flex-shrink-0" style="border-color: var(--border-color);">
+            <h2 class="text-xl sm:text-2xl font-bold">Gerenciar</h2>
+            <button id="close-modal-btn" class="px-3 py-1.5 rounded-lg text-sm font-semibold" style="background-color: var(--secondary-bg); color: var(--secondary-text);">
+                Fechar
+            </button>
         </div>
-        <div id="settings-accordion-container" class="overflow-y-auto px-6 pb-6 sm:px-0 sm:pb-0">
+
+        <div id="settings-accordion-container" class="overflow-y-auto p-4 sm:p-6">
+            
             <div class="settings-accordion-item">
                 <div class="settings-accordion-trigger">
                     <span>Cartões de Crédito</span>
                     <span class="arrow muted-text">▼</span>
                 </div>
                 <div class="settings-accordion-content">
-                    <div class="flex gap-2 mb-4"><input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field"><button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field">
+                        <button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button>
+                    </div>
                     <div id="card-list" class="flex flex-col gap-2"></div>
                 </div>
             </div>
@@ -419,7 +438,10 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
                     <span class="arrow muted-text">▼</span>
                 </div>
                 <div class="settings-accordion-content">
-                    <div class="flex gap-2 mb-4"><input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field"><button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button></div>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field">
+                        <button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button>
+                    </div>
                     <div id="category-list" class="flex flex-col gap-2"></div>
                 </div>
             </div>
@@ -430,13 +452,25 @@ input[type="number"] { -moz-appearance: textfield; -webkit-appearance: none; app
                     <span class="arrow muted-text">▼</span>
                 </div>
                 <div class="settings-accordion-content">
-                    <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);"><input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field"><div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field"></div><select id="recurring-type" class="w-full p-2 input-field"></select><div id="recurring-expense-fields" class="space-y-2 hidden"><select id="recurring-category" class="w-full p-2 input-field"></select><select id="recurring-payment" class="w-full p-2 input-field"></select><select id="recurring-card" class="w-full p-2 input-field hidden"></select></div><button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button></div>
+                    <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);">
+                        <input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field">
+                            <input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field">
+                        </div>
+                        <select id="recurring-type" class="w-full p-2 input-field"></select>
+                        <div id="recurring-expense-fields" class="space-y-2 hidden">
+                            <select id="recurring-category" class="w-full p-2 input-field"></select>
+                            <select id="recurring-payment" class="w-full p-2 input-field"></select>
+                            <select id="recurring-card" class="w-full p-2 input-field hidden"></select>
+                        </div>
+                        <button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button>
+                    </div>
                     <div id="recurring-list" class="flex flex-col gap-2"></div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+
+        </div> </div> </div>
         <div id="confirm-recurring-delete-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
     <div class="modal-content card rounded-2xl shadow-xl w-full max-w-lg p-6 transform scale-95">
         <h2 class="text-xl font-bold mb-4">Confirmar Remoção</h2>
