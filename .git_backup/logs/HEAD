@@ -1,0 +1,12 @@
+0000000000000000000000000000000000000000 3c417ef66af4ecc38083bc34b377e67dd552dea4 franzoieric-art <franzoieric@gmail.com> 1763655269 -0300	commit (initial): Subindo versao final para Vercel
+3c417ef66af4ecc38083bc34b377e67dd552dea4 0000000000000000000000000000000000000000 franzoieric-art <franzoieric@gmail.com> 1763656791 -0300	Branch: renamed refs/heads/main to refs/heads/main
+3c417ef66af4ecc38083bc34b377e67dd552dea4 3c417ef66af4ecc38083bc34b377e67dd552dea4 franzoieric-art <franzoieric@gmail.com> 1763656791 -0300	Branch: renamed refs/heads/main to refs/heads/main
+3c417ef66af4ecc38083bc34b377e67dd552dea4 0000000000000000000000000000000000000000 franzoieric-art <franzoieric@gmail.com> 1763656840 -0300	Branch: renamed refs/heads/main to refs/heads/main
+3c417ef66af4ecc38083bc34b377e67dd552dea4 3c417ef66af4ecc38083bc34b377e67dd552dea4 franzoieric-art <franzoieric@gmail.com> 1763656840 -0300	Branch: renamed refs/heads/main to refs/heads/main
+3c417ef66af4ecc38083bc34b377e67dd552dea4 296adff802e8719a42de80d01fe6104a502465c4 franzoieric-art <franzoieric@gmail.com> 1763658872 -0300	commit: Ajuste final de rota login
+296adff802e8719a42de80d01fe6104a502465c4 af7465a819d7a07d3407441bc6d188d8588ae43d franzoieric-art <franzoieric@gmail.com> 1763659112 -0300	commit: Solucao final de conflito: renomeando index para app-index
+af7465a819d7a07d3407441bc6d188d8588ae43d a697c4c6c1982db44d004097a149e282f9a87973 franzoieric-art <franzoieric@gmail.com> 1763660930 -0300	commit: Corrigindo nome do entry point apos renomeacao
+a697c4c6c1982db44d004097a149e282f9a87973 adc6ccc6a082805e9be81e3e28072aa520344923 franzoieric-art <franzoieric@gmail.com> 1763662371 -0300	commit: 1512
+adc6ccc6a082805e9be81e3e28072aa520344923 ebdd7f8bf7b70b170a166519ec30158e0579a57f franzoieric-art <franzoieric@gmail.com> 1763662715 -0300	commit: Solucao FINAL: Movendo app/login para subpasta
+ebdd7f8bf7b70b170a166519ec30158e0579a57f 51bdf311a04f80cfc856962e1341c294ce02d9a1 franzoieric-art <franzoieric@gmail.com> 1763663370 -0300	commit: 1529
+51bdf311a04f80cfc856962e1341c294ce02d9a1 7df56354e17952637ba082f6f0f9e218afafeea2 franzoieric-art <franzoieric@gmail.com> 1763669810 -0300	commit: 1716
