@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rico Plus - Teste Grátis de 7 Dias</title>
+    <meta name="description" content="Controle suas finanças com o Rico Plus. Teste grátis por 7 dias e tenha acesso completo à nossa plataforma de gestão financeira com inteligência artificial.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .bg-hero {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F3F4F6 100%);
+        }
+        /* Animações */
+        .animated-element {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            transition-delay: var(--animation-delay, 0s);
+        }
+        .fade-in.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .slide-in-left {
+            transform: translateX(-20px);
+        }
+        .slide-in-right {
+            transform: translateX(20px);
+        }
+        .slide-in-left.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .slide-in-right.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        /* Preço riscado */
+        .line-through-price {
+            position: relative;
+            display: inline-block;
+        }
+        .line-through-price::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            border-top: 3px solid #ff453a;
+            transform: translateY(-50%) rotate(-5deg);
+        }
+        /* Animação do botão de preço */
+        @keyframes pulse-once {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .price-animation {
+            animation: pulse-once 1s ease-in-out;
+        }
+        /* Animação para o botão de compra */
+        @keyframes pulse-infinite {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-button {
+            animation: pulse-infinite 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        /* Estilos do Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Novos estilos para o conteúdo dos modais */
+        .legal-section {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            border-radius: 0 8px 8px 0;
+        }
+        .legal-section-primary {
+            border-color: #4338ca;
+        }
+        .legal-section-secondary {
+            border-color: #9333ea;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 relative">
+
+    <div class="absolute top-0 right-0 p-4 md:p-6 z-10">
+        <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-md p-3 md:p-4 flex items-center space-x-2">
+            <p class="text-sm md:text-base text-gray-700 font-medium whitespace-nowrap">
+                Já tem uma conta?
+            </p>
+            <a href="https://ricoplus.com.br/login" class="px-3 py-1 bg-indigo-600 text-white text-sm md:text-base font-bold rounded-lg shadow-sm hover:bg-indigo-700 transition-colors whitespace-nowrap">
+                Entrar
+            </a>
+        </div>
+    </div>
+
+    <main>
+        <section class="bg-hero py-12 md:py-10 pb-8 pt-16 md:pt-10">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <img src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/edce14b0be6a60fc650fb1b50142615f48033158/logoricoplus.png" alt="Rico Plus Logo" class="h-28 md:h-32 w-auto mx-auto mb-6 animated-element fade-in">
+                <h1 class="text-3xl sm:text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight animated-element fade-in" style="--animation-delay: 0.1s;">
+                    Controle suas finanças em <br class="hidden md:inline"><span class="text-indigo-600">7 dias grátis</span>. Sem pagar nada para começar.
+                </h1>
+                <p class="mt-4 text-base md:text-xl text-gray-600 max-w-2xl mx-auto animated-element fade-in" style="--animation-delay: 0.2s;">
+                    Ao final do teste, se você amar a plataforma, o <b>acesso de 1 ano custará apenas R$ 47.</b>
+                </p>
+                <div class="mt-6 animated-element fade-in" style="--animation-delay: 0.3s;">
+                    <a href="#buy" class="inline-block px-6 py-3 text-lg md:px-8 md:py-4 md:text-2xl font-extrabold bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition-colors pulse-button">
+                        Começar Meu Teste Grátis Agora
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-10 md:py-14">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-stretch">
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 animated-element fade-in">O Problema</h2>
+                        <div class="space-y-6 flex-grow flex flex-col justify-between">
+                            <div class="p-6 bg-white rounded-xl shadow-md animated-element slide-in-left" style="--animation-delay: 0.1s;">
+                                <div class="flex items-start">
+                                    <svg class="w-8 h-8 flex-shrink-0 text-red-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-lg font-semibold text-gray-800">
+                                            Inadimplência no Brasil: Uma realidade que afeta milhões.
+                                        </p>
+                                        <p class="mt-2 text-gray-700">
+                                            Mais de 70 milhões de brasileiros têm dívidas atrasadas, um cenário que impacta a economia e o bem-estar das famílias.
+                                        </p>
+                                        <a href="https://www.cnnbrasil.com.br/economia/macroeconomia/inadimplencia-sobe-ao-maior-nivel-da-serie-historica-em-agosto-aponta-cnc/" target="_blank" rel="noopener noreferrer" class="mt-3 inline-block px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors">
+                                            Ver dados oficiais <span aria-hidden="true">&rarr;</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6 bg-white rounded-xl shadow-md animated-element slide-in-left" style="--animation-delay: 0.2s;">
+                                <div class="flex items-start">
+                                    <svg class="w-8 h-8 flex-shrink-0 text-yellow-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-lg font-semibold text-gray-800">
+                                            Educação Financeira: Um privilégio para poucos.
+                                        </p>
+                                        <p class="mt-2 text-gray-700">
+                                            Pesquisas indicam que a grande maioria dos brasileiros nunca teve acesso a ensinamentos sobre finanças, seja em casa ou na escola.
+                                        </p>
+                                        <a href="https://portal.febraban.org.br/noticia/4324/pt-br/" target="_blank" rel="noopener noreferrer" class="mt-3 inline-block px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 transition-colors">
+                                            Ver dados oficiais <span aria-hidden="true">&rarr;</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6 bg-white rounded-xl shadow-md animated-element slide-in-left" style="--animation-delay: 0.3s;">
+                                <div class="flex items-start">
+                                    <svg class="w-8 h-8 flex-shrink-0 text-gray-500 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5m18 7.5v-7.5m-18 0h.008v.008H3v-.008zm-2.25 0h.008v.008H.75v-.008zm-2.25 0h.008v.008H-1.5v-.008zm18 0h.008v.008h-2.25v-.008zm-2.25 0h.008v.008h-2.25v-.008zm-2.25 0h.008v.008h-2.25v-.008zm-2.25 0h.008v.008h-2.25v-.008zM12 9v4m-2-2h4"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-lg font-semibold text-gray-800">
+                                            Dificuldade em Conquistar Sonhos
+                                        </p>
+                                        <p class="mt-2 text-gray-700">
+                                            A ausência de controle financeiro torna a conquista de metas de longo prazo, como comprar a casa própria, viajar ou ter uma aposentadoria tranquila, praticamente impossível. A falta de um plano impede que seu dinheiro trabalhe a seu favor, transformando sonhos em algo inatingível.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 animated-element fade-in">A Solução</h2>
+                        <div class="space-y-6 flex-grow flex flex-col justify-between">
+                            <div class="p-6 bg-white rounded-xl shadow-md animated-element slide-in-right" style="--animation-delay: 0.1s;">
+                                <div class="flex items-start">
+                                    <svg class="w-8 h-8 flex-shrink-0 text-indigo-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-xl font-semibold text-gray-900">Gestão Completa e Unificada</h3>
+                                        <p class="mt-2 text-gray-600">Unifique todas as suas finanças, de receitas PJ a gastos pessoais, em um só painel intuitivo e fácil de usar. Diga adeus às planilhas complicadas!</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6 bg-white rounded-xl shadow-md animated-element slide-in-right" style="--animation-delay: 0.2s;">
+                                <div class="flex items-start">
+                                    <svg class="w-8 h-8 flex-shrink-0 text-indigo-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20h4a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2zM12 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zM12 12a1 1 0 0 1-1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 1-1 1zM7 16h10v2H7v-2zM4 14h16v-2H4v2zM6 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM18 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM4 20h16v2H4v-2z"></path>
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-xl font-semibold text-gray-900">Inteligência Artificial Personalizada</h3>
+                                        <p class="mt-2 text-gray-600">Receba insights e sugestões personalizadas para otimizar seus gastos, identificar padrões e alcançar suas metas financeiras de forma inteligente.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6 bg-white rounded-xl shadow-md animated-element slide-in-right" style="--animation-delay: 0.3s;">
+                                <div class="flex items-start">
+                                    <svg class="w-8 h-8 flex-shrink-0 text-indigo-600 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-xl font-semibold text-gray-900">Experimente Grátis por 7 Dias: Sua Jornada Começa Aqui!</h3>
+                                        <p class="mt-2 text-gray-600">
+                                            Aproveite 7 dias para testar todas as funcionalidades do Rico Plus, sem qualquer compromisso ou custo. Decida por você mesmo se é a ferramenta perfeita para sua jornada financeira. Descubra como é fácil organizar suas finanças, tomar decisões mais assertivas e construir um futuro financeiro sem preocupações. Seu teste grátis começa agora!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xl sm:text-2xl md:text-3xl font-bold text-center text-gray-900 mt-12 animated-element slide-in-left" style="--animation-delay: 0.4s;">
+                    O Rico Plus é a ferramenta definitiva para você construir seu futuro financeiro.
+                </p>
+            </div>
+        </section>
+
+        <section class="py-10 md:py-14 bg-gray-50">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-8 animated-element fade-in">O que nossos clientes dizem</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-5 bg-white rounded-xl shadow-md animated-element fade-in" style="--animation-delay: 0.1s;">
+                        <p class="text-gray-700 italic text-base">"Com o Rico Plus, finalmente entendi para onde meu dinheiro estava indo. A funcionalidade de IA é um diferencial incrível!"</p>
+                        <p class="mt-3 font-semibold text-gray-800 text-sm">- Carina de Andrade</p>
+                    </div>
+                    <div class="p-5 bg-white rounded-xl shadow-md animated-element fade-in" style="--animation-delay: 0.2s;">
+                        <p class="text-gray-700 italic text-base">"Simples de usar, completo e sem complicação. É a ferramenta que eu precisava para gerenciar meus ganhos PJ e PF."</p>
+                        <p class="mt-3 font-semibold text-gray-800 text-sm">- Aline Leão</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="buy" class="py-10 md:py-14">
+            <div class="max-w-4xl mx-auto px-4 text-center p-6 md:p-10 bg-white rounded-xl shadow-lg border-t-4 border-indigo-600 animated-element fade-in">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Democratizamos a educação financeira.</h2>
+                <p class="mt-3 text-gray-600 md:text-lg">
+                    Todos os recursos do Rico Plus, você já percebeu que poderia custar muito mais, mas <b>nosso compromisso é oferecer um preço justo para que mais pessoas tomem controle de suas finanças.</b>
+                </p>
+                <div class="mt-5">
+                    <p class="text-xl sm:text-2xl font-extrabold text-gray-500 line-through-price animated-element fade-in" style="--animation-delay: 0.1s;">R$ 147,00</p>
+                    <p class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-indigo-600 price-animation animated-element fade-in" style="--animation-delay: 0.2s;">R$ 47,00</p>
+                    <p class="mt-2 text-gray-500 text-sm animated-element fade-in" style="--animation-delay: 0.3s;">Pagamento Único, Válido por 1 Ano após 7 dias de teste grátis.</p>
+                </div>
+                <div class="mt-8 animated-element fade-in" style="--animation-delay: 0.4s;">
+                    <a href="https://pay.hotmart.com/E101839411B" class="inline-block px-6 py-3 text-lg md:px-8 md:py-4 md:text-2xl font-extrabold bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition-colors pulse-button">
+                        Começar Meu Teste Grátis Agora
+                    </a>
+                </div>
+                <div class="mt-8 p-4 bg-green-50 rounded-lg border border-green-200 animated-element fade-in" style="--animation-delay: 0.5s;">
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                        <img src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/e8079e6de846b0ca27508068610a855ab48e6a63/images/selo-garantia-7-dias-small.png" alt="Selo de Garantia" class="h-24 md:h-28 w-auto animated-element fade-in" style="--animation-delay: 0.6s;">
+                        <p class="text-green-800 font-bold text-base md:text-xl text-center md:text-left animated-element fade-in" style="--animation-delay: 0.7s;">
+                            Garantia de 7 Dias: Satisfação ou seu dinheiro de volta! <br class="sm:hidden">Sem perguntas, sem burocracia.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="py-6 bg-gray-800 text-white text-xs">
+        <div class="max-w-6xl mx-auto px-4 text-center md:flex md:justify-between md:items-center">
+            <p>&copy; 2025 Rico Plus. Todos os direitos reservados.</p>
+            <div class="mt-3 md:mt-0 flex justify-center space-x-4">
+                <a href="#" id="openTermsModal" class="text-gray-300 hover:text-white transition-colors">Termos de Uso</a>
+                <a href="#" id="openPrivacyModal" class="text-gray-300 hover:text-white transition-colors">Política de Privacidade</a>
+            </div>
+        </div>
+    </footer>
+    
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <span id="closeTermsModal" class="close-btn">&times;</span>
+            <div class="max-w-none text-sm text-gray-700">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Termos de Uso da Plataforma Rico Plus</h1>
+                <p class="mt-2 text-gray-600 text-xs">Ao utilizar os serviços da Rico Plus, o usuário declara que está de acordo com as normas vigentes neste contrato.</p>
+                <p class="mt-1 text-gray-600 text-xs">Última atualização: 11 de setembro de 2025</p>
+
+                <div class="legal-section legal-section-primary mt-6">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">1. Aceitação dos Termos</h2>
+                    <p class="mt-2">Este Termo de Uso ("Termo") se aplica ao uso da plataforma digital Rico Plus ("Plataforma"), desenvolvida e de propriedade da Franzoi Tech. Ao acessar, se cadastrar ou usar a Plataforma, você concorda integralmente com estes Termos de Uso e com a nossa Política de Privacidade. Caso não concorde, você não deve utilizar a Plataforma.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">2. O Serviço</h2>
+                    <p class="mt-2">O Rico Plus é uma plataforma de gestão de finanças pessoais e empresariais, oferecida por um modelo de assinatura anual. O serviço inclui funcionalidades de controle de receitas e despesas, relatórios financeiros, e outras ferramentas para auxiliar na organização financeira.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">3. Período de Teste Gratuito</h2>
+                    <p class="mt-2">A Plataforma oferece um período de teste gratuito de 7 (sete) dias para novos usuários. Durante este período, você terá acesso total às funcionalidades. O teste inicia-se na data de conclusão do seu cadastro. Ao final do período, para continuar o acesso, é necessário aderir ao Plano Anual. O acesso será suspenso caso a assinatura não seja contratada.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">4. Assinatura e Pagamento</h2>
+                    <p class="mt-2">O acesso contínuo à Plataforma requer a contratação do Plano Anual, no valor de R$ 47,00 por ano. O usuário que desejar prosseguir com a assinatura será redirecionado para a plataforma Hotmart. O Rico Plus é hospedado e comercializado através da Hotmart, que gerencia o pagamento. Assim que o pagamento for confirmado, você receberá por e-mail as informações de usuário e senha para acessar a Plataforma.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">5. Política de Cancelamento e Reembolso</h2>
+                    <p class="mt-2">De acordo com o Código de Defesa do Consumidor, você tem o direito de se arrepender da compra e solicitar o reembolso total do valor pago dentro do prazo de 7 (sete) dias corridos a partir da data de confirmação do pagamento. Para solicitar o reembolso, você deve entrar em contato com nosso suporte através do e-mail franzoitechcorp@gmail.com ou utilizar o sistema de suporte disponível na plataforma Hotmart. Você pode cancelar sua assinatura a qualquer momento, mas o cancelamento não dá direito a reembolso, a menos que seja solicitado dentro do prazo de 7 dias.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">6. Uso da Plataforma e Responsabilidade do Usuário</h2>
+                    <p class="mt-2">Você é o único responsável pela veracidade, precisão e integridade dos dados financeiros inseridos. O Rico Plus atua apenas como uma ferramenta para organização desses dados. Fica proibido usar a Plataforma para fins ilegais, tentar acessar contas de outros usuários, realizar engenharia reversa, fazer cópias não autorizadas do software, ou usá-la para fins comerciais sem autorização expressa.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">7. Propriedade Intelectual</h2>
+                    <p class="mt-2">Todos os elementos da Plataforma Rico Plus, incluindo software, design, logotipos e conteúdo, são de propriedade exclusiva da Franzoi Tech e são protegidos por leis de direitos autorais e propriedade intelectual. A adesão ao Plano Anual concede apenas o direito de uso, e não a posse ou qualquer direito sobre o código-fonte.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">8. Limitação de Responsabilidade</h2>
+                    <p class="mt-2">O Rico Plus não se responsabiliza por perdas financeiras, danos diretos ou indiretos, ou qualquer prejuízo decorrente do uso ou da impossibilidade de uso da Plataforma, incluindo falhas de conexão ou interrupções no serviço. A Plataforma é fornecida "no estado em que se encontra".</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">9. Disposições Gerais</h2>
+                    <p class="mt-2">Comunicações oficiais do Rico Plus serão feitas por notificação na Plataforma ou pelo e-mail cadastrado. Estes Termos de Uso são regidos pela legislação da República Federativa do Brasil. Para a resolução de disputas, fica eleito o Foro da Comarca de São Paulo, SP, com renúncia a qualquer outro.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="privacyModal" class="modal">
+        <div class="modal-content">
+            <span id="closePrivacyModal" class="close-btn">&times;</span>
+            <div class="max-w-none text-sm text-gray-700">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Política de Privacidade da Plataforma Rico Plus</h1>
+                <p class="mt-2 text-gray-600 text-xs">Esta Política de Privacidade ("Política") descreve como a Plataforma Rico Plus ("Plataforma") coleta, usa, armazena e protege os dados pessoais de seus usuários. A Plataforma é de propriedade da Franzoi Tech.</p>
+                <p class="mt-1 text-gray-600 text-xs">Última atualização: 11 de setembro de 2025</p>
+
+                <div class="legal-section legal-section-primary mt-6">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">1. Tipos de Dados Coletados</h2>
+                    <p class="mt-2">Para operar e fornecer o serviço, a Plataforma coleta dados de cadastro (nome e e-mail), dados financeiros (receitas, despesas, etc., inseridos por você) e dados de uso e técnicos (endereço IP, navegador, etc.).</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">2. Finalidade da Coleta de Dados</h2>
+                    <p class="mt-2">Os dados são usados para fornecer o serviço, gerenciar sua conta, comunicação, análise e melhoria da Plataforma.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">3. Compartilhamento de Dados</h2>
+                    <p class="mt-2">O Rico Plus não vende ou aluga seus dados. Eles são compartilhados apenas com serviços essenciais, como a Hotmart para processamento de pagamentos, e provedores de hospedagem, sempre sob acordos de confidencialidade.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">4. Segurança e Armazenamento dos Dados</h2>
+                    <p class="mt-2">Adotamos medidas de segurança para proteger seus dados pessoais. Eles são armazenados pelo tempo necessário para a finalidade da coleta ou para cumprir obrigações legais, conforme a LGPD.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">5. Direitos do Titular dos Dados (LGPD)</h2>
+                    <p class="mt-2">De acordo com a LGPD, você tem direitos como acesso, correção e exclusão de seus dados. Para exercê-los, entre em contato pelo e-mail franzoitechcorp@gmail.com.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">6. Política de Cookies</h2>
+                    <p class="mt-2">Utilizamos cookies e tecnologias similares para melhorar sua experiência. Você pode gerenciar as preferências nas configurações do seu navegador.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">7. Alterações na Política de Privacidade</h2>
+                    <p class="mt-2">Esta Política pode ser atualizada periodicamente. A versão mais recente será sempre publicada aqui. Recomendamos a revisão regular.</p>
+                </div>
+
+                <div class="legal-section legal-section-primary">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-900">8. Contato e Foro</h2>
+                    <p class="mt-2">Para dúvidas, entre em contato pelo e-mail franzoitechcorp@gmail.com. Fica eleito o Foro da Comarca de São Paulo, SP, para a resolução de disputas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    } else {
+                        // Opcional: remover a classe para re-animar ao rolar para cima e para baixo
+                        // entry.target.classList.remove('is-visible');
+                    }
+                });
+            }, {
+                threshold: 0.1 
+            });
+
+            document.querySelectorAll('.animated-element').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Lógica do Modal dos Termos de Uso
+            const termsModal = document.getElementById("termsModal");
+            const openTermsBtn = document.getElementById("openTermsModal");
+            const closeTermsBtn = document.getElementById("closeTermsModal");
+
+            openTermsBtn.onclick = function(e) {
+                e.preventDefault();
+                termsModal.style.display = "block";
+            }
+            
+            closeTermsBtn.onclick = function() {
+                termsModal.style.display = "none";
+            }
+
+            // Lógica do Modal da Política de Privacidade
+            const privacyModal = document.getElementById("privacyModal");
+            const openPrivacyBtn = document.getElementById("openPrivacyModal");
+            const closePrivacyBtn = document.getElementById("closePrivacyModal");
+
+            openPrivacyBtn.onclick = function(e) {
+                e.preventDefault();
+                privacyModal.style.display = "block";
+            }
+
+            closePrivacyBtn.onclick = function() {
+                privacyModal.style.display = "none";
+            }
+            
+            // Fechar modais ao clicar fora
+            window.onclick = function(event) {
+                if (event.target == termsModal) {
+                    termsModal.style.display = "none";
+                }
+                if (event.target == privacyModal) {
+                    privacyModal.style.display = "none";
+                }
+            }
+        });
+    </script>
+</body>
+</html>

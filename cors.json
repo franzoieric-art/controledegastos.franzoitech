@@ -1,0 +1,16 @@
+[
+  {
+    "origin": [
+      "https://franzoitech.com",
+      "https://www.franzoitech.com",
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://localhost:5175"
+      
+      
+    ],
+    "method": ["GET", "POST", "PUT", "HEAD"],
+    "responseHeader": ["Content-Type", "Authorization"],
+    "maxAgeSeconds": 3600
+  }
+]

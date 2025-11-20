@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soberana Imperial - Edição Limitada Black Friday</title>
+    <meta name="description" content="Apenas 30 facas Soberana Imperial numeradas, com cabo de Imbuia e personalização gratuita. Reserve a sua antes que o estoque zere.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* ESTILOS DE PREÇO E BOTÃO EXISTENTES */
+        .line-through-price-red {
+            position: relative;
+            display: inline-block;
+            font-size: 1.25rem;
+            color: #fca5a5;
+        }
+        .line-through-price-red::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            border-top: 3px solid #f87171;
+            transform: translateY(-50%) rotate(-5deg);
+        }
+        @keyframes pulse-infinite {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .pulse-button {
+            animation: pulse-infinite 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* NOVOS ESTILOS PARA O CABEÇALHO E HARMONIA */
+        
+        /* 1. ESTILO DE BRILHO (GLOW) SUAVE para o subtítulo "Faca Soberana Imperial de Imbuia" */
+        .text-shadow-glow-light {
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+        }
+
+        /* 2. ESTILO PARA O TÍTULO PRINCIPAL (ESQUENTA BLACK FRIDAY) e EMOJIS */
+        .text-shadow-glow-red {
+            text-shadow: 
+                3px 3px 0 #000, 
+                -3px -3px 0 #000, 
+                3px -3px 0 #000, 
+                -3px 3px 0 #000;
+        }
+        
+        /* 3. ESTILO PARA O NOME DA FACA (SOBERANA IMPERIAL 10") */
+        .text-shadow-glow {
+            color: #fcd34d;
+            text-shadow: 
+                1px 1px 0 #000, 
+                -1px -1px 0 #000, 
+                1px -1px 0 #000, 
+                -1px 1px 0 #000,
+                0 0 15px rgba(255, 255, 255, 0.5); 
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <section id="oferta-soberana" class="py-10 md:py-14 bg-red-600 text-white border-t-8 border-red-700 shadow-2xl">
+    <div class="max-w-6xl mx-auto px-4 text-center">
+        
+        <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-2 text-shadow-glow-red">
+            <span class="text-yellow-300">💥</span> ESQUENTA BLACK FRIDAY <span class="text-yellow-300">💥</span>
+        </h2>
+        
+        <div class="mb-8">
+            <span class="text-2xl md:text-3xl font-bold block mb-1 text-shadow-glow-light">
+                Série Limitada de Colecionador
+            </span>
+            
+            <span class="text-4xl md:text-5xl font-black text-shadow-glow block">
+                SOBERANA IMPERIAL 10"
+            </span>
+            
+            <span class="text-xl md:text-2xl font-extrabold mt-1 block text-shadow-glow-light">
+                Apenas 30 Unidades Exclusivas!
+            </span>
+        </div>
+
+        <div class="max-w-md mx-auto">
+            <form id="form-reserva-faca" class="p-6 bg-white text-gray-900 rounded-xl shadow-2xl border-b-4 border-red-700">
+                <p class="text-lg font-bold mb-4">
+                    EDIÇÃO DE COLECIONADOR: Seu Nome e Número Gravados.
+                </p>
+                
+                <div class="mb-4">
+                    <label for="select-numero-faca" class="block text-sm font-medium text-gray-700 text-left">
+                        Escolha seu Número de Série (01/30)
+                    </label>
+                    <select id="select-numero-faca" required 
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md">
+                        <option value="" disabled selected>Carregando números...</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="input-nome" class="block text-sm font-medium text-gray-700 text-left">Nome para Gravação</label>
+                    <input type="text" id="input-nome" required 
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                </div>
+
+                <div class="mb-6">
+                    <label for="input-telefone" class="block text-sm font-medium text-gray-700 text-left">Telefone Celular (WhatsApp)</label>
+                    <input type="tel" id="input-telefone" required 
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                </div>
+
+                <p class="text-sm font-bold text-gray-600 mb-2 line-through-price-red">De R$ 327,00</p>
+                <p class="text-3xl font-extrabold text-red-600 mb-4">
+                    Por APENAS R$ 297,00
+                    <span class="text-sm font-normal text-gray-600 block">Em até 3x de R$ 99,00 sem juros</span>
+                </p>
+                
+                <button type="submit" id="btn-reservar" 
+                        class="w-full bg-red-700 hover:bg-red-800 text-white font-extrabold py-3 rounded-md transition duration-150 pulse-button">
+                    RESERVAR MINHA UNIDADE AGORA
+                </button>
+                <p id="feedback-message" class="mt-3 text-sm text-center text-red-500 hidden"></p>
+            </form>
+        </div>
+        
+        <p class="mt-8 text-sm text-red-200">
+            O pagamento será finalizado por contato telefônico. A reserva é válida por 24h.
+        </p>
+    </div>
+</section>
+
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // --- CHAVES DE CONFIGURAÇÃO (ATUALIZE AQUI) ---
+        // 🚨 NUNCA COMPARTILHE ESTES VALORES PUBLICAMENTE 🚨
+        const firebaseConfig = {
+            apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0", 
+            authDomain: "controle-de-gastos-74daf.firebaseapp.com",
+            projectId: "controle-de-gastos-74daf",
+            storageBucket: "controle-de-gastos-74daf.appspot.com",
+            messagingSenderId: "331667008487",
+            appId: "1:331667008487:web:c5200f64ac27d0c32feb42"
+        };
+        
+        // Inicialização do Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = app.firestore();
+
+        // --- Variáveis de DOM (Localizar Elementos) ---
+        const selectFaca = document.getElementById('select-numero-faca');
+        const formReserva = document.getElementById('form-reserva-faca');
+        const btnReservar = document.getElementById('btn-reservar');
+        const feedbackMessage = document.getElementById('feedback-message');
+
+        // FUNÇÃO DE LEITURA (PREENCHE A LISTA)
+        async function carregarNumerosDisponiveis() {
+            const facasRef = db.collection("facas_soberana");
+            
+            try {
+                const querySnapshot = await facasRef
+                    .where("disponivel", "==", true)
+                    .get();
+
+                selectFaca.innerHTML = '<option value="" disabled selected>Escolha seu número</option>';
+                
+                const numerosDisponiveis = [];
+
+                querySnapshot.forEach((doc) => {
+                    numerosDisponiveis.push(doc.id);
+                });
+
+                // CORREÇÃO FINAL: Ordenação numérica no JavaScript
+                numerosDisponiveis.sort((a, b) => parseInt(a) - parseInt(b));
+
+                numerosDisponiveis.forEach((numeroFaca) => {
+                    const option = document.createElement('option');
+                    option.value = numeroFaca;
+                    option.textContent = `#${numeroFaca}`;
+                    selectFaca.appendChild(option);
+                });
+
+                if (querySnapshot.empty) {
+                    selectFaca.innerHTML = '<option value="" disabled selected>TODAS VENDIDAS!</option>';
+                    btnReservar.disabled = true;
+                } else {
+                    btnReservar.disabled = false;
+                }
+
+            } catch (error) {
+                console.error("Erro ao carregar números disponíveis:", error);
+                selectFaca.innerHTML = '<option value="" disabled selected>Erro de conexão</option>';
+            }
+        }
+
+
+        // FUNÇÃO DE TRANSAÇÃO (TRAVA O ESTOQUE)
+        async function reservarFaca(numeroEscolhido, nome, telefone) {
+            const facaRef = db.collection("facas_soberana").doc(numeroEscolhido); 
+
+            try {
+                await db.runTransaction(async (transaction) => {
+                    const facaDoc = await transaction.get(facaRef);
+
+                    if (!facaDoc.exists || facaDoc.data().disponivel === false) {
+                        throw new Error("Este número foi reservado há um instante. Por favor, escolha outro."); 
+                    }
+
+                    transaction.update(facaRef, {
+                        disponivel: false,
+                        nome_cliente: nome,
+                        telefone: telefone,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+
+                return { success: true, message: `Faca #${numeroEscolhido} reservada para ${nome}.` };
+
+            } catch (e) {
+                return { success: false, message: e.message || "Erro desconhecido na reserva." }; 
+            }
+        }
+
+
+        // ATIVAÇÃO DA LÓGICA (ON LOAD e ON SUBMIT)
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarNumerosDisponiveis(); 
+
+            if (formReserva) {
+                formReserva.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const numeroEscolhido = selectFaca.value;
+                    const nome = document.getElementById('input-nome').value;
+                    const telefone = document.getElementById('input-telefone').value;
+
+                    if (!numeroEscolhido || !nome || !telefone) {
+                        feedbackMessage.textContent = 'Preencha todos os campos e escolha um número.';
+                        feedbackMessage.classList.remove('hidden');
+                        return;
+                    }
+
+                    feedbackMessage.classList.add('hidden');
+                    btnReservar.textContent = 'Reservando...';
+                    btnReservar.disabled = true;
+
+                    const resultado = await reservarFaca(numeroEscolhido, nome, telefone);
+
+                    if (resultado.success) {
+                        // 1. Confirmação Rápida no navegador
+                        alert(`SUCESSO! Faca #${numeroEscolhido} reservada. Você será redirecionado para o pagamento.`);
+                        
+                        // 2. AÇÃO CHAVE: REDIRECIONA PARA A SUA LOJA
+                        window.location.href = 'https://www.cabanafranzoi.com.br/faca-de-churrasco-soberana-imperial-10-edicao-especial/p';
+                        
+                        // NOTA: As linhas de reset e recarga foram removidas daqui
+                        // pois a página será fechada/trocada imediatamente.
+                    } else {
+                        // Se falhou (alguém pegou ao mesmo tempo), informa o erro e recarrega a lista
+                        alert(`FALHA NA RESERVA: ${resultado.message}`);
+                        carregarNumerosDisponiveis();
+                    }
+
+                    feedbackMessage.classList.remove('hidden');
+                    btnReservar.textContent = 'RESERVAR MINHA UNIDADE AGORA';
+                    btnReservar.disabled = false;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

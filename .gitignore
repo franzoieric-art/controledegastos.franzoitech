@@ -1,0 +1,18 @@
+# Arquivos do Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos do Editor de Código
+.vscode/
+
+# SDKs e Dependências (O MAIS IMPORTANTE)
+google-cloud-sdk/
+node_modules/
+
+# Arquivos de build ou pacotes
+dist/
+build/
+*.zip
+*.rar
+.vercel
+.env

@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/login",
+      "destination": "https://controledegastos1-0.vercel.app/index.html"
+    },
+    {
+      "source": "/assets/:path*",
+      "destination": "https://controledegastos1-0.vercel.app/assets/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/landing.html"
+    }
+  ]
+}
