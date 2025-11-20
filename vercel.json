@@ -7,15 +7,15 @@
     },
     {
       "source": "/login",
-      "destination": "/index.html"
+      "destination": "/app-index.html"
     },
     {
       "source": "/blackfriday",
       "destination": "/blackfriday.html"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/((?!.*\\.).*)",
+      "destination": "/app-index.html"
     }
   ]
 }
