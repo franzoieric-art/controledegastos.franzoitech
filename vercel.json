@@ -2,20 +2,20 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/login",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/cadastro",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/index.html"
+    },
+    {
       "source": "/",
       "destination": "/ricoplus-landing-page/index.html"
-    },
-    {
-      "source": "/login",
-      "destination": "/app/app-index.html" 
-    },
-    {
-      "source": "/blackfriday",
-      "destination": "/blackfriday.html"
-    },
-    {
-      "source": "/((?!.*\\.).*)",
-      "destination": "/app/app-index.html" 
     }
   ]
 }
