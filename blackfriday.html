@@ -7,22 +7,16 @@
     <meta name="description" content="Apenas 30 facas Soberana Imperial numeradas, com cabo de Imbuia e personalização gratuita. Reserve a sua antes que o estoque zere.">
 
     <!-- --- ÍCONE DA PÁGINA (FAVICON) --- -->
-    <!-- Este código faz o emoji 💥 aparecer na aba do navegador -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>">
-    <!-- --- FIM DO ÍCONE DA PÁGINA --- -->
-
+    
     <!-- --- INÍCIO DAS TAGS PARA WHATSAPP (OPEN GRAPH) --- -->
     <meta property="og:type" content="website">
-    <!-- O link final da sua página -->
     <meta property="og:url" content="https://ricoplus.com.br/blackfriday"> 
-    <!-- O Título que aparece em negrito no Whats -->
     <meta property="og:title" content="🔪 Soberana Imperial - Edição de Colecionador">
-    <!-- A descrição que aparece embaixo do título -->
     <meta property="og:description" content="Apenas 30 unidades numeradas! Garanta sua faca exclusiva com gravação de nome antes que acabe.">
-    <!-- A Imagem que vai aparecer (Sua foto da faca) -->
     <meta property="og:image" content="https://storage.moovin.store/main/336e5abf-846b-4547-80e0-46602c567975/851979052-0.jpeg?v=1763598681&ims=fit-in/1200x">
     
-    <!-- Tags para Twitter/X (Opcional, mas bom ter) -->
+    <!-- Tags para Twitter/X -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:title" content="Soberana Imperial - Edição de Colecionador">
     <meta property="twitter:description" content="Apenas 30 unidades numeradas! Garanta sua faca exclusiva.">
@@ -127,8 +121,25 @@
                 Apenas 30 Unidades Exclusivas!
             </span>
 
+            <!-- --- INÍCIO DA ÁREA DO VÍDEO (NOVO) --- -->
+            <div class="mt-8 flex justify-center relative z-10 mb-8">
+                <div class="p-2 bg-red-800/50 rounded-xl backdrop-blur-sm w-full max-w-3xl">
+                    <div class="relative pb-[56.25%] h-0 overflow-hidden rounded-lg shadow-2xl border-4 border-yellow-400">
+                        <iframe 
+                            class="absolute top-0 left-0 w-full h-full"
+                            src="https://www.youtube.com/embed/N_zfB78A3mM" 
+                            title="Vídeo da Soberana Imperial" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+            <!-- --- FIM DA ÁREA DO VÍDEO --- -->
+
             <!-- --- INÍCIO DA GALERIA DE IMAGENS (CARROSSEL) --- -->
-            <div class="mt-8 flex justify-center relative z-10">
+            <div class="flex justify-center relative z-10">
                 <div class="p-2 bg-red-800/50 rounded-xl backdrop-blur-sm w-full max-w-3xl relative group">
                     
                     <!-- Imagem Principal -->
@@ -151,7 +162,7 @@
                         </svg>
                     </button>
                     
-                    <!-- Indicador de Fotos (Opcional: exibe 1/3) -->
+                    <!-- Indicador de Fotos -->
                     <div class="absolute bottom-4 right-4 bg-black/60 text-white text-xs px-2 py-1 rounded">
                         <span id="contador-fotos">1</span>/<span id="total-fotos">3</span>
                     </div>
@@ -232,9 +243,8 @@
     
     <script>
         // --- CONFIGURAÇÃO DA GALERIA DE FOTOS ---
-        // LINKS DAS SUAS FOTOS NOVAS
         const imagensGaleria = [
-            "https://storage.moovin.store/main/336e5abf-846b-4547-80e0-46602c567975/851979052-0.jpeg?v=1763598681&ims=fit-in/1200x", // Foto 1 (Principal)
+            "https://storage.moovin.store/main/336e5abf-846b-4547-80e0-46602c567975/851979052-0.jpeg?v=1763598681&ims=fit-in/1200x", // Foto 1
             "https://storage.moovin.store/main/336e5abf-846b-4547-80e0-46602c567975/fb9236fb-516d-47fc-a153-cabd886215a9.png?v=1763732223&ims=fit-in/1200x", // Foto 2
             "https://storage.moovin.store/main/336e5abf-846b-4547-80e0-46602c567975/851979052-1.jpeg?v=1763598680&ims=fit-in/500x/filters:fill(FFF)", // Foto 3
             "https://storage.moovin.store/main/336e5abf-846b-4547-80e0-46602c567975/a0bb5055-9ff9-4ad5-885a-ae885efed171.png?v=1763732223&ims=fit-in/1200x"  // Foto 4
@@ -245,26 +255,20 @@
         const contadorElemento = document.getElementById('contador-fotos');
         const totalFotosElemento = document.getElementById('total-fotos');
 
-        // Inicializa o contador
         if (totalFotosElemento) totalFotosElemento.innerText = imagensGaleria.length;
 
         function mudarFoto(direcao) {
-            // Calcula o novo índice
             indiceFotoAtual += direcao;
-
-            // Lógica circular (se passar do fim, volta pro começo e vice-versa)
             if (indiceFotoAtual >= imagensGaleria.length) {
                 indiceFotoAtual = 0;
             } else if (indiceFotoAtual < 0) {
                 indiceFotoAtual = imagensGaleria.length - 1;
             }
-
-            // Atualiza a imagem e o contador
-            imgElemento.style.opacity = 0; // Efeito de fade rápido
+            imgElemento.style.opacity = 0;
             setTimeout(() => {
                 imgElemento.src = imagensGaleria[indiceFotoAtual];
                 imgElemento.style.opacity = 1;
-            }, 150); // Troca a imagem no meio da transição
+            }, 150);
             
             if (contadorElemento) contadorElemento.innerText = indiceFotoAtual + 1;
         }
