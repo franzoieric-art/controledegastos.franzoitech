@@ -7,7 +7,7 @@
     },
     {
       "source": "/",
-      "destination": "/ricoplus-landing-page/index.html"
+      "destination": "/landing.html"
     },
     {
       "source": "/(.*)",
