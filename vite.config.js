@@ -5,10 +5,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        // O PULO DO GATO: Chamamos de 'index' aqui para o Vite criar um 'index.html' na saída
-        index: resolve(__dirname, 'landing.html'), 
-        
-        // O App continua como app
+        // O 'main' é o index.html (Landing Page)
+        main: resolve(__dirname, 'index.html'),
+        // O 'app' é o app.html (Sistema de Login)
         app: resolve(__dirname, 'app.html')
       }
     }
