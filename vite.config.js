@@ -1,17 +1,15 @@
-// vite.config.js
-
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        // O App principal (que agora está na raiz)
-        app: './app.html', 
+        // App Principal (Login/Sistema)
+        app: resolve(__dirname, 'app.html'), 
         
-        // A Landing Page: Diz ao Vite para PEGAR este arquivo 
-        // da subpasta e GARANTIR que ele seja o index.html final
-        index: './ricoplus-landing-page/index.html' 
+        // Landing Page (Caminho absoluto para a subpasta)
+        landing: resolve(__dirname, 'ricoplus-landing-page/index.html') 
       }
     }
   }

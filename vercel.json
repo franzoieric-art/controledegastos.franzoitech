@@ -6,6 +6,10 @@
       "destination": "/app.html"
     },
     {
+      "source": "/",
+      "destination": "/ricoplus-landing-page/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/app.html"
     }
