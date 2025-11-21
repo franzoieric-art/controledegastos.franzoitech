@@ -1,17 +1,10 @@
 {
   "cleanUrls": true,
   "rewrites": [
-
-    {
-      "source": "/",
-      "destination": "/ricoplus-landing-page/index.html"
-    },
-
     {
       "source": "/login",
       "destination": "/app.html"
     },
-
     {
       "source": "/(.*)",
       "destination": "/app.html"
