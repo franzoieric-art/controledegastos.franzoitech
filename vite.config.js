@@ -5,10 +5,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        // O 'main' é o index.html (Landing Page)
+        // A Home Page
         main: resolve(__dirname, 'index.html'),
-        // O 'app' é o app.html (Sistema de Login)
-        app: resolve(__dirname, 'app.html')
+        
+        // AQUI ESTA A MUDANÇA: Agora geramos um arquivo 'login.html'
+        login: resolve(__dirname, 'login.html') 
       }
     }
   }

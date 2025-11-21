@@ -3,11 +3,11 @@
   "rewrites": [
     {
       "source": "/login",
-      "destination": "/app.html"
+      "destination": "/login.html"
     },
     {
       "source": "/(.*)",
-      "destination": "/app.html"
+      "destination": "/login.html"
     }
   ]
 }
