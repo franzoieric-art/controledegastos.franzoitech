@@ -14,7 +14,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         
-        /* ESTILOS DE PREÇO E BOTÃO EXISTENTES */
         .line-through-price-red {
             position: relative;
             display: inline-block;
@@ -38,14 +37,10 @@
             animation: pulse-infinite 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
-        /* NOVOS ESTILOS PARA O CABEÇALHO E HARMONIA */
-        
-        /* 1. ESTILO DE BRILHO (GLOW) SUAVE para o subtítulo "Faca Soberana Imperial de Imbuia" */
         .text-shadow-glow-light {
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
         }
 
-        /* 2. ESTILO PARA O TÍTULO PRINCIPAL (ESQUENTA BLACK FRIDAY) e EMOJIS */
         .text-shadow-glow-red {
             text-shadow: 
                 3px 3px 0 #000, 
@@ -54,7 +49,6 @@
                 -3px 3px 0 #000;
         }
         
-        /* 3. ESTILO PARA O NOME DA FACA (SOBERANA IMPERIAL 10") */
         .text-shadow-glow {
             color: #fcd34d;
             text-shadow: 
@@ -99,22 +93,39 @@
                 
                 <div class="mb-4">
                     <label for="select-numero-faca" class="block text-sm font-medium text-gray-700 text-left">
-                        Escolha seu Número de Série (01/30)
+                        1. Escolha seu Número de Série (01/30)
                     </label>
                     <select id="select-numero-faca" required 
                             class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md">
                         <option value="" disabled selected>Carregando números...</option>
                     </select>
                 </div>
+
+                <!-- CAMPO DE PROTOCOLO (NOVO) -->
+                <div id="container-protocolo" class="mb-4 hidden p-3 bg-yellow-50 border-2 border-yellow-400 rounded-lg animate-pulse">
+                    <label class="block text-sm font-bold text-yellow-800 text-center mb-1">
+                        SEU CÓDIGO DE RESERVA:
+                    </label>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="input-protocolo" readonly 
+                               class="block w-full text-center font-mono font-black text-lg text-gray-800 bg-white border border-yellow-300 rounded-md py-2 shadow-inner focus:outline-none">
+                        <button type="button" id="btn-copiar" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-sm transition-colors text-sm">
+                            COPIAR
+                        </button>
+                    </div>
+                    <p class="text-xs text-yellow-700 mt-1 text-center font-medium">
+                        ⚠️ Copie e cole este código no campo de observação da compra.
+                    </p>
+                </div>
                 
                 <div class="mb-4">
-                    <label for="input-nome" class="block text-sm font-medium text-gray-700 text-left">Nome para Gravação</label>
+                    <label for="input-nome" class="block text-sm font-medium text-gray-700 text-left">2. Nome para Gravação</label>
                     <input type="text" id="input-nome" required 
                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
                 </div>
 
                 <div class="mb-6">
-                    <label for="input-telefone" class="block text-sm font-medium text-gray-700 text-left">Telefone Celular (WhatsApp)</label>
+                    <label for="input-telefone" class="block text-sm font-medium text-gray-700 text-left">3. Telefone Celular (WhatsApp)</label>
                     <input type="tel" id="input-telefone" required 
                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
                 </div>
@@ -134,7 +145,7 @@
         </div>
         
         <p class="mt-8 text-sm text-red-200">
-            O pagamento será finalizado por contato telefônico. A reserva é válida por 24h.
+            O pagamento será finalizado pelo site. A reserva é válida por 24h.
         </p>
     </div>
 </section>
@@ -143,8 +154,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore-compat.js"></script>
     
     <script>
-        // --- CHAVES DE CONFIGURAÇÃO (ATUALIZE AQUI) ---
-        // 🚨 NUNCA COMPARTILHE ESTES VALORES PUBLICAMENTE 🚨
+        // --- CHAVES DE CONFIGURAÇÃO ---
         const firebaseConfig = {
             apiKey: "AIzaSyApSIolaeRxXdVNsnZkAvz_F_ILmxs1_K0", 
             authDomain: "controle-de-gastos-74daf.firebaseapp.com",
@@ -154,17 +164,57 @@
             appId: "1:331667008487:web:c5200f64ac27d0c32feb42"
         };
         
-        // Inicialização do Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = app.firestore();
 
-        // --- Variáveis de DOM (Localizar Elementos) ---
+        // Variáveis de DOM
         const selectFaca = document.getElementById('select-numero-faca');
         const formReserva = document.getElementById('form-reserva-faca');
         const btnReservar = document.getElementById('btn-reservar');
         const feedbackMessage = document.getElementById('feedback-message');
+        const containerProtocolo = document.getElementById('container-protocolo');
+        const inputProtocolo = document.getElementById('input-protocolo');
+        const btnCopiar = document.getElementById('btn-copiar');
 
-        // FUNÇÃO DE LEITURA (PREENCHE A LISTA)
+        // FUNÇÃO PARA GERAR PROTOCOLO ALEATÓRIO
+        function gerarProtocolo() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let codigo = "";
+            for (let i = 0; i < 4; i++) {
+                codigo += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return `RES-BF-${codigo}`;
+        }
+
+        // FUNÇÃO DE CÓPIA PARA CLIPBOARD
+        btnCopiar.addEventListener('click', () => {
+            inputProtocolo.select();
+            inputProtocolo.setSelectionRange(0, 99999); // Para mobile
+            
+            navigator.clipboard.writeText(inputProtocolo.value).then(() => {
+                const originalText = btnCopiar.innerText;
+                btnCopiar.innerText = "COPIADO!";
+                btnCopiar.classList.replace('bg-yellow-500', 'bg-green-500');
+                btnCopiar.classList.replace('hover:bg-yellow-600', 'hover:bg-green-600');
+                
+                setTimeout(() => {
+                    btnCopiar.innerText = originalText;
+                    btnCopiar.classList.replace('bg-green-500', 'bg-yellow-500');
+                    btnCopiar.classList.replace('hover:bg-green-600', 'hover:bg-yellow-600');
+                }, 2000);
+            });
+        });
+
+        // EVENTO: AO ESCOLHER O NÚMERO
+        selectFaca.addEventListener('change', () => {
+            if (selectFaca.value) {
+                // Gera um novo protocolo se ainda não existir ou atualiza
+                const novoProtocolo = gerarProtocolo();
+                inputProtocolo.value = novoProtocolo;
+                containerProtocolo.classList.remove('hidden');
+            }
+        });
+
         async function carregarNumerosDisponiveis() {
             const facasRef = db.collection("facas_soberana");
             
@@ -174,14 +224,12 @@
                     .get();
 
                 selectFaca.innerHTML = '<option value="" disabled selected>Escolha seu número</option>';
-                
                 const numerosDisponiveis = [];
 
                 querySnapshot.forEach((doc) => {
                     numerosDisponiveis.push(doc.id);
                 });
 
-                // CORREÇÃO FINAL: Ordenação numérica no JavaScript
                 numerosDisponiveis.sort((a, b) => parseInt(a) - parseInt(b));
 
                 numerosDisponiveis.forEach((numeroFaca) => {
@@ -199,14 +247,13 @@
                 }
 
             } catch (error) {
-                console.error("Erro ao carregar números disponíveis:", error);
+                console.error("Erro:", error);
                 selectFaca.innerHTML = '<option value="" disabled selected>Erro de conexão</option>';
             }
         }
 
-
-        // FUNÇÃO DE TRANSAÇÃO (TRAVA O ESTOQUE)
-        async function reservarFaca(numeroEscolhido, nome, telefone) {
+        // FUNÇÃO DE RESERVA ATUALIZADA (SALVA O PROTOCOLO)
+        async function reservarFaca(numeroEscolhido, nome, telefone, protocolo) {
             const facaRef = db.collection("facas_soberana").doc(numeroEscolhido); 
 
             try {
@@ -221,19 +268,18 @@
                         disponivel: false,
                         nome_cliente: nome,
                         telefone: telefone,
+                        protocolo_reserva: protocolo, // Salva o protocolo no banco
                         timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 });
 
-                return { success: true, message: `Faca #${numeroEscolhido} reservada para ${nome}.` };
+                return { success: true, message: `Faca #${numeroEscolhido} reservada.` };
 
             } catch (e) {
-                return { success: false, message: e.message || "Erro desconhecido na reserva." }; 
+                return { success: false, message: e.message || "Erro desconhecido." }; 
             }
         }
 
-
-        // ATIVAÇÃO DA LÓGICA (ON LOAD e ON SUBMIT)
         document.addEventListener('DOMContentLoaded', () => {
             carregarNumerosDisponiveis(); 
 
@@ -244,37 +290,29 @@
                     const numeroEscolhido = selectFaca.value;
                     const nome = document.getElementById('input-nome').value;
                     const telefone = document.getElementById('input-telefone').value;
+                    const protocolo = document.getElementById('input-protocolo').value;
 
                     if (!numeroEscolhido || !nome || !telefone) {
-                        feedbackMessage.textContent = 'Preencha todos os campos e escolha um número.';
+                        feedbackMessage.textContent = 'Preencha todos os campos.';
                         feedbackMessage.classList.remove('hidden');
                         return;
                     }
 
                     feedbackMessage.classList.add('hidden');
-                    btnReservar.textContent = 'Reservando...';
+                    btnReservar.textContent = 'Processando Reserva...';
                     btnReservar.disabled = true;
 
-                    const resultado = await reservarFaca(numeroEscolhido, nome, telefone);
+                    const resultado = await reservarFaca(numeroEscolhido, nome, telefone, protocolo);
 
                     if (resultado.success) {
-                        // 1. Confirmação Rápida no navegador
-                        alert(`SUCESSO! Faca #${numeroEscolhido} reservada. Você será redirecionado para o pagamento.`);
-                        
-                        // 2. AÇÃO CHAVE: REDIRECIONA PARA A SUA LOJA
+                        alert(`RESERVA CONFIRMADA!\n\nSeu Protocolo: ${protocolo}\n\nCopie o código e clique em OK para finalizar o pagamento.`);
                         window.location.href = 'https://www.cabanafranzoi.com.br/faca-de-churrasco-soberana-imperial-10-edicao-especial/p';
-                        
-                        // NOTA: As linhas de reset e recarga foram removidas daqui
-                        // pois a página será fechada/trocada imediatamente.
                     } else {
-                        // Se falhou (alguém pegou ao mesmo tempo), informa o erro e recarrega a lista
-                        alert(`FALHA NA RESERVA: ${resultado.message}`);
+                        alert(`FALHA: ${resultado.message}`);
                         carregarNumerosDisponiveis();
+                        btnReservar.textContent = 'RESERVAR MINHA UNIDADE AGORA';
+                        btnReservar.disabled = false;
                     }
-
-                    feedbackMessage.classList.remove('hidden');
-                    btnReservar.textContent = 'RESERVAR MINHA UNIDADE AGORA';
-                    btnReservar.disabled = false;
                 });
             }
         });
