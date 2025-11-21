@@ -6,10 +6,6 @@
       "destination": "/app.html"
     },
     {
-      "source": "/",
-      "destination": "/landing.html"
-    },
-    {
       "source": "/(.*)",
       "destination": "/app.html"
     }
