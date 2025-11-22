@@ -1,12 +1,13 @@
 import './input.css';
 
-// Importações corretas para o Vite (usando o npm install firebase que você já fez)
+// Importações corretas para o Vite
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+// Mantemos a importação do storage para não quebrar a inicialização, mas não usaremos para upload
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-// Debug das variáveis (pode remover depois se quiser)
+// Debug das variáveis
 console.log('Verificando VITE_FIREBASE_API_KEY:', import.meta.env.VITE_FIREBASE_API_KEY);
 
 const firebaseConfig = {
@@ -22,7 +23,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
+const storage = getStorage(app); // Inicializado mas não usado para avatar agora
 
 // Elementos da UI
 const authScreen = document.getElementById('auth-screen');
@@ -189,27 +190,60 @@ const App = {
         generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
     },
 
-    async handleAvatarUpload(event) {
+    // =========================================================================
+    // NOVA LÓGICA DE UPLOAD (SALVA DIRETO NO BANCO DE DADOS / SEM STORAGE)
+    // =========================================================================
+    handleAvatarUpload(event) {
         const file = event.target.files[0];
         if (!file || !this.state.currentUserId) return;
+
+        // Trava de segurança: 700KB para não pesar o banco de dados
+        if (file.size > 700 * 1024) {
+            alert("A imagem é muito grande! Escolha uma foto menor que 700KB.");
+            return;
+        }
+
         const avatarImg = document.getElementById('user-avatar');
         const originalSrc = avatarImg.src;
+        
+        // Efeito visual de carregamento
         avatarImg.style.opacity = '0.5';
-        try {
-            const storagePath = `avatars/${this.state.currentUserId}`;
-            const storageRef = ref(storage, storagePath);
-            await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(storageRef);
-            this.state.profile.avatarUrl = downloadURL;
-            avatarImg.src = downloadURL;
-            await this.saveDataToFirestore();
-        } catch (error) {
-            console.error("Erro no upload do avatar:", error);
+
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+            try {
+                // Converte a imagem para texto (Base64)
+                const base64String = e.target.result;
+                
+                // Atualiza o estado local
+                this.state.profile.avatarUrl = base64String;
+                
+                // Mostra na tela na hora
+                avatarImg.src = base64String;
+                
+                // Salva no Firestore (banco de dados)
+                await this.saveDataToFirestore();
+                
+            } catch (error) {
+                console.error("Erro ao processar avatar:", error);
+                avatarImg.src = originalSrc;
+                alert("Erro ao salvar a imagem.");
+            } finally {
+                avatarImg.style.opacity = '1';
+            }
+        };
+
+        reader.onerror = () => {
+            console.error("Erro ao ler arquivo");
             avatarImg.src = originalSrc;
-        } finally {
             avatarImg.style.opacity = '1';
-        }
+        };
+
+        // Inicia a leitura do arquivo
+        reader.readAsDataURL(file);
     },
+    // =========================================================================
 
     async saveDataToFirestore() {
         if (!App.state.currentUserId) return;
