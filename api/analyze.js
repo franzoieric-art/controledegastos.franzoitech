@@ -23,8 +23,7 @@ export default async (req, res) => {
         const genAI = new GoogleGenerativeAI(API_KEY);
         
         // CORREÇÃO 2: Usando a versão estável 'gemini-1.5-flash' para garantir que funcione
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const { prompt } = req.body;
 
         if (!prompt) {

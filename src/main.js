@@ -1,11 +1,13 @@
 import './input.css';
-console.log('Verificando VITE_FIREBASE_API_KEY:', import.meta.env.VITE_FIREBASE_API_KEY);
-console.log('Todas as variáveis de ambiente do Vite:', import.meta.env);
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-storage.js";
+// Importações corretas para o Vite (usando o npm install firebase que você já fez)
+import { initializeApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+// Debug das variáveis (pode remover depois se quiser)
+console.log('Verificando VITE_FIREBASE_API_KEY:', import.meta.env.VITE_FIREBASE_API_KEY);
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -16,10 +18,13 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// Inicialização do Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
+
+// Elementos da UI
 const authScreen = document.getElementById('auth-screen');
 const appScreen = document.getElementById('app-screen');
 const mainAuthBtn = document.getElementById('main-auth-btn');
@@ -29,6 +34,7 @@ const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const loadingOverlay = document.getElementById('loading-overlay');
 let isLoginMode = true;
 
+// Listeners de Autenticação
 const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
 document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress);
 document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
@@ -54,8 +60,13 @@ mainAuthBtn.addEventListener('click', () => {
     mainAuthBtn.disabled = true;
     mainAuthBtn.textContent = 'Aguarde...';
     const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; };
+    
     if (isLoginMode) {
-        signInWithEmailAndPassword(auth, email, password).catch(error => { showError('Email ou senha inválidos.'); restoreBtn(); });
+        signInWithEmailAndPassword(auth, email, password).catch(error => { 
+            console.error(error);
+            showError('Email ou senha inválidos.'); 
+            restoreBtn(); 
+        });
     } else {
         const confirmPassword = document.getElementById('confirm-password-input').value;
         if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; }
@@ -70,11 +81,7 @@ mainAuthBtn.addEventListener('click', () => {
 
 forgotPasswordLink.addEventListener('click', async (e) => {
     e.preventDefault();
-    
-    // Assegura que a função é assíncrona para usar await e Promises corretamente
     const email = document.getElementById('email-input').value.trim(); 
-    
-    // Define a mensagem de erro (usando a função existente)
     showError(''); 
     
     if (!email) { 
@@ -82,31 +89,22 @@ forgotPasswordLink.addEventListener('click', async (e) => {
         return; 
     }
     
-    // ⚠️ OBJETO OBRIGATÓRIO: Define a URL de retorno para evitar o erro 400
     const actionCodeSettings = {
-        // A URL para onde o usuário voltará. DEVE ser o seu domínio.
         url: 'https://ricoplus.com.br/login', 
-        handleCodeInApp: false, // Indica que o link deve ser tratado no navegador
+        handleCodeInApp: false,
     };
     
-    // Feedback visual
     const originalText = forgotPasswordLink.textContent;
     forgotPasswordLink.textContent = 'Enviando...';
     forgotPasswordLink.style.pointerEvents = 'none';
 
     try {
-        // CORREÇÃO: Passa o actionCodeSettings como o segundo parâmetro
         await sendPasswordResetEmail(auth, email, actionCodeSettings); 
-        
-        // Mensagem de sucesso (que também funciona como proteção contra enumeração)
         showError('Link de recuperação enviado! Verifique sua caixa de entrada.');
         authError.style.color = 'var(--green-color)';
 
     } catch (error) {
-        // Tratamento do erro 400
         console.error("Erro ao enviar email:", error);
-        
-        // Mantém a mensagem de sucesso mesmo em caso de erro 'user-not-found' por segurança
         showError('Link de recuperação enviado! Verifique sua caixa de entrada.');
         authError.style.color = 'var(--green-color)';
 
@@ -588,29 +586,6 @@ const App = {
             App.render.updateHeader();
         });
 
-        /*
-        document.getElementById('save-integration-btn').addEventListener('click', () => {
-            const wa = App.state.integrations.whatsapp;
-            wa.phoneNumberId = App.ui.whatsappPhoneId.value;
-            wa.accessToken = App.ui.whatsappToken.value;
-            wa.webhookVerifyToken = App.ui.whatsappVerifyToken.value;
-            App.saveDataToFirestore();
-            App.ui.accountModal.classList.add('hidden');
-            App.helpers.showSaveFeedback();
-        });
-
-        document.getElementById('generate-verify-token-btn').addEventListener('click', () => {
-            const newToken = App.helpers.generateRandomToken();
-            App.ui.whatsappVerifyToken.value = newToken;
-        });
-
-        document.getElementById('copy-webhook-url-btn').addEventListener('click', (e) => {
-            navigator.clipboard.writeText(App.ui.whatsappWebhookUrl.value);
-            e.target.textContent = 'Copiado!';
-            setTimeout(() => { e.target.textContent = 'Copiar'; }, 2000);
-        });
-        */
-
         document.getElementById('close-ai-modal-btn').addEventListener('click', () => { this.ui.aiAnalysisModal.classList.add('hidden'); });
         document.getElementById('add-card-btn').addEventListener('click', () => { const n = this.ui.newCardNameInput.value.trim(); if (n && !this.state.creditCards.includes(n)) { this.state.creditCards.push(n); this.ui.newCardNameInput.value = ''; this.render.renderCardList(); this.saveDataToFirestore(); } });
         document.getElementById('add-category-btn').addEventListener('click', () => {
@@ -915,7 +890,8 @@ const App = {
             }
         },
         async callVercelFunction(prompt) {
-            const VERCEL_API_URL = "https://controledegastos1-0.vercel.app/api/analyze";
+            // CORREÇÃO AQUI: Usando caminho relativo para evitar CORS e HTTPS problems
+            const VERCEL_API_URL = "/api/analyze";
             const response = await fetch(VERCEL_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

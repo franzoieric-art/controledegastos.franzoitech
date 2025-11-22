@@ -27,8 +27,7 @@ export default async (req, res) => {
     }
 
     const genAI = new GoogleGenerativeAI(API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     // 💡 AQUI ESTÁ A MÁGICA: O contexto foi atualizado para o seu app financeiro
     const fullPrompt = `
       Você é o assistente virtual inteligente do "Rico Plus", um painel de controle financeiro pessoal.
