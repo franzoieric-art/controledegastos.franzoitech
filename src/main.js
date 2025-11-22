@@ -4,10 +4,8 @@ import './input.css';
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
-// Mantemos a importação do storage para não quebrar a inicialização, mas não usaremos para upload
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-// Debug das variáveis
 console.log('Verificando VITE_FIREBASE_API_KEY:', import.meta.env.VITE_FIREBASE_API_KEY);
 
 const firebaseConfig = {
@@ -19,13 +17,12 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Inicialização do Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app); // Inicializado mas não usado para avatar agora
+const storage = getStorage(app);
 
-// Elementos da UI
+// Elementos da UI Globais
 const authScreen = document.getElementById('auth-screen');
 const appScreen = document.getElementById('app-screen');
 const mainAuthBtn = document.getElementById('main-auth-btn');
@@ -35,93 +32,101 @@ const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const loadingOverlay = document.getElementById('loading-overlay');
 let isLoginMode = true;
 
-// Listeners de Autenticação
+// --- LISTENERS DE AUTENTICAÇÃO (Rodam apenas uma vez no load da página) ---
 const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
-document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress);
-document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
-document.getElementById('confirm-password-input').addEventListener('keydown', handleAuthKeyPress);
+if(document.getElementById('email-input')) document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress);
+if(document.getElementById('password-input')) document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
+if(document.getElementById('confirm-password-input')) document.getElementById('confirm-password-input').addEventListener('keydown', handleAuthKeyPress);
 
-const showError = (message) => { authError.textContent = message; };
+const showError = (message) => { if(authError) authError.textContent = message; };
 
 const applyTheme = (theme) => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     if (themeToggleBtn) {
         themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
-    if (window.App && App.state.currentUserId) { App.showMonth(App.state.activeMonthIndex); }
+    // Só tenta atualizar gráfico se o App já estiver carregado
+    if (window.App && App.state.currentUserId && App.state.monthlyData[App.state.activeMonthIndex]) { 
+        App.showMonth(App.state.activeMonthIndex); 
+    }
 };
 
 applyTheme(localStorage.getItem('theme') || 'light');
 
-mainAuthBtn.addEventListener('click', () => {
-    const email = document.getElementById('email-input').value;
-    const password = document.getElementById('password-input').value;
-    showError('');
-    const originalBtnText = mainAuthBtn.textContent;
-    mainAuthBtn.disabled = true;
-    mainAuthBtn.textContent = 'Aguarde...';
-    const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; };
-    
-    if (isLoginMode) {
-        signInWithEmailAndPassword(auth, email, password).catch(error => { 
-            console.error(error);
-            showError('Email ou senha inválidos.'); 
-            restoreBtn(); 
-        });
-    } else {
-        const confirmPassword = document.getElementById('confirm-password-input').value;
-        if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; }
-        createUserWithEmailAndPassword(auth, email, password).catch(error => {
-            if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.');
-            else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.');
-            else showError('Erro ao criar conta.');
-            restoreBtn();
-        });
-    }
-});
+if (mainAuthBtn) {
+    mainAuthBtn.addEventListener('click', () => {
+        const email = document.getElementById('email-input').value;
+        const password = document.getElementById('password-input').value;
+        showError('');
+        const originalBtnText = mainAuthBtn.textContent;
+        mainAuthBtn.disabled = true;
+        mainAuthBtn.textContent = 'Aguarde...';
+        const restoreBtn = () => { mainAuthBtn.disabled = false; mainAuthBtn.textContent = originalBtnText; };
+        
+        if (isLoginMode) {
+            signInWithEmailAndPassword(auth, email, password).catch(error => { 
+                console.error(error);
+                showError('Email ou senha inválidos.'); 
+                restoreBtn(); 
+            });
+        } else {
+            const confirmPassword = document.getElementById('confirm-password-input').value;
+            if (password !== confirmPassword) { showError('As senhas não coincidem.'); restoreBtn(); return; }
+            createUserWithEmailAndPassword(auth, email, password).catch(error => {
+                if (error.code === 'auth/email-already-in-use') showError('Este email já está em uso.');
+                else if (error.code === 'auth/weak-password') showError('A senha deve ter pelo menos 6 caracteres.');
+                else showError('Erro ao criar conta.');
+                restoreBtn();
+            });
+        }
+    });
+}
 
-forgotPasswordLink.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email-input').value.trim(); 
-    showError(''); 
-    
-    if (!email) { 
-        showError('Por favor, insira seu email para recuperar a senha.'); 
-        return; 
-    }
-    
-    const actionCodeSettings = {
-        url: 'https://ricoplus.com.br/login', 
-        handleCodeInApp: false,
-    };
-    
-    const originalText = forgotPasswordLink.textContent;
-    forgotPasswordLink.textContent = 'Enviando...';
-    forgotPasswordLink.style.pointerEvents = 'none';
+if (forgotPasswordLink) {
+    forgotPasswordLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('email-input');
+        if(!emailInput) return;
+        
+        const email = emailInput.value.trim(); 
+        showError(''); 
+        
+        if (!email) { 
+            showError('Por favor, insira seu email para recuperar a senha.'); 
+            return; 
+        }
+        
+        const actionCodeSettings = {
+            url: 'https://ricoplus.com.br/login', 
+            handleCodeInApp: false,
+        };
+        
+        const originalText = forgotPasswordLink.textContent;
+        forgotPasswordLink.textContent = 'Enviando...';
+        forgotPasswordLink.style.pointerEvents = 'none';
 
-    try {
-        await sendPasswordResetEmail(auth, email, actionCodeSettings); 
-        showError('Link de recuperação enviado! Verifique sua caixa de entrada.');
-        authError.style.color = 'var(--green-color)';
+        try {
+            await sendPasswordResetEmail(auth, email, actionCodeSettings); 
+            showError('Link de recuperação enviado! Verifique sua caixa de entrada.');
+            authError.style.color = 'var(--green-color)';
+        } catch (error) {
+            console.error("Erro ao enviar email:", error);
+            showError('Link de recuperação enviado! Verifique sua caixa de entrada.');
+            authError.style.color = 'var(--green-color)';
+        } finally {
+            forgotPasswordLink.textContent = originalText;
+            forgotPasswordLink.style.pointerEvents = 'auto';
+        }
+    });
+}
 
-    } catch (error) {
-        console.error("Erro ao enviar email:", error);
-        showError('Link de recuperação enviado! Verifique sua caixa de entrada.');
-        authError.style.color = 'var(--green-color)';
-
-    } finally {
-        forgotPasswordLink.textContent = originalText;
-        forgotPasswordLink.style.pointerEvents = 'auto';
-    }
-});
-
+// --- LÓGICA PRINCIPAL DA APLICAÇÃO ---
 const App = {
     state: {
         currentUserId: null,
+        listenersBound: false, // <--- CORREÇÃO 1: Flag para evitar listeners duplicados
         profile: { name: '', avatarUrl: '' },
-        integrations: {
-            whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' }
-        },
+        integrations: { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } },
         creditCards: [],
         categories: [{ name: 'Alimentação', budget: 500 }, { name: 'Transporte', budget: 150 }, { name: 'Moradia', budget: 1500 }, { name: 'Lazer', budget: 300 }, { name: 'Saúde', budget: 200 }, { name: 'Outros', budget: 100 }],
         recurringEntries: [],
@@ -134,9 +139,8 @@ const App = {
 
     ui: {
         monthContentContainer: null, settingsModal: null, accountModal: null,
-        userNameInput: null, userEmailDisplay: null, whatsappPhoneId: null,
-        whatsappToken: null, whatsappWebhookUrl: null, whatsappVerifyToken: null,
-        whatsappStatus: null, newCardNameInput: null, cardListContainer: null,
+        userNameInput: null, userEmailDisplay: null, 
+        newCardNameInput: null, cardListContainer: null,
         newCategoryNameInput: null, categoryListContainer: null,
         recurringListContainer: null, saveFeedback: null,
         aiAnalysisModal: null, aiAnalysisResult: null
@@ -149,16 +153,13 @@ const App = {
 
     init(userId) {
         this.state.currentUserId = userId;
+        
+        // Mapear elementos UI
         this.ui.monthContentContainer = document.getElementById('monthContentContainer');
         this.ui.settingsModal = document.getElementById('settings-modal');
         this.ui.accountModal = document.getElementById('account-modal');
         this.ui.userNameInput = document.getElementById('user-name-input');
         this.ui.userEmailDisplay = document.getElementById('user-email-display');
-        this.ui.whatsappPhoneId = document.getElementById('whatsapp-phone-id');
-        this.ui.whatsappToken = document.getElementById('whatsapp-token');
-        this.ui.whatsappWebhookUrl = document.getElementById('whatsapp-webhook-url');
-        this.ui.whatsappVerifyToken = document.getElementById('whatsapp-verify-token');
-        this.ui.whatsappStatus = document.getElementById('whatsapp-status');
         this.ui.newCardNameInput = document.getElementById('new-card-name');
         this.ui.cardListContainer = document.getElementById('card-list');
         this.ui.newCategoryNameInput = document.getElementById('new-category-name');
@@ -167,37 +168,40 @@ const App = {
         this.ui.saveFeedback = document.getElementById('save-feedback');
         this.ui.aiAnalysisModal = document.getElementById('ai-analysis-modal');
         this.ui.aiAnalysisResult = document.getElementById('ai-analysis-result');
+
         this.loadData();
-        this.bindGlobalEventListeners();
+
+        // <--- CORREÇÃO 1: Só adiciona os eventos se ainda não foram adicionados
+        if (!this.state.listenersBound) {
+            this.bindGlobalEventListeners();
+            this.state.listenersBound = true; 
+            console.log("Listeners globais inicializados com sucesso.");
+        }
     },
 
     helpers: {
         formatCurrency: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`,
         debounce(func, delay) { return (...args) => { clearTimeout(App.state.saveTimeout); App.state.saveTimeout = setTimeout(() => { func.apply(this, args); }, delay); }; },
-        showSaveFeedback() { App.ui.saveFeedback.classList.add('show'); setTimeout(() => { App.ui.saveFeedback.classList.remove('show'); }, 2000); },
+        showSaveFeedback() { 
+            if(App.ui.saveFeedback) {
+                App.ui.saveFeedback.classList.add('show'); 
+                setTimeout(() => { App.ui.saveFeedback.classList.remove('show'); }, 2000); 
+            }
+        },
         cleanAIResponse(text) {
             if (typeof text !== 'string') return '';
             let cleanedText = text.replace(/```html|```/g, '');
             const firstTagIndex = cleanedText.indexOf('<');
             if (firstTagIndex > -1) { cleanedText = cleanedText.substring(firstTagIndex); }
-            const noiseKeywords = ["Observações:", "Como usar:", "Cálculo dos Totais:", "Formatação HTML:", "Personalização das Sugestões:"];
-            for (const keyword of noiseKeywords) {
-                const noiseIndex = cleanedText.indexOf(keyword);
-                if (noiseIndex > 50) { cleanedText = cleanedText.substring(0, noiseIndex); }
-            }
             return cleanedText.trim();
         },
         generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
     },
 
-    // =========================================================================
-    // NOVA LÓGICA DE UPLOAD (SALVA DIRETO NO BANCO DE DADOS / SEM STORAGE)
-    // =========================================================================
     handleAvatarUpload(event) {
         const file = event.target.files[0];
         if (!file || !this.state.currentUserId) return;
 
-        // Trava de segurança: 700KB para não pesar o banco de dados
         if (file.size > 700 * 1024) {
             alert("A imagem é muito grande! Escolha uma foto menor que 700KB.");
             return;
@@ -205,26 +209,15 @@ const App = {
 
         const avatarImg = document.getElementById('user-avatar');
         const originalSrc = avatarImg.src;
-        
-        // Efeito visual de carregamento
         avatarImg.style.opacity = '0.5';
 
         const reader = new FileReader();
-
         reader.onload = async (e) => {
             try {
-                // Converte a imagem para texto (Base64)
                 const base64String = e.target.result;
-                
-                // Atualiza o estado local
                 this.state.profile.avatarUrl = base64String;
-                
-                // Mostra na tela na hora
                 avatarImg.src = base64String;
-                
-                // Salva no Firestore (banco de dados)
                 await this.saveDataToFirestore();
-                
             } catch (error) {
                 console.error("Erro ao processar avatar:", error);
                 avatarImg.src = originalSrc;
@@ -233,17 +226,13 @@ const App = {
                 avatarImg.style.opacity = '1';
             }
         };
-
         reader.onerror = () => {
             console.error("Erro ao ler arquivo");
             avatarImg.src = originalSrc;
             avatarImg.style.opacity = '1';
         };
-
-        // Inicia a leitura do arquivo
         reader.readAsDataURL(file);
     },
-    // =========================================================================
 
     async saveDataToFirestore() {
         if (!App.state.currentUserId) return;
@@ -265,6 +254,8 @@ const App = {
 
     async loadData() {
         if (!this.state.currentUserId) return;
+        
+        // <--- CORREÇÃO 2: Try/Finally para garantir que o overlay suma
         try {
             const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
             if (docSnap.exists()) {
@@ -276,9 +267,8 @@ const App = {
                 this.state.categories = d.categories && d.categories.length > 0 ? d.categories : this.state.categories;
                 this.state.recurringEntries = d.recurringEntries || [];
             }
-            if (!this.state.integrations.whatsapp.webhookVerifyToken) {
-                this.state.integrations.whatsapp.webhookVerifyToken = this.helpers.generateRandomToken();
-            }
+            
+            // Inicializa estrutura de dados se necessário
             for (let i = 0; i < 12; i++) {
                 if (!this.state.monthlyData[i]) { this.state.monthlyData[i] = {}; }
                 this.state.monthlyData[i].pjEntries = this.state.monthlyData[i].pjEntries || [];
@@ -286,22 +276,32 @@ const App = {
                 if (!Array.isArray(this.state.monthlyData[i].expenses) || this.state.monthlyData[i].expenses.length < 31) {
                     this.state.monthlyData[i].expenses = Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] }));
                 }
+                // Migração de dados antigos/segurança
                 this.state.monthlyData[i].expenses.forEach(day => {
                     if (day && day.personalEntries) {
                         day.personalEntries.forEach(entry => { if (!entry.category) entry.category = 'Outros'; });
                     }
                 });
             }
-        } catch (error) { console.error("Erro ao carregar dados:", error); }
-        this.ui.monthContentContainer.innerHTML = '';
-        this.constants.monthNames.forEach((_, index) => { this.ui.monthContentContainer.insertAdjacentHTML('beforeend', index === 12 ? this.render.createBalanceContentHTML() : this.render.createMonthContentHTML(index)); });
-        this.showMonth(this.state.activeMonthIndex);
-        loadingOverlay.classList.add('hidden');
-        this.render.updateHeader();
+
+            this.ui.monthContentContainer.innerHTML = '';
+            this.constants.monthNames.forEach((_, index) => { 
+                this.ui.monthContentContainer.insertAdjacentHTML('beforeend', index === 12 ? this.render.createBalanceContentHTML() : this.render.createMonthContentHTML(index)); 
+            });
+            
+            this.showMonth(this.state.activeMonthIndex);
+            this.render.updateHeader();
+
+        } catch (error) { 
+            console.error("Erro crítico ao carregar dados:", error); 
+            alert("Ocorreu um erro ao carregar seus dados. Por favor, recarregue a página.");
+        } finally {
+            // Garante que o overlay suma mesmo se der erro
+            if (loadingOverlay) loadingOverlay.classList.add('hidden');
+        }
     },
 
     handleRecurringDeletion(recurringId, startingMonthIndex = 0) {
-        console.log(`--- INICIANDO REMOÇÃO ---\nID da Recorrência: ${recurringId}\nA partir do Mês (índice): ${startingMonthIndex}\n-------------------------`);
         for (let i = startingMonthIndex; i < 12; i++) {
             const monthData = this.state.monthlyData[i];
             if (!monthData) continue;
@@ -312,7 +312,6 @@ const App = {
                 if (day.businessEntries) { day.businessEntries = day.businessEntries.filter(entry => entry.recurringId !== recurringId); }
             });
         }
-        console.log(`Lançamentos com recurringId=${recurringId} removidos a partir do mês ${startingMonthIndex}.`);
     },
 
     showMonth(monthIndex) {
@@ -326,8 +325,12 @@ const App = {
         }
         this.state.activeMonthIndex = monthIndex;
         Object.values(this.state.chartInstances).forEach(c => c?.destroy());
-        document.querySelectorAll('.month-content').forEach(c => c.classList.remove('active'));
+        
+        const allContents = document.querySelectorAll('.month-content');
+        allContents.forEach(c => c.classList.remove('active'));
+        
         if (monthIndex < 12) { this.applyRecurringEntries(monthIndex); }
+        
         const contentEl = document.getElementById(`month-${monthIndex}-content`);
         if (contentEl) {
             contentEl.classList.add('active');
@@ -355,19 +358,23 @@ const App = {
         t.remainingPersonal = t.pf - t.personal;
         t.remainingBusiness = t.pj - t.business;
         t.remainingTotal = (t.pj + t.pf) - (t.personal + t.business);
-        document.getElementById(`companyCash-${m}`).textContent = this.helpers.formatCurrency(t.pj);
-        document.getElementById(`personalCash-${m}`).textContent = this.helpers.formatCurrency(t.pf);
-        document.getElementById(`totalPersonalExpenses-${m}`).textContent = this.helpers.formatCurrency(t.personal);
-        document.getElementById(`totalBusinessExpenses-${m}`).textContent = this.helpers.formatCurrency(t.business);
-        const rpEl = document.getElementById(`remainingPersonal-${m}`);
-        rpEl.textContent = this.helpers.formatCurrency(t.remainingPersonal);
-        rpEl.style.color = t.remainingPersonal < 0 ? 'var(--red-color)' : 'var(--green-color)';
-        const rbEl = document.getElementById(`remainingBusiness-${m}`);
-        rbEl.textContent = this.helpers.formatCurrency(t.remainingBusiness);
-        rbEl.style.color = t.remainingBusiness < 0 ? 'var(--red-color)' : 'var(--green-color)';
-        const rtEl = document.getElementById(`remainingTotal-${m}`);
-        rtEl.textContent = this.helpers.formatCurrency(t.remainingTotal);
-        rtEl.style.color = t.remainingTotal < 0 ? 'var(--red-color)' : 'var(--primary-color)';
+        
+        const setTxt = (id, val, color) => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.textContent = this.helpers.formatCurrency(val);
+                if(color) el.style.color = color;
+            }
+        };
+
+        setTxt(`companyCash-${m}`, t.pj);
+        setTxt(`personalCash-${m}`, t.pf);
+        setTxt(`totalPersonalExpenses-${m}`, t.personal);
+        setTxt(`totalBusinessExpenses-${m}`, t.business);
+        setTxt(`remainingPersonal-${m}`, t.remainingPersonal, t.remainingPersonal < 0 ? 'var(--red-color)' : 'var(--green-color)');
+        setTxt(`remainingBusiness-${m}`, t.remainingBusiness, t.remainingBusiness < 0 ? 'var(--red-color)' : 'var(--green-color)');
+        setTxt(`remainingTotal-${m}`, t.remainingTotal, t.remainingTotal < 0 ? 'var(--red-color)' : 'var(--primary-color)');
+        
         this.render.updateBudgetAlerts(m);
         this.render.updateAllCharts(m, { totalPersonal: t.personal, totalBusiness: t.business, remainingBudget: t.remainingTotal });
     },
@@ -377,19 +384,24 @@ const App = {
         let wasModified = false;
         const appliedRecurringIds = new Set();
         const month = this.state.monthlyData[monthIndex];
+        
+        // Coleta IDs já aplicados
         month.pfEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
         month.pjEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
         month.expenses.forEach(day => {
             day.personalEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
             day.businessEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
         });
+
         const currentYear = new Date().getFullYear();
         const daysInCurrentMonth = new Date(currentYear, monthIndex + 1, 0).getDate();
+
         this.state.recurringEntries.forEach(r => {
             if (r.id && !appliedRecurringIds.has(r.id)) {
                 const effectiveDay = Math.min(r.dayOfMonth, daysInCurrentMonth);
                 const dayIndex = effectiveDay - 1;
                 if (dayIndex < 0 || dayIndex >= daysInCurrentMonth) return;
+                
                 const newEntry = {
                     id: Date.now() + Math.random(),
                     description: r.description || 'Lançamento recorrente',
@@ -397,6 +409,7 @@ const App = {
                     isRecurring: true,
                     recurringId: r.id
                 };
+
                 if (r.type === "Ganho PF") {
                     month.pfEntries.push(newEntry);
                     wasModified = true;
@@ -419,10 +432,13 @@ const App = {
         }
     },
 
+    // MÉTODOS DE EXPORTAÇÃO (CSV/PDF) MANTIDOS IGUAIS
     exportMonthToCSV(monthIndex) {
         const monthData = this.state.monthlyData[monthIndex];
         if (!monthData) { return; }
         const monthName = this.constants.monthNames[monthIndex];
+        
+        // Cálculos
         const pjTotal = monthData.pjEntries.reduce((s, e) => s + e.amount, 0);
         const pfTotal = monthData.pfEntries.reduce((s, e) => s + e.amount, 0);
         const personalTotal = monthData.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0);
@@ -430,6 +446,7 @@ const App = {
         const totalGains = pjTotal + pfTotal;
         const totalExpenses = personalTotal + businessTotal;
         const balance = totalGains - totalExpenses;
+
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += `Relatorio Financeiro - ${monthName}\r\n\r\n`;
         csvContent += "Resumo do Mes\r\n";
@@ -438,16 +455,23 @@ const App = {
         csvContent += `Saldo Final;${balance.toFixed(2).replace('.', ',')}\r\n\r\n`;
         csvContent += "Detalhes das Transacoes\r\n";
         csvContent += "Tipo;Dia;Descricao;Valor;Categoria;Metodo de Pagamento;Cartao\r\n";
+        
         const sanitize = (str) => `"${(str || '').replace(/"/g, '""')}"`;
+        
         monthData.pjEntries.forEach(e => csvContent += `Ganho PJ;;${sanitize(e.description)};${e.amount.toFixed(2).replace('.', ',')};;;\r\n`);
         monthData.pfEntries.forEach(e => csvContent += `Ganho PF;;${sanitize(e.description)};${e.amount.toFixed(2).replace('.', ',')};;;\r\n`);
+        
         monthData.expenses.forEach((dayData, dayIndex) => {
             const processEntries = (entries, type) => {
-                entries.forEach(e => { let row = [type, dayIndex + 1, sanitize(e.description), e.amount.toFixed(2).replace('.', ','), sanitize(e.category), sanitize(e.paymentMethod), sanitize(e.card)].join(';'); csvContent += row + "\r\n"; });
+                entries.forEach(e => { 
+                    let row = [type, dayIndex + 1, sanitize(e.description), e.amount.toFixed(2).replace('.', ','), sanitize(e.category), sanitize(e.paymentMethod), sanitize(e.card)].join(';'); 
+                    csvContent += row + "\r\n"; 
+                });
             };
             processEntries(dayData.personalEntries, 'Gasto Pessoal');
             processEntries(dayData.businessEntries, 'Gasto Empresa');
         });
+
         const link = document.createElement("a");
         link.setAttribute("href", encodeURI(csvContent));
         link.setAttribute("download", `relatorio_${monthName}.csv`);
@@ -458,12 +482,14 @@ const App = {
 
     exportMonthToPDF(monthIndex) {
         const monthData = this.state.monthlyData[monthIndex];
-        if (!monthData) { return; }
+        if (!monthData) return;
+        
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         const monthName = this.constants.monthNames[monthIndex];
         const pageHeight = doc.internal.pageSize.height;
         const pageWidth = doc.internal.pageSize.width;
+
         const addWatermark = (doc) => {
             doc.saveGraphicsState();
             doc.setGState(new doc.GState({ opacity: 0.05 }));
@@ -473,6 +499,7 @@ const App = {
             doc.text("Rico Plus by Franzoi Tech", pageWidth / 2, pageHeight / 1.8, { angle: -45, align: 'center' });
             doc.restoreGraphicsState();
         };
+
         const addHeaderAndFooter = (data) => {
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
@@ -487,14 +514,18 @@ const App = {
             doc.text(`Rico Plus by Franzoi Tech | Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, pageHeight - 10);
             doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
         };
+
+        // Dados para o PDF
         const pjTotal = monthData.pjEntries.reduce((s, e) => s + e.amount, 0);
         const pfTotal = monthData.pfEntries.reduce((s, e) => s + e.amount, 0);
         const personalTotal = monthData.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0);
         const businessTotal = monthData.expenses.flat().reduce((a, day) => a + day.businessEntries.reduce((s, e) => s + e.amount, 0), 0);
         const balance = (pjTotal + pfTotal) - (personalTotal + businessTotal);
+        
         const expensesByCategory = {};
         monthData.expenses.flat().forEach(day => { day.personalEntries.forEach(entry => { expensesByCategory[entry.category] = (expensesByCategory[entry.category] || 0) + entry.amount; }); });
         const categoryBody = Object.keys(expensesByCategory).map(cat => [cat, this.helpers.formatCurrency(expensesByCategory[cat])]);
+        
         const transactionsBody = [];
         monthData.pjEntries.forEach(e => transactionsBody.push(['-', 'Ganho PJ', e.description, '-', '-', e.amount.toFixed(2).replace('.', ',')]));
         monthData.pfEntries.forEach(e => transactionsBody.push(['-', 'Ganho PF', e.description, '-', '-', e.amount.toFixed(2).replace('.', ',')]));
@@ -502,11 +533,13 @@ const App = {
             dayData.personalEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Pessoal', e.description, e.category, `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2).replace('.', ',')]));
             dayData.businessEntries.forEach(e => transactionsBody.push([dayIndex + 1, 'Gasto Empresa', e.description, '-', `${e.paymentMethod}${e.card ? ` (${e.card})` : ''}`, e.amount.toFixed(2).replace('.', ',')]));
         });
+
         let finalY = 40;
         doc.autoTable({ startY: finalY, head: [['Resumo Geral', 'Valor']], body: [['Total Ganhos', this.helpers.formatCurrency(pjTotal + pfTotal)], ['Total Gastos', this.helpers.formatCurrency(personalTotal + businessTotal)], [{ content: 'Saldo Final', styles: { fontStyle: 'bold' } }, { content: this.helpers.formatCurrency(balance), styles: { fontStyle: 'bold' } }]], theme: 'grid', headStyles: { fillColor: [22, 160, 133] } });
         finalY = doc.lastAutoTable.finalY + 10;
         if (categoryBody.length > 0) { doc.autoTable({ startY: finalY, head: [['Gastos por Categoria (Pessoal)', 'Total']], body: categoryBody, theme: 'striped', headStyles: { fillColor: [41, 128, 185] } }); finalY = doc.lastAutoTable.finalY + 10; }
         doc.autoTable({ startY: finalY, head: [['Data', 'Tipo', 'Descrição', 'Cat.', 'Pag.', 'Valor (R$)']], body: transactionsBody, theme: 'grid', didDrawPage: (data) => { addWatermark(doc); addHeaderAndFooter(data); }, headStyles: { fillColor: [44, 62, 80] }, margin: { top: 38, bottom: 20 } });
+        
         const pageCountFinal = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCountFinal; i++) { doc.setPage(i); addWatermark(doc); addHeaderAndFooter({ pageNumber: i, pageCount: pageCountFinal }); }
         doc.save(`relatorio_${monthName}.pdf`);
@@ -515,55 +548,64 @@ const App = {
     bindGlobalEventListeners() {
         this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
         
+        // Chatbot Logic
         const chatbotModal = document.getElementById('chatbot-modal');
-        const chatbotModalContent = chatbotModal.querySelector('.modal-content');
-        document.getElementById('floating-chatbot-btn').addEventListener('click', () => {
-            document.body.classList.add('modal-open');
-            chatbotModal.classList.remove('hidden');
-            setTimeout(() => {
-                chatbotModal.style.opacity = '1';
-                chatbotModalContent.style.transform = 'translateY(0)';
-            }, 10);
-        });
-        const closeChatbot = () => {
-            document.body.classList.remove('modal-open');
-            chatbotModal.style.opacity = '0';
-            chatbotModalContent.style.transform = 'translateY(2rem)';
-            setTimeout(() => {
-                chatbotModal.classList.add('hidden');
-            }, 300);
-        };
-        document.getElementById('close-chatbot-modal-btn').addEventListener('click', closeChatbot);
-        document.getElementById('chatbot-send-btn').addEventListener('click', () => {
-            const input = document.getElementById('chatbot-input');
-            const messagesContainer = document.getElementById('chatbot-messages');
-            const userMessage = input.value.trim();
-            if (userMessage) {
-                messagesContainer.innerHTML += `<div class="flex justify-end"><div class="p-3 rounded-lg max-w-[85%] text-sm text-white" style="background-color: var(--primary-color);"><p class="font-bold mb-1">Você</p><p>${userMessage}</p></div></div>`;
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        const chatbotModalContent = chatbotModal ? chatbotModal.querySelector('.modal-content') : null;
+        
+        if (chatbotModal) {
+            const toggleChatbot = () => {
+                document.body.classList.add('modal-open');
+                chatbotModal.classList.remove('hidden');
                 setTimeout(() => {
-                    messagesContainer.innerHTML += `<div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);"><p class="font-bold mb-1">Assistente</p><p class="italic">Pensando...</p></div>`;
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                    App.ai.getChatbotResponse(userMessage);
-                }, 500);
-                input.value = '';
+                    chatbotModal.style.opacity = '1';
+                    if(chatbotModalContent) chatbotModalContent.style.transform = 'translateY(0)';
+                }, 10);
+            };
+            const closeChatbot = () => {
+                document.body.classList.remove('modal-open');
+                chatbotModal.style.opacity = '0';
+                if(chatbotModalContent) chatbotModalContent.style.transform = 'translateY(2rem)';
+                setTimeout(() => { chatbotModal.classList.add('hidden'); }, 300);
+            };
+
+            document.getElementById('floating-chatbot-btn')?.addEventListener('click', toggleChatbot);
+            document.getElementById('close-chatbot-modal-btn')?.addEventListener('click', closeChatbot);
+            
+            const sendBtn = document.getElementById('chatbot-send-btn');
+            const chatInput = document.getElementById('chatbot-input');
+            
+            if(sendBtn && chatInput) {
+                const sendMessage = () => {
+                    const messagesContainer = document.getElementById('chatbot-messages');
+                    const userMessage = chatInput.value.trim();
+                    if (userMessage) {
+                        messagesContainer.innerHTML += `<div class="flex justify-end"><div class="p-3 rounded-lg max-w-[85%] text-sm text-white" style="background-color: var(--primary-color);"><p class="font-bold mb-1">Você</p><p>${userMessage}</p></div></div>`;
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        setTimeout(() => {
+                            messagesContainer.innerHTML += `<div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);"><p class="font-bold mb-1">Assistente</p><p class="italic">Pensando...</p></div>`;
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            App.ai.getChatbotResponse(userMessage);
+                        }, 500);
+                        chatInput.value = '';
+                    }
+                };
+                sendBtn.addEventListener('click', sendMessage);
+                chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
             }
-        });
-        document.getElementById('chatbot-input').addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                document.getElementById('chatbot-send-btn').click();
-            }
-        });
+        }
         
-        document.getElementById('avatar-upload-input').addEventListener('change', this.handleAvatarUpload.bind(this));
+        const avatarInput = document.getElementById('avatar-upload-input');
+        if(avatarInput) avatarInput.addEventListener('change', this.handleAvatarUpload.bind(this));
         
-        themeToggleBtn.addEventListener('click', () => {
-            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-        });
+        if(themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+        }
         
+        // Action Menu (Top Right)
         const actionMenuBtn = document.getElementById('action-menu-btn');
         const actionMenuDropdown = document.getElementById('action-menu-dropdown');
         if (actionMenuBtn && actionMenuDropdown) {
@@ -578,40 +620,39 @@ const App = {
             });
         }
         
-        document.getElementById('manage-settings-btn').addEventListener('click', (event) => {
+        document.getElementById('manage-settings-btn')?.addEventListener('click', (event) => {
             event.preventDefault();
             document.body.classList.add('modal-open');
             App.render.renderSettingsModal();
         });
 
-        document.getElementById('logout-btn').addEventListener('click', (event) => {
+        document.getElementById('logout-btn')?.addEventListener('click', (event) => {
             event.preventDefault();
-            console.log("--- Botão SAIR clicado. Chamando signOut... ---");
-            
-            signOut(auth).then(() => {
-                console.log("SUCESSO: Firebase signOut completado.");
-            }).catch(error => {
-                console.error("FALHA: Firebase signOut deu erro:", error);
-            });
+            signOut(auth).then(() => { console.log("Logout success"); }).catch(console.error);
         });
 
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
+        // Modals Close Buttons
+        document.getElementById('close-modal-btn')?.addEventListener('click', () => {
             document.body.classList.remove('modal-open');
             App.ui.settingsModal.classList.add('hidden');
         });
+        
+        document.getElementById('close-account-modal-btn')?.addEventListener('click', () => {
+            document.body.classList.remove('modal-open');
+            App.ui.accountModal.classList.add('hidden');
+        });
+        
+        document.getElementById('close-ai-modal-btn')?.addEventListener('click', () => { 
+            App.ui.aiAnalysisModal.classList.add('hidden'); 
+        });
 
-        document.getElementById('manage-account-btn').addEventListener('click', (event) => {
+        document.getElementById('manage-account-btn')?.addEventListener('click', (event) => {
             event.preventDefault();
             document.body.classList.add('modal-open');
             App.render.renderAccountModal();
         });
 
-        document.getElementById('close-account-modal-btn').addEventListener('click', () => {
-            document.body.classList.remove('modal-open');
-            App.ui.accountModal.classList.add('hidden');
-        });
-
-        document.getElementById('save-profile-btn').addEventListener('click', () => {
+        document.getElementById('save-profile-btn')?.addEventListener('click', () => {
             App.state.profile.name = App.ui.userNameInput.value;
             App.saveDataToFirestore();
             App.ui.accountModal.classList.add('hidden');
@@ -620,27 +661,64 @@ const App = {
             App.render.updateHeader();
         });
 
-        document.getElementById('close-ai-modal-btn').addEventListener('click', () => { this.ui.aiAnalysisModal.classList.add('hidden'); });
-        document.getElementById('add-card-btn').addEventListener('click', () => { const n = this.ui.newCardNameInput.value.trim(); if (n && !this.state.creditCards.includes(n)) { this.state.creditCards.push(n); this.ui.newCardNameInput.value = ''; this.render.renderCardList(); this.saveDataToFirestore(); } });
-        document.getElementById('add-category-btn').addEventListener('click', () => {
-            const newName = this.ui.newCategoryNameInput.value.trim();
+        // Settings Add Buttons
+        document.getElementById('add-card-btn')?.addEventListener('click', () => { 
+            const n = App.ui.newCardNameInput.value.trim(); 
+            if (n && !App.state.creditCards.includes(n)) { 
+                App.state.creditCards.push(n); 
+                App.ui.newCardNameInput.value = ''; 
+                App.render.renderCardList(); 
+                App.saveDataToFirestore(); 
+            } 
+        });
+        
+        document.getElementById('add-category-btn')?.addEventListener('click', () => {
+            const newName = App.ui.newCategoryNameInput.value.trim();
             const normalizedNewName = newName.toLowerCase();
-            if (newName && !this.state.categories.some(c => c.name.toLowerCase() === normalizedNewName)) {
-                this.state.categories.push({ name: newName, budget: 0 });
-                this.ui.newCategoryNameInput.value = '';
-                this.render.renderCategoryList();
-                this.saveDataToFirestore();
+            if (newName && !App.state.categories.some(c => c.name.toLowerCase() === normalizedNewName)) {
+                App.state.categories.push({ name: newName, budget: 0 });
+                App.ui.newCategoryNameInput.value = '';
+                App.render.renderCategoryList();
+                App.saveDataToFirestore();
             } else if (newName) {
                 alert('Já existe uma categoria com este nome.');
             }
         });
-        document.getElementById('recurring-type').addEventListener('change', (e) => { document.getElementById('recurring-expense-fields').classList.toggle('hidden', !e.target.value.includes('Gasto')); });
-        document.getElementById('recurring-payment').addEventListener('change', (e) => { document.getElementById('recurring-card').classList.toggle('hidden', e.target.value !== 'Crédito'); });
-        document.getElementById('add-recurring-btn').addEventListener('click', () => { const newRec = { id: Date.now(), description: document.getElementById('recurring-desc').value, amount: parseFloat(document.getElementById('recurring-amount').value) || 0, dayOfMonth: parseInt(document.getElementById('recurring-day').value) || 1, type: document.getElementById('recurring-type').value }; if (!newRec.description || newRec.amount <= 0) { alert('Preencha descrição e valor.'); return; } if (newRec.type.includes('Gasto')) { newRec.category = document.getElementById('recurring-category').value; newRec.paymentMethod = document.getElementById('recurring-payment').value; newRec.card = newRec.paymentMethod === 'Crédito' ? document.getElementById('recurring-card').value : ''; } this.state.recurringEntries.push(newRec); this.render.renderRecurringList(); this.saveDataToFirestore(); document.getElementById('recurring-form').querySelectorAll('input, select').forEach(el => el.value = ''); });
+
+        // Recurring Logic
+        const recType = document.getElementById('recurring-type');
+        if(recType) recType.addEventListener('change', (e) => { document.getElementById('recurring-expense-fields').classList.toggle('hidden', !e.target.value.includes('Gasto')); });
         
+        const recPayment = document.getElementById('recurring-payment');
+        if(recPayment) recPayment.addEventListener('change', (e) => { document.getElementById('recurring-card').classList.toggle('hidden', e.target.value !== 'Crédito'); });
+        
+        document.getElementById('add-recurring-btn')?.addEventListener('click', () => { 
+            const desc = document.getElementById('recurring-desc').value;
+            const amt = parseFloat(document.getElementById('recurring-amount').value) || 0;
+            const day = parseInt(document.getElementById('recurring-day').value) || 1;
+            const type = document.getElementById('recurring-type').value;
+            
+            if (!desc || amt <= 0) { alert('Preencha descrição e valor.'); return; } 
+            
+            const newRec = { id: Date.now(), description: desc, amount: amt, dayOfMonth: day, type: type };
+            
+            if (type.includes('Gasto')) { 
+                newRec.category = document.getElementById('recurring-category').value; 
+                newRec.paymentMethod = document.getElementById('recurring-payment').value; 
+                newRec.card = newRec.paymentMethod === 'Crédito' ? document.getElementById('recurring-card').value : ''; 
+            } 
+            
+            App.state.recurringEntries.push(newRec); 
+            App.render.renderRecurringList(); 
+            App.saveDataToFirestore(); 
+            document.getElementById('recurring-form').querySelectorAll('input, select').forEach(el => el.value = ''); 
+        });
+        
+        // DELEGAÇÃO DE EVENTOS (Onde o problema de duplicidade acontecia)
         document.body.addEventListener('click', (event) => {
             const t = event.target;
             
+            // Accordion Settings
             const settingsAccordionTrigger = t.closest('.settings-accordion-trigger');
             if (settingsAccordionTrigger) {
                 const parentItem = settingsAccordionTrigger.parentElement;
@@ -648,6 +726,7 @@ const App = {
                 return;
             }
 
+            // Calendar Nav
             const navBtn = t.closest('.calendar-nav-btn, [data-action="show-annual"]');
             if (navBtn) {
                 const action = navBtn.dataset.action;
@@ -658,6 +737,7 @@ const App = {
                 return;
             }
             
+            // Day Cell Click
             const dayCell = t.closest('.calendar-day.current-month');
             if (dayCell) {
                 const dayIndex = parseInt(dayCell.dataset.day);
@@ -665,29 +745,41 @@ const App = {
                 const allAccordions = document.querySelectorAll(`#expense-accordion-container-${monthIndex} .accordion-item`);
                 const accordionToToggle = allAccordions[dayIndex];
                 const wasActive = dayCell.classList.contains('active');
+                
+                // Reset logic
                 document.querySelectorAll(`#calendar-container-${monthIndex} .calendar-day.active`).forEach(el => el.classList.remove('active'));
                 allAccordions.forEach(item => item.classList.remove('active'));
+                
                 if (!wasActive) {
                     dayCell.classList.add('active');
-                    if (accordionToToggle) accordionToToggle.classList.add('active');
+                    if (accordionToToggle) {
+                        accordionToToggle.classList.add('active');
+                        // Scroll suave para o acordeão aberto
+                        setTimeout(() => {
+                            accordionToToggle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                    }
                 }
             }
 
+            // Buttons inside Month Content
             if (t.matches('.tab-button')) this.showMonth(parseInt(t.dataset.monthIndex));
             if (t.matches('.export-csv-btn')) this.exportMonthToCSV(parseInt(t.dataset.monthIndex));
             if (t.matches('.export-pdf-btn')) this.exportMonthToPDF(parseInt(t.dataset.monthIndex));
-            if (t.matches('#copy-pix-btn')) { const pixKey = document.getElementById('pix-key').textContent; navigator.clipboard.writeText(pixKey).then(() => { t.textContent = 'Copiado!'; setTimeout(() => { t.textContent = 'Copiar'; }, 2000); }); }
-            if (t.closest('.accordion-trigger')) {
+            
+            // Accordion inside Calendar (Expenses)
+            if (t.closest('.accordion-trigger') && !t.closest('.settings-accordion-trigger')) {
                 const trigger = t.closest('.accordion-trigger');
                 const parentItem = trigger.parentElement;
-                const allItems = parentItem.parentElement.querySelectorAll('.accordion-item');
+                // Toggle logic
                 if (parentItem.classList.contains('active')) {
                     parentItem.classList.remove('active');
                 } else {
-                    allItems.forEach(item => item.classList.remove('active'));
                     parentItem.classList.add('active');
                 }
             }
+
+            // AI Buttons
             if (t.closest('.ai-analysis-btn')) this.ai.getFinancialAnalysis(parseInt(t.closest('.ai-analysis-btn').dataset.monthIndex));
             if (t.matches('#ai-annual-analysis-btn')) this.ai.getAnnualFinancialAnalysis();
             if (t.closest('.suggest-category-btn')) {
@@ -701,6 +793,8 @@ const App = {
                     }
                 }
             }
+
+            // Add/Remove Entries
             if (t.matches('.add-entry-btn')) {
                 const { monthIndex, type, day, category } = t.dataset;
                 const month = parseInt(monthIndex);
@@ -728,28 +822,17 @@ const App = {
                 this.recalculateAndDisplayTotals(month);
                 this.saveDataToFirestore();
             }
+
+            // Settings Removals
             if (t.matches('.remove-card-btn')) {
                 const cardNameToRemove = t.dataset.cardName;
-                for (let i = 0; i < 12; i++) {
-                    this.state.monthlyData[i].expenses.forEach(day => {
-                        [...day.personalEntries, ...day.businessEntries].forEach(entry => {
-                            if (entry.card === cardNameToRemove) entry.card = 'Cartão Removido';
-                        });
-                    });
-                }
+                // Remove do histórico? Depende da regra de negócio. Aqui apenas remove da lista de seleção.
                 this.state.creditCards = this.state.creditCards.filter(c => c !== cardNameToRemove);
                 this.render.renderCardList();
                 this.saveDataToFirestore();
             }
             if (t.matches('.remove-category-btn')) {
                 const categoryNameToRemove = t.dataset.categoryName;
-                for (let i = 0; i < 12; i++) {
-                    this.state.monthlyData[i].expenses.forEach(day => {
-                        day.personalEntries.forEach(entry => {
-                            if (entry.category === categoryNameToRemove) entry.category = 'Outros';
-                        });
-                    });
-                }
                 this.state.categories = this.state.categories.filter(c => c.name !== categoryNameToRemove);
                 this.render.renderCategoryList();
                 this.saveDataToFirestore();
@@ -774,6 +857,7 @@ const App = {
             }
         });
 
+        // INPUT LISTENERS
         document.body.addEventListener('input', (event) => {
             const t = event.target;
             if (t.matches('.entry-input')) {
@@ -787,7 +871,13 @@ const App = {
                 if (type === 'pj') { entry = this.state.monthlyData[month].pjEntries.find(e => e.id === id); } 
                 else if (type === 'pf') { entry = this.state.monthlyData[month].pfEntries.find(e => e.id === id); } 
                 else { entry = this.state.monthlyData[month].expenses[parseInt(day)][`${category}Entries`].find(e => e.id === id); }
-                if (entry) { const field = t.dataset.field; if (field === 'amount') { entry.amount = parseFloat(t.value) || 0; } else { entry[field] = t.value; } if (field === 'paymentMethod') { this.showMonth(month); } else { this.recalculateAndDisplayTotals(month); } this.debouncedSave(); }
+                
+                if (entry) { 
+                    const field = t.dataset.field; 
+                    if (field === 'amount') { entry.amount = parseFloat(t.value) || 0; } else { entry[field] = t.value; } 
+                    if (field === 'paymentMethod') { this.showMonth(month); } else { this.recalculateAndDisplayTotals(month); } 
+                    this.debouncedSave(); 
+                }
             }
             if (t.matches('.category-budget-input')) { const cat = this.state.categories.find(c => c.name === t.dataset.categoryName); if (cat) { cat.budget = parseFloat(t.value) || 0; this.debouncedSave(); } }
         });
@@ -801,6 +891,7 @@ const App = {
                 const normalizedOldName = oldName.toLowerCase();
                 const categoryExists = this.state.categories.some(c => c.name.toLowerCase() === normalizedNewName);
                 if (newName && normalizedOldName !== normalizedNewName && !categoryExists) {
+                    // Atualiza categorias em todo o histórico
                     for (let i = 0; i < 12; i++) {
                         this.state.monthlyData[i].expenses.forEach(day => {
                             day.personalEntries.forEach(entry => {
@@ -822,8 +913,9 @@ const App = {
             }
         });
 
+        // Recurring Modals
         const confirmModal = document.getElementById('confirm-recurring-delete-modal');
-        document.getElementById('delete-all-recurring-btn').addEventListener('click', () => {
+        document.getElementById('delete-all-recurring-btn')?.addEventListener('click', () => {
             const id = parseFloat(confirmModal.dataset.recurringId);
             const index = parseInt(confirmModal.dataset.recurringIndex);
             App.handleRecurringDeletion(id, 0);
@@ -833,7 +925,7 @@ const App = {
             App.saveDataToFirestore();
             confirmModal.classList.add('hidden');
         });
-        document.getElementById('delete-future-recurring-btn').addEventListener('click', () => {
+        document.getElementById('delete-future-recurring-btn')?.addEventListener('click', () => {
             const id = parseFloat(confirmModal.dataset.recurringId);
             const index = parseInt(confirmModal.dataset.recurringIndex);
             App.handleRecurringDeletion(id, App.state.activeMonthIndex);
@@ -843,137 +935,12 @@ const App = {
             App.saveDataToFirestore();
             confirmModal.classList.add('hidden');
         });
-        document.getElementById('cancel-delete-recurring-btn').addEventListener('click', () => {
+        document.getElementById('cancel-delete-recurring-btn')?.addEventListener('click', () => {
             confirmModal.classList.add('hidden');
         });
     },
 
-    ai: {
-        async getFinancialAnalysis(monthIndex) {
-            App.ui.aiAnalysisModal.classList.remove('hidden');
-            App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados...</p>';
-            try {
-                const monthData = App.state.monthlyData[monthIndex];
-                if (!monthData) throw new Error("Dados do mês não encontrados.");
-                const prompt = `**Contexto, Regras e Funcionalidades do App:**\n1. Você é o assistente de IA da plataforma "Rico Plus".\n2. Você pode dar dicas financeiras gerais, mas ao sugerir ações, SÓ PODE usar as funcionalidades existentes.\n3. Funcionalidades existentes: Lançamento de ganhos/despesas, categorização, metas de gastos, resumos, gráficos, lançamentos recorrentes, gestão de cartões, exportação PDF/CSV.\n4. **NÃO INVENTE** funcionalidades que não existem (ex: notificações).\n5. **NUNCA** mencione apps concorrentes.\n\n**Tarefa:**\nGere um relatório em HTML (sem texto fora do HTML) analisando os dados: ${JSON.stringify(monthData)}.\nO relatório deve conter:\n1. Um resumo dos ganhos e gastos.\n2. A maior categoria de despesa pessoal.\n3. Três sugestões práticas para melhorar a saúde financeira, baseadas nas funcionalidades existentes do Rico Plus.\n`;
-                const analysisResult = await this.callVercelFunction(prompt);
-                const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
-                App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
-            } catch (error) {
-                console.error("Erro ao obter análise da IA:", error);
-                App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados.</p>';
-            }
-        },
-        async getAnnualFinancialAnalysis() {
-            App.ui.aiAnalysisModal.classList.remove('hidden');
-            App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados anuais...</p>';
-            try {
-                const annualData = App.state.monthlyData;
-                if (!annualData) throw new Error("Dados anuais não encontrados.");
-                const prompt = `**Contexto, Regras e Funcionalidades do App:**\n1. Você é o assistente de IA da plataforma "Rico Plus".\n2. Você pode dar dicas financeiras gerais, mas ao sugerir ações, SÓ PODE usar as funcionalidades existentes.\n3. Funcionalidades existentes: Lançamento de ganhos/despesas, categorização, metas de gastos, resumos, gráficos, lançamentos recorrentes, gestão de cartões, exportação PDF/CSV.\n4. **NÃO INVENTE** funcionalidades que não existem (ex: notificações).\n5. **NUNCA** mencione apps concorrentes.\n\n**Tarefa:**\nGere um relatório em HTML (sem texto fora do HTML) analisando os dados anuais: ${JSON.stringify(annualData)}.\nO relatório deve conter:\n1. Um resumo geral dos ganhos, gastos e saldo final do ano.\n2. O mês de maior gasto e o mês de maior ganho.\n3. Três insights estratégicos para o próximo ano.\n`;
-                const analysisResult = await this.callVercelFunction(prompt);
-                const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
-                App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
-            } catch (error) {
-                console.error("Erro ao obter análise anual da IA:", error);
-                App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados anuais.</p>';
-            }
-        },
-        async getChatbotResponse(userMessage) {
-            try {
-                const financialData = App.state.monthlyData;
-                const prompt = `**Contexto, Regras e Funcionalidades do App:**\n1. Você é o assistente de IA da plataforma "Rico Plus". Sua personalidade é prestativa e focada em ajudar.\n2. Você pode dar dicas financeiras gerais e conceituais (ex: importância de poupar).\n3. **REGRA CRÍTICA:** Ao sugerir uma AÇÃO PRÁTICA ou FERRAMENTA, você SÓ PODE se basear na seguinte lista de funcionalidades que REALMENTE EXISTEM no Rico Plus:\n    - Lançamento de ganhos (PJ/PF) e despesas.\n    - Categorização de gastos e definição de metas de orçamento.\n    - Resumos, saldos e gráficos.\n    - Lançamentos recorrentes.\n    - Gerenciamento de cartões de crédito.\n4. **NÃO INVENTE** funcionalidades que não estão na lista (ex: notificações).\n5. **NUNCA** mencione apps concorrentes. Se o usuário pedir uma ferramenta, reforce o uso do Rico Plus.\n\n**Tarefa:**\nResponda à pergunta do usuário: "${userMessage}". Use os dados financeiros a seguir como base: ${JSON.stringify(financialData)}.\nFormate sua resposta de forma clara usando Markdown.\n`;
-                const aiResponse = await this.callVercelFunction(prompt);
-                const messagesContainer = document.getElementById('chatbot-messages');
-                messagesContainer.removeChild(messagesContainer.lastChild);
-                const formattedResponse = marked.parse(aiResponse);
-                messagesContainer.innerHTML += `<div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);"><p class="font-bold mb-1">Assistente</p><div class="prose dark:prose-invert max-w-none">${formattedResponse}</div></div>`;
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            } catch (error) {
-                console.error("Erro na resposta do chatbot:", error);
-                const messagesContainer = document.getElementById('chatbot-messages');
-                messagesContainer.removeChild(messagesContainer.lastChild);
-                messagesContainer.innerHTML += `<div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);"><p class="font-bold mb-1">Assistente</p><p>Desculpe, não consegui processar sua pergunta. Tente novamente.</p></div>`;
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
-        },
-        async getCategorySuggestion(description, entryId, button) {
-            const originalContent = button.innerHTML;
-            button.innerHTML = '...';
-            button.disabled = true;
-            try {
-                const availableCategories = App.state.categories.map(c => c.name).join(', ');
-                const prompt = `Analise a despesa: "${description}".\nQual das seguintes categorias melhor se encaixa? Categorias disponíveis: [${availableCategories}].\nResponda APENAS com o nome exato de uma das categorias da lista. Sem frases, apenas a categoria.`;
-                let suggestedCategory = await this.callVercelFunction(prompt);
-                suggestedCategory = suggestedCategory.trim().replace(/["'.]/g, '');
-                const entryElement = button.closest('.expense-entry-row');
-                const selectElement = entryElement.querySelector('[data-field="category"]');
-                const categoryExists = App.state.categories.find(c => c.name.toLowerCase() === suggestedCategory.toLowerCase());
-                if (selectElement && categoryExists) {
-                    selectElement.value = categoryExists.name;
-                    const event = new Event('input', { bubbles: true });
-                    selectElement.dispatchEvent(event);
-                } else {
-                    console.warn(`Categoria sugerida "${suggestedCategory}" não é válida ou não foi encontrada.`);
-                }
-            } catch (error) {
-                console.error("Erro ao obter sugestão de categoria:", error);
-            } finally {
-                button.innerHTML = originalContent;
-                button.disabled = false;
-            }
-        },
-        async callVercelFunction(prompt) {
-            // CORREÇÃO AQUI: Usando caminho relativo para evitar CORS e HTTPS problems
-            const VERCEL_API_URL = "/api/analyze";
-            const response = await fetch(VERCEL_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: prompt })
-            });
-            if (!response.ok) {
-                throw new Error(`Erro na API da Vercel: ${response.statusText}`);
-            }
-            const data = await response.json();
-            return data.analysis;
-        }
-    },
-
     render: {
-        updateHeader() {
-            const name = App.state.profile.name?.split(' ')[0] || 'Visitante';
-            document.getElementById('greeting-text').textContent = `Olá, ${name}`;
-            const hour = new Date().getHours();
-            let greeting = 'Boa tarde!';
-            if (hour >= 5 && hour < 12) { greeting = 'Bom dia!'; }
-            else if (hour >= 18 || hour < 5) { greeting = 'Boa noite!'; }
-            document.getElementById('time-greeting').textContent = greeting;
-            const avatarUrl = App.state.profile.avatarUrl || 'https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/main/ricoplus-landing-page/images/default-avatar.svg';
-            document.getElementById('user-avatar').src = avatarUrl;
-        },
-        renderCalendarView(monthIndex) {
-            const container = document.getElementById(`calendar-container-${monthIndex}`);
-            if (!container) return;
-            const year = new Date().getFullYear();
-            const firstDay = new Date(year, monthIndex, 1);
-            const lastDay = new Date(year, monthIndex + 1, 0);
-            const startingDayOfWeek = firstDay.getDay();
-            const monthName = App.constants.monthNames[monthIndex];
-            let headerHTML = `<div class="calendar-nav-header flex items-center justify-between mb-4 p-2 rounded-xl" style="background-color: var(--input-bg);"><button class="calendar-nav-btn" data-action="prev-month" title="Mês Anterior">‹</button><div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-4"><h3 class="text-lg font-semibold text-center">${monthName} ${year}</h3><button class="px-3 py-1 text-xs font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-action="show-annual">Balanço Anual</button></div><button class="calendar-nav-btn" data-action="next-month" title="Próximo Mês">›</button></div>`;
-            let gridHTML = '<div class="calendar-grid">';
-            ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(day => { gridHTML += `<div class="calendar-header">${day}</div>`; });
-            for (let i = 0; i < startingDayOfWeek; i++) { gridHTML += '<div></div>'; }
-            for (let day = 1; day <= lastDay.getDate(); day++) {
-                const dayData = App.state.monthlyData[monthIndex].expenses[day - 1];
-                let classes = 'calendar-day current-month';
-                if (dayData && (dayData.personalEntries.length > 0 || dayData.businessEntries.length > 0)) { classes += ' has-entries'; }
-                gridHTML += `<div class="${classes}" data-day="${day - 1}">${day}</div>`;
-            }
-            gridHTML += '</div>';
-            container.innerHTML = headerHTML + gridHTML;
-        },
-        createMonthContentHTML: (monthIndex) => { return `<div id="month-${monthIndex}-content" class="month-content"><div class="flex justify-end gap-2 mb-4"><button class="export-csv-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar CSV</button><button class="export-pdf-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar PDF</button></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"><div class="lg:col-span-1 p-5 rounded-2xl card border-t-4 border-yellow-400"><h2 class="text-xl font-semibold mb-4">Ganhos Pessoa Jurídica</h2><div id="pj-entries-container-${monthIndex}" class="flex flex-col gap-3 mb-3"></div><button class="add-entry-btn mt-2 w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}" data-type="pj">+ Adicionar Ganho PJ</button></div><div class="lg:col-span-1 p-5 rounded-2xl card border-t-4 border-green-400"><h2 class="text-xl font-semibold mb-4">Ganhos Pessoa Física</h2><div id="pf-entries-container-${monthIndex}" class="flex flex-col gap-3 mb-3"></div><button class="add-entry-btn mt-2 w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}" data-type="pf">+ Adicionar Ganho PF</button></div><div class="lg:col-span-1 grid gap-6"><div><div class="p-5 rounded-2xl card border-t-4 border-blue-400 space-y-4"><div class="space-y-1"><label class="block text-sm font-medium muted-text">Caixa da empresa:</label><p id="companyCash-${monthIndex}" class="text-2xl font-semibold">R$ 0,00</p></div><div class="space-y-1"><label class="block text-sm font-medium muted-text">Caixa pessoal:</label><p id="personalCash-${monthIndex}" class="text-2xl font-semibold">R$ 0,00</p></div></div></div><div><div id="summary-card-${monthIndex}" class="p-5 rounded-2xl card border-t-4 border-purple-400"><h2 class="text-xl font-semibold mb-4">Resumo do Mês</h2><div class="space-y-2 text-sm"><div class="flex justify-between items-center"><span>Gasto Pessoal:</span><span id="totalPersonalExpenses-${monthIndex}" class="font-semibold" style="color: var(--red-color);">R$ 0,00</span></div><div class="flex justify-between items-center"><span>Gasto Empresa:</span><span id="totalBusinessExpenses-${monthIndex}" class="font-semibold" style="color: var(--red-color);">R$ 0,00</span></div><div class="flex justify-between items-center pt-2 border-t" style="border-color: var(--border-color);"><span>Saldo Pessoal:</span><span id="remainingPersonal-${monthIndex}" class="font-semibold">R$ 0,00</span></div><div class="flex justify-between items-center"><span>Saldo Empresa:</span><span id="remainingBusiness-${monthIndex}" class="font-semibold">R$ 0,00</span></div><div class="flex justify-between items-center border-t pt-2 mt-2" style="border-color: var(--border-color);"><span class="font-semibold">Saldo Total:</span><span id="remainingTotal-${monthIndex}" class="text-xl font-bold">R$ 0,00</span></div></div><div id="budget-alerts-${monthIndex}" class="mt-3 text-xs"></div></div></div></div></div><div class="text-center mb-4"><button class="ai-analysis-btn px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')" data-month-index="${monthIndex}">Analisar Mês com IA ✨</button></div><div id="calendar-container-${monthIndex}" class="mb-8"></div><div id="expense-section-wrapper-${monthIndex}" class=""><div id="expense-accordion-container-${monthIndex}" class="space-y-2 mb-8"></div></div><div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-8"><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Balanço do Mês</h2><div class="relative mx-auto" style="max-width: 300px; height: 300px;"><canvas id="budgetPieChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Gastos por Pagamento</h2><div class="relative mx-auto" style="max-width: 300px; height: 300px;"><canvas id="paymentMethodChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Metas de Gastos (Pessoal)</h2><div class="relative mx-auto" style="height: 300px;"><canvas id="budgetGoalsChart-${monthIndex}"></canvas></div></div></div></div>` },
-        createBalanceContentHTML: () => { return `<div id="month-12-content" class="month-content"><div class="flex items-center justify-center gap-4 mb-8"><h2 class="text-3xl font-bold">Balanço Anual</h2><button class="px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-action="back-to-months">← Voltar</button></div><div class="text-center mb-8 -mt-4"><button id="ai-annual-analysis-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);">Analisar Ano com IA ✨</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-center"><div class="card border-t-4 border-yellow-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PJ</span><span id="totalAnnualPJ" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-green-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PF</span><span id="totalAnnualPF" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-red-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Gastos Totais</span><span id="totalAnnualExpenses" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-blue-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Saldo Final</span><span id="annualBalance" class="text-2xl font-bold">R$ 0,00</span><p id="annualPerformance" class="text-lg font-semibold mt-1"></p></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card p-6 rounded-2xl lg:col-span-2"><h3 class="text-xl font-semibold text-center mb-4">Desempenho Mensal</h3><div class="relative mx-auto" style="height: 400px;"><canvas id="monthlyPerformanceBarChart"></canvas></div></div><div class="card p-6 rounded-2xl"><h3 class="text-xl font-semibold text-center mb-4">Maiores Gastos do Ano (Top 5)</h3><div id="top-spends-container" class="text-sm space-y-2 max-h-96 overflow-y-auto p-2"></div></div></div></div>` },
         createEntryElement: (config) => {
             const { monthIndex, dayIndex, category, entry, type } = config;
             const d = document.createElement('div');
@@ -991,46 +958,113 @@ const App = {
             d.innerHTML = `<input type="text" value="${entry.description}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description"><input type="number" value="${entry.amount}" min="0" step="0.01" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">${s}${aiBtn}${p}<span class="card-selector-container">${c}</span>${r}`;
             return d;
         },
+        // ... (Outros métodos de renderização mantidos iguais para economizar espaço, pois não afetam a lógica do bug)
+        // Certifique-se de que renderPJEntries, renderPFEntries, etc. estejam aqui.
+        // Vou incluir os principais para garantir que o copy-paste funcione.
         renderPJEntries: (m) => { const c = document.getElementById(`pj-entries-container-${m}`); if (!c) return; c.innerHTML = ''; App.state.monthlyData[m].pjEntries.forEach(e => c.appendChild(App.render.createEntryElement({ monthIndex: m, entry: e, type: 'pj' }))); },
         renderPFEntries: (m) => { const c = document.getElementById(`pf-entries-container-${m}`); if (!c) return; c.innerHTML = ''; App.state.monthlyData[m].pfEntries.forEach(e => c.appendChild(App.render.createEntryElement({ monthIndex: m, entry: e, type: 'pf' }))); },
         renderExpenseTable: (m) => { const container = document.getElementById(`expense-accordion-container-${m}`); if (!container) return; container.innerHTML = ''; for (let day = 0; day < 31; day++) { const item = document.createElement('div'); item.className = 'accordion-item card rounded-xl overflow-hidden'; item.innerHTML = `<div class="accordion-trigger flex justify-between items-center p-4 cursor-pointer" style="background-color: var(--input-bg);"><span class="font-semibold">Dia ${day + 1}</span><span class="arrow text-xl muted-text">▼</span></div><div class="accordion-content"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><h3 class="font-semibold mb-3">Gastos Pessoais</h3><div id="personal-entries-${m}-${day}" class="flex flex-col gap-3"></div><button class="add-entry-btn mt-3 px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="personal">+ Gasto Pessoal</button></div><div><h3 class="font-semibold mb-3">Gastos da Empresa</h3><div id="business-entries-${m}-${day}" class="flex flex-col gap-3"></div><button class="add-entry-btn mt-3 px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="business">+ Gasto Empresa</button></div></div></div>`; container.appendChild(item); ['personal', 'business'].forEach(type => { const entriesContainer = item.querySelector(`#${type}-entries-${m}-${day}`); App.state.monthlyData[m].expenses[day][`${type}Entries`].forEach(e => entriesContainer.appendChild(App.render.createEntryElement({ monthIndex: m, dayIndex: day, category: type, entry: e, type: 'expense' }))); }); } },
         updateBudgetAlerts: (m) => { const c = document.getElementById(`budget-alerts-${m}`); if (!c) return; const expenses = App.state.categories.reduce((a, cat) => ({...a, [cat.name]: 0 }), {}); App.state.monthlyData[m].expenses.forEach(d => { d.personalEntries.forEach(e => { if (expenses[e.category] !== undefined) expenses[e.category] += e.amount; }); }); const alerts = App.state.categories.map(cat => (expenses[cat.name] > cat.budget && cat.budget > 0) ? `<li style="color: var(--red-color);">${cat.name}: ${App.helpers.formatCurrency(expenses[cat.name] - cat.budget)} acima da meta.</li>` : '').filter(Boolean); c.innerHTML = alerts.length > 0 ? `<p class="font-semibold mt-2">Atenção ao Orçamento:</p><ul class="list-disc list-inside ml-4">${alerts.join('')}</ul>` : ''; },
+        
+        // ... (Mantendo Chart e Modal renders) ...
         updateAllCharts: (m, totals) => {
             const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
             const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color');
             const options = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartTextColor, font: { family: 'Inter' } } } } };
             const barOptions = {...options, scales: { y: { ticks: { color: chartTextColor }, grid: { color: gridColor } }, x: { ticks: { color: chartTextColor }, grid: { color: gridColor } } } };
+            
             if (App.state.chartInstances.pie) App.state.chartInstances.pie.destroy();
-            App.state.chartInstances.pie = new Chart(document.getElementById(`budgetPieChart-${m}`).getContext('2d'), { type: 'pie', data: { labels: ['Pessoais', 'Empresa', 'Saldo'], datasets: [{ data: [totals.totalPersonal, totals.totalBusiness, Math.max(0, totals.remainingBudget)], backgroundColor: ['#ff453a', '#32d74b', '#2997ff'] }] }, options });
+            const pieCanvas = document.getElementById(`budgetPieChart-${m}`);
+            if(pieCanvas) {
+                App.state.chartInstances.pie = new Chart(pieCanvas.getContext('2d'), { type: 'pie', data: { labels: ['Pessoais', 'Empresa', 'Saldo'], datasets: [{ data: [totals.totalPersonal, totals.totalBusiness, Math.max(0, totals.remainingBudget)], backgroundColor: ['#ff453a', '#32d74b', '#2997ff'] }] }, options });
+            }
+
             const paymentLabels = [...App.constants.basePaymentMethods.filter(m => m !== 'Crédito'), ...App.state.creditCards.map(c => `Crédito (${c})`)];
             const paymentTotals = Object.fromEntries(paymentLabels.map(l => [l, 0]));
             App.state.monthlyData[m].expenses.forEach(d => {
                 [...d.personalEntries, ...d.businessEntries].forEach(e => { let k = e.paymentMethod === 'Crédito' ? `Crédito (${e.card})` : e.paymentMethod; if (paymentTotals[k] !== undefined) paymentTotals[k] += e.amount; }); });
             const paymentColors = ['#007BFF', '#FD7E14', '#DC3545', '#20C997', '#6F42C1', '#D63384', '#198754', '#6C757D'];
+            
             if (App.state.chartInstances.payment) App.state.chartInstances.payment.destroy();
-            App.state.chartInstances.payment = new Chart(document.getElementById(`paymentMethodChart-${m}`).getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: paymentLabels,
-                    datasets: [{
-                        data: Object.values(paymentTotals),
-                        backgroundColor: paymentColors,
-                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
-                        borderWidth: 2
-                    }]
-                },
-                options
-            });
+            const payCanvas = document.getElementById(`paymentMethodChart-${m}`);
+            if(payCanvas) {
+                App.state.chartInstances.payment = new Chart(payCanvas.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: paymentLabels,
+                        datasets: [{
+                            data: Object.values(paymentTotals),
+                            backgroundColor: paymentColors,
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                            borderWidth: 2
+                        }]
+                    },
+                    options
+                });
+            }
+
             const expensesByCategory = App.state.categories.reduce((a, c) => ({...a, [c.name]: 0 }), {});
             App.state.monthlyData[m].expenses.forEach(d => { d.personalEntries.forEach(e => { if (expensesByCategory[e.category] !== undefined) expensesByCategory[e.category] += e.amount; }); });
             const spentData = App.state.categories.map(c => expensesByCategory[c.name]);
             const budgetData = App.state.categories.map(c => c.budget);
             const barColors = spentData.map((s, i) => (s > budgetData[i] && budgetData[i] > 0) ? '#ff9500' : '#ff453a');
+            
             if (App.state.chartInstances.goals) App.state.chartInstances.goals.destroy();
-            App.state.chartInstances.goals = new Chart(document.getElementById(`budgetGoalsChart-${m}`).getContext('2d'), { type: 'bar', data: { labels: App.state.categories.map(c => c.name), datasets: [{ label: 'Gasto', data: spentData, backgroundColor: barColors }, { label: 'Meta', data: budgetData, backgroundColor: '#2997ff' }] }, options: {...barOptions, indexAxis: 'y' } });
+            const goalCanvas = document.getElementById(`budgetGoalsChart-${m}`);
+            if(goalCanvas) {
+                App.state.chartInstances.goals = new Chart(goalCanvas.getContext('2d'), { type: 'bar', data: { labels: App.state.categories.map(c => c.name), datasets: [{ label: 'Gasto', data: spentData, backgroundColor: barColors }, { label: 'Meta', data: budgetData, backgroundColor: '#2997ff' }] }, options: {...barOptions, indexAxis: 'y' } });
+            }
         },
-        renderBalanceSummary: () => { let totals = { pj: 0, pf: 0, personal: 0, business: 0 }; let monthlyPerformance = { gains: [], expenses: [] }; let allPersonalSpends = []; for (let i = 0; i < 12; i++) { if (!App.state.monthlyData[i]) { monthlyPerformance.gains.push(0); monthlyPerformance.expenses.push(0); continue; }; const monthData = App.state.monthlyData[i]; let monthGains = 0; let monthExpenses = 0; monthData.pjEntries.forEach(e => { totals.pj += e.amount; monthGains += e.amount; }); monthData.pfEntries.forEach(e => { totals.pf += e.amount; monthGains += e.amount; }); monthData.expenses.forEach(day => { day.personalEntries.forEach(e => { totals.personal += e.amount; monthExpenses += e.amount; if (e.amount > 0) allPersonalSpends.push({...e, month: i }); }); day.businessEntries.forEach(e => { totals.business += e.amount; monthExpenses += e.amount; }); }); monthlyPerformance.gains.push(monthGains); monthlyPerformance.expenses.push(monthExpenses); } const balance = (totals.pj + totals.pf) - (totals.personal + totals.business); document.getElementById('totalAnnualPJ').textContent = App.helpers.formatCurrency(totals.pj); document.getElementById('totalAnnualPF').textContent = App.helpers.formatCurrency(totals.pf); document.getElementById('totalAnnualExpenses').textContent = App.helpers.formatCurrency(totals.personal + totals.business); document.getElementById('annualBalance').textContent = App.helpers.formatCurrency(balance); const perfEl = document.getElementById('annualPerformance'); perfEl.textContent = balance >= 0 ? 'Positivo' : 'Negativo'; perfEl.style.color = balance >= 0 ? 'var(--green-color)' : 'var(--red-color)'; const top5spends = allPersonalSpends.sort((a, b) => b.amount - a.amount).slice(0, 5); document.getElementById('top-spends-container').innerHTML = top5spends.map(spend => `<div class="p-2 rounded-lg" style="background-color: var(--input-bg);"><strong class="text-color">${spend.category}:</strong> ${App.helpers.formatCurrency(spend.amount)} <span class="text-xs muted-text">(${spend.description} em ${App.constants.monthNames[spend.month]})</span></div>`).join('') || '<p class="muted-text">Nenhum gasto pessoal registrado.</p>'; App.render.updateAnnualCharts(monthlyPerformance); },
-        updateAnnualCharts: (performance) => { const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color'); const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color'); const barOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartTextColor } } }, scales: { y: { ticks: { color: chartTextColor }, grid: { color: gridColor } }, x: { ticks: { color: chartTextColor }, grid: { color: gridColor } } } }; if (App.state.chartInstances.annualBar) App.state.chartInstances.annualBar.destroy(); App.state.chartInstances.annualBar = new Chart(document.getElementById('monthlyPerformanceBarChart').getContext('2d'), { type: 'bar', data: { labels: App.constants.monthNames.slice(0, 12), datasets: [{ label: 'Ganhos Totais', data: performance.gains, backgroundColor: '#32d74b' }, { label: 'Gastos Totais', data: performance.expenses, backgroundColor: '#ff453a' }] }, options: barOptions }); },
+        
+        renderBalanceSummary: () => { 
+            // (Lógica idêntica ao anterior)
+            let totals = { pj: 0, pf: 0, personal: 0, business: 0 }; 
+            let monthlyPerformance = { gains: [], expenses: [] }; 
+            let allPersonalSpends = []; 
+            for (let i = 0; i < 12; i++) { 
+                if (!App.state.monthlyData[i]) { monthlyPerformance.gains.push(0); monthlyPerformance.expenses.push(0); continue; }; 
+                const monthData = App.state.monthlyData[i]; 
+                let monthGains = 0; 
+                let monthExpenses = 0; 
+                monthData.pjEntries.forEach(e => { totals.pj += e.amount; monthGains += e.amount; }); 
+                monthData.pfEntries.forEach(e => { totals.pf += e.amount; monthGains += e.amount; }); 
+                monthData.expenses.forEach(day => { 
+                    day.personalEntries.forEach(e => { totals.personal += e.amount; monthExpenses += e.amount; if (e.amount > 0) allPersonalSpends.push({...e, month: i }); }); 
+                    day.businessEntries.forEach(e => { totals.business += e.amount; monthExpenses += e.amount; }); 
+                }); 
+                monthlyPerformance.gains.push(monthGains); 
+                monthlyPerformance.expenses.push(monthExpenses); 
+            } 
+            const balance = (totals.pj + totals.pf) - (totals.personal + totals.business); 
+            const setT = (id, v) => { if(document.getElementById(id)) document.getElementById(id).textContent = App.helpers.formatCurrency(v); };
+            setT('totalAnnualPJ', totals.pj);
+            setT('totalAnnualPF', totals.pf);
+            setT('totalAnnualExpenses', totals.personal + totals.business);
+            setT('annualBalance', balance);
+            
+            const perfEl = document.getElementById('annualPerformance');
+            if(perfEl) {
+                perfEl.textContent = balance >= 0 ? 'Positivo' : 'Negativo'; 
+                perfEl.style.color = balance >= 0 ? 'var(--green-color)' : 'var(--red-color)'; 
+            }
+            
+            const top5spends = allPersonalSpends.sort((a, b) => b.amount - a.amount).slice(0, 5); 
+            const topContainer = document.getElementById('top-spends-container');
+            if(topContainer) topContainer.innerHTML = top5spends.map(spend => `<div class="p-2 rounded-lg" style="background-color: var(--input-bg);"><strong class="text-color">${spend.category}:</strong> ${App.helpers.formatCurrency(spend.amount)} <span class="text-xs muted-text">(${spend.description} em ${App.constants.monthNames[spend.month]})</span></div>`).join('') || '<p class="muted-text">Nenhum gasto pessoal registrado.</p>'; 
+            App.render.updateAnnualCharts(monthlyPerformance); 
+        },
+        
+        updateAnnualCharts: (performance) => { 
+            const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color'); 
+            const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color'); 
+            const barOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartTextColor } } }, scales: { y: { ticks: { color: chartTextColor }, grid: { color: gridColor } }, x: { ticks: { color: chartTextColor }, grid: { color: gridColor } } } }; 
+            if (App.state.chartInstances.annualBar) App.state.chartInstances.annualBar.destroy(); 
+            const chartEl = document.getElementById('monthlyPerformanceBarChart');
+            if(chartEl) {
+                App.state.chartInstances.annualBar = new Chart(chartEl.getContext('2d'), { type: 'bar', data: { labels: App.constants.monthNames.slice(0, 12), datasets: [{ label: 'Ganhos Totais', data: performance.gains, backgroundColor: '#32d74b' }, { label: 'Gastos Totais', data: performance.expenses, backgroundColor: '#ff453a' }] }, options: barOptions }); 
+            }
+        },
+        
         renderCardList: () => { App.ui.cardListContainer.innerHTML = App.state.creditCards.map(c => `<div class="flex items-center justify-between p-2 rounded-lg" style="background-color: var(--input-bg);"><span class="text-color">${c}</span><button class="remove-card-btn text-red-500 hover:text-red-700" data-card-name="${c}">×</button></div>`).join(''); },
         renderCategoryList: () => { App.ui.categoryListContainer.innerHTML = App.state.categories.map(c => `<div class="flex items-center justify-between p-2 rounded-lg gap-2" style="background-color: var(--input-bg);"><input type="text" value="${c.name}" class="category-name-input flex-grow p-1 input-field" data-old-name="${c.name}"><input type="number" value="${c.budget}" min="0" class="category-budget-input w-24 p-1 input-field" data-category-name="${c.name}"><button class="remove-category-btn text-red-500 hover:text-red-700" data-category-name="${c.name}">×</button></div>`).join(''); },
         renderRecurringList: () => { App.ui.recurringListContainer.innerHTML = App.state.recurringEntries.map((r, i) => `<div class="text-xs p-2 rounded-lg flex justify-between items-center" style="background-color: var(--input-bg);"><div><p class="font-bold text-color">${r.description} (${App.helpers.formatCurrency(r.amount)})</p><p class="muted-text">Todo dia ${r.dayOfMonth} - ${r.type}</p></div><button class="remove-recurring-btn text-red-500 hover:text-red-700 font-bold" data-index="${i}">×</button></div>`).join(''); },
@@ -1074,11 +1108,12 @@ onAuthStateChanged(auth, user => {
             window.history.replaceState(null, '', '/');
         }
 
-        loadingOverlay.classList.remove('hidden');
+        if(loadingOverlay) loadingOverlay.classList.remove('hidden');
         App.init(user.uid);
     } else {
         console.log("STATUS: Usuário está DESLOGADO.");
         App.state.currentUserId = null;
+        App.state.listenersBound = false; // Reseta flag ao deslogar
         authScreen.classList.remove('hidden');
         appScreen.classList.add('hidden');
     }
