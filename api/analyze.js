@@ -1,14 +1,13 @@
-// api/analyze.js
-import { GoogleGenerativeAI } from "@google/generative-ai"; // <-- MUDANÇA AQUI
+// Arquivo: api/analyze.js
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export default async (req, res) => { // <-- MUDANÇA AQUI
-    // O RESTO DO SEU CÓDIGO CONTINUA EXATAMENTE O MESMO
-    
-    // Cabeçalhos de CORS para permitir a comunicação com o front-end
-    res.setHeader('Access-Control-Allow-Origin', 'https://www.franzoitech.com');
+export default async (req, res) => {
+    // CORREÇÃO 1: Liberando acesso para qualquer origem (resolve o problema do domínio novo)
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+    // Responde rapidamente à verificação do navegador (Pre-flight)
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -16,31 +15,30 @@ export default async (req, res) => { // <-- MUDANÇA AQUI
     const API_KEY = process.env.GEMINI_API_KEY;
 
     if (!API_KEY) {
-        console.error("ERRO: GEMINI_API_KEY não foi encontrada.");
-        return res.status(500).json({ error: "Chave de API não configurada no servidor." });
+        console.error("ERRO: GEMINI_API_KEY não foi encontrada no servidor.");
+        return res.status(500).json({ error: "Chave de API não configurada." });
     }
 
     try {
         const genAI = new GoogleGenerativeAI(API_KEY);
         
-        // Mantendo o modelo que você estava usando
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        // CORREÇÃO 2: Usando a versão estável 'gemini-1.5-flash' para garantir que funcione
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const { prompt } = req.body;
 
         if (!prompt) {
-            return res.status(400).json({ error: "O prompt не pode estar vazio." });
+            return res.status(400).json({ error: "O prompt não pode estar vazio." });
         }
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
-        // Enviando a resposta no formato JSON que o front-end espera.
         return res.status(200).json({ analysis: text });
 
     } catch (error) {
-        console.error("Erro capturado ao chamar a API da IA:", error);
-        return res.status(500).json({ error: "Erro na comunicação com a API da IA." });
+        console.error("Erro detalhado da IA:", error);
+        return res.status(500).json({ error: "Erro ao processar a inteligência artificial." });
     }
 };
