@@ -32,7 +32,7 @@ const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const loadingOverlay = document.getElementById('loading-overlay');
 let isLoginMode = true;
 
-// --- LISTENERS DE AUTENTICAÇÃO (Executam apenas uma vez no carregamento) ---
+// --- LISTENERS DE AUTENTICAÇÃO ---
 const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
 if(document.getElementById('email-input')) document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress);
 if(document.getElementById('password-input')) document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
@@ -123,7 +123,7 @@ if (forgotPasswordLink) {
 const App = {
     state: {
         currentUserId: null,
-        listenersBound: false, // <--- CORREÇÃO FUNDAMENTAL: Flag para evitar listeners duplicados
+        listenersBound: false,
         profile: { name: '', avatarUrl: '' },
         integrations: { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } },
         creditCards: [],
@@ -169,11 +169,10 @@ const App = {
 
         this.loadData();
 
-        // <--- TRAVA DE SEGURANÇA: Só adiciona os eventos se a flag for falsa
         if (!this.state.listenersBound) {
             this.bindGlobalEventListeners();
             this.state.listenersBound = true; 
-            console.log("Listeners globais inicializados (ÚNICA VEZ).");
+            console.log("Listeners globais inicializados.");
         }
     },
 
@@ -196,12 +195,10 @@ const App = {
         generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
     },
 
-    // Lógica de Upload SEM Storage (Base64 no Firestore)
     handleAvatarUpload(event) {
         const file = event.target.files[0];
         if (!file || !this.state.currentUserId) return;
 
-        // Limite de 700KB
         if (file.size > 700 * 1024) {
             alert("A imagem é muito grande! Escolha uma foto menor que 700KB.");
             return;
@@ -267,7 +264,6 @@ const App = {
                 this.state.recurringEntries = d.recurringEntries || [];
             }
             
-            // Inicializa meses se estiverem vazios
             for (let i = 0; i < 12; i++) {
                 if (!this.state.monthlyData[i]) { this.state.monthlyData[i] = {}; }
                 this.state.monthlyData[i].pjEntries = this.state.monthlyData[i].pjEntries || [];
@@ -292,10 +288,7 @@ const App = {
 
         } catch (error) { 
             console.error("Erro crítico ao carregar dados:", error); 
-            // Comentei o alert para não irritar se for um erro menor, mas deixei o log
-            // alert("Ocorreu um erro ao carregar seus dados. Por favor, recarregue a página.");
         } finally {
-            // Garante que o loading suma
             if (loadingOverlay) loadingOverlay.classList.add('hidden');
         }
     },
@@ -543,7 +536,6 @@ const App = {
     bindGlobalEventListeners() {
         this.debouncedSave = this.helpers.debounce(this.saveDataToFirestore, 750);
         
-        // Chatbot Logic
         const chatbotModal = document.getElementById('chatbot-modal');
         const chatbotModalContent = chatbotModal ? chatbotModal.querySelector('.modal-content') : null;
         
@@ -600,7 +592,6 @@ const App = {
             });
         }
         
-        // Action Menu (Top Right)
         const actionMenuBtn = document.getElementById('action-menu-btn');
         const actionMenuDropdown = document.getElementById('action-menu-dropdown');
         if (actionMenuBtn && actionMenuDropdown) {
@@ -655,7 +646,6 @@ const App = {
             App.render.updateHeader();
         });
 
-        // Settings Add Buttons
         document.getElementById('add-card-btn')?.addEventListener('click', () => { 
             const n = App.ui.newCardNameInput.value.trim(); 
             if (n && !App.state.creditCards.includes(n)) { 
@@ -679,7 +669,6 @@ const App = {
             }
         });
 
-        // Recurring Logic
         const recType = document.getElementById('recurring-type');
         if(recType) recType.addEventListener('change', (e) => { document.getElementById('recurring-expense-fields').classList.toggle('hidden', !e.target.value.includes('Gasto')); });
         
@@ -708,11 +697,9 @@ const App = {
             document.getElementById('recurring-form').querySelectorAll('input, select').forEach(el => el.value = ''); 
         });
         
-        // DELEGAÇÃO DE EVENTOS (Onde o problema de duplicidade acontecia)
         document.body.addEventListener('click', (event) => {
             const t = event.target;
             
-            // Accordion Settings
             const settingsAccordionTrigger = t.closest('.settings-accordion-trigger');
             if (settingsAccordionTrigger) {
                 const parentItem = settingsAccordionTrigger.parentElement;
@@ -720,7 +707,6 @@ const App = {
                 return;
             }
 
-            // Calendar Nav
             const navBtn = t.closest('.calendar-nav-btn, [data-action="show-annual"]');
             if (navBtn) {
                 const action = navBtn.dataset.action;
@@ -731,7 +717,6 @@ const App = {
                 return;
             }
             
-            // Day Cell Click
             const dayCell = t.closest('.calendar-day.current-month');
             if (dayCell) {
                 const dayIndex = parseInt(dayCell.dataset.day);
@@ -740,7 +725,6 @@ const App = {
                 const accordionToToggle = allAccordions[dayIndex];
                 const wasActive = dayCell.classList.contains('active');
                 
-                // Reset logic
                 document.querySelectorAll(`#calendar-container-${monthIndex} .calendar-day.active`).forEach(el => el.classList.remove('active'));
                 allAccordions.forEach(item => item.classList.remove('active'));
                 
@@ -748,7 +732,6 @@ const App = {
                     dayCell.classList.add('active');
                     if (accordionToToggle) {
                         accordionToToggle.classList.add('active');
-                        // Scroll suave para o acordeão aberto
                         setTimeout(() => {
                             accordionToToggle.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }, 100);
@@ -756,16 +739,13 @@ const App = {
                 }
             }
 
-            // Buttons inside Month Content
             if (t.matches('.tab-button')) this.showMonth(parseInt(t.dataset.monthIndex));
             if (t.matches('.export-csv-btn')) this.exportMonthToCSV(parseInt(t.dataset.monthIndex));
             if (t.matches('.export-pdf-btn')) this.exportMonthToPDF(parseInt(t.dataset.monthIndex));
             
-            // Accordion inside Calendar (Expenses)
             if (t.closest('.accordion-trigger') && !t.closest('.settings-accordion-trigger')) {
                 const trigger = t.closest('.accordion-trigger');
                 const parentItem = trigger.parentElement;
-                // Toggle logic
                 if (parentItem.classList.contains('active')) {
                     parentItem.classList.remove('active');
                 } else {
@@ -773,7 +753,6 @@ const App = {
                 }
             }
 
-            // AI Buttons
             if (t.closest('.ai-analysis-btn')) this.ai.getFinancialAnalysis(parseInt(t.closest('.ai-analysis-btn').dataset.monthIndex));
             if (t.matches('#ai-annual-analysis-btn')) this.ai.getAnnualFinancialAnalysis();
             if (t.closest('.suggest-category-btn')) {
@@ -788,7 +767,6 @@ const App = {
                 }
             }
 
-            // Add/Remove Entries
             if (t.matches('.add-entry-btn')) {
                 const { monthIndex, type, day, category } = t.dataset;
                 const month = parseInt(monthIndex);
@@ -817,7 +795,6 @@ const App = {
                 this.saveDataToFirestore();
             }
 
-            // Settings Removals
             if (t.matches('.remove-card-btn')) {
                 const cardNameToRemove = t.dataset.cardName;
                 this.state.creditCards = this.state.creditCards.filter(c => c !== cardNameToRemove);
@@ -850,7 +827,6 @@ const App = {
             }
         });
 
-        // INPUT LISTENERS
         document.body.addEventListener('input', (event) => {
             const t = event.target;
             if (t.matches('.entry-input')) {
@@ -884,7 +860,6 @@ const App = {
                 const normalizedOldName = oldName.toLowerCase();
                 const categoryExists = this.state.categories.some(c => c.name.toLowerCase() === normalizedNewName);
                 if (newName && normalizedOldName !== normalizedNewName && !categoryExists) {
-                    // Atualiza categorias em todo o histórico
                     for (let i = 0; i < 12; i++) {
                         this.state.monthlyData[i].expenses.forEach(day => {
                             day.personalEntries.forEach(entry => {
@@ -906,7 +881,6 @@ const App = {
             }
         });
 
-        // Recurring Modals
         const confirmModal = document.getElementById('confirm-recurring-delete-modal');
         document.getElementById('delete-all-recurring-btn')?.addEventListener('click', () => {
             const id = parseFloat(confirmModal.dataset.recurringId);
@@ -931,6 +905,97 @@ const App = {
         document.getElementById('cancel-delete-recurring-btn')?.addEventListener('click', () => {
             confirmModal.classList.add('hidden');
         });
+    },
+
+    ai: {
+        async getFinancialAnalysis(monthIndex) {
+            App.ui.aiAnalysisModal.classList.remove('hidden');
+            App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados...</p>';
+            try {
+                const monthData = App.state.monthlyData[monthIndex];
+                if (!monthData) throw new Error("Dados do mês não encontrados.");
+                const prompt = `**Contexto, Regras e Funcionalidades do App:**\n1. Você é o assistente de IA da plataforma "Rico Plus".\n2. Você pode dar dicas financeiras gerais, mas ao sugerir ações, SÓ PODE usar as funcionalidades existentes.\n3. Funcionalidades existentes: Lançamento de ganhos/despesas, categorização, metas de gastos, resumos, gráficos, lançamentos recorrentes, gestão de cartões, exportação PDF/CSV.\n4. **NÃO INVENTE** funcionalidades que não existem (ex: notificações).\n5. **NUNCA** mencione apps concorrentes.\n\n**Tarefa:**\nGere um relatório em HTML (sem texto fora do HTML) analisando os dados: ${JSON.stringify(monthData)}.\nO relatório deve conter:\n1. Um resumo dos ganhos e gastos.\n2. A maior categoria de despesa pessoal.\n3. Três sugestões práticas para melhorar a saúde financeira, baseadas nas funcionalidades existentes do Rico Plus.\n`;
+                const analysisResult = await this.callVercelFunction(prompt);
+                const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
+                App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
+            } catch (error) {
+                console.error("Erro ao obter análise da IA:", error);
+                App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados.</p>';
+            }
+        },
+        async getAnnualFinancialAnalysis() {
+            App.ui.aiAnalysisModal.classList.remove('hidden');
+            App.ui.aiAnalysisResult.innerHTML = '<p class="muted-text">Analisando seus dados anuais...</p>';
+            try {
+                const annualData = App.state.monthlyData;
+                if (!annualData) throw new Error("Dados anuais não encontrados.");
+                const prompt = `**Contexto, Regras e Funcionalidades do App:**\n1. Você é o assistente de IA da plataforma "Rico Plus".\n2. Você pode dar dicas financeiras gerais, mas ao sugerir ações, SÓ PODE usar as funcionalidades existentes.\n3. Funcionalidades existentes: Lançamento de ganhos/despesas, categorização, metas de gastos, resumos, gráficos, lançamentos recorrentes, gestão de cartões, exportação PDF/CSV.\n4. **NÃO INVENTE** funcionalidades que não existem (ex: notificações).\n5. **NUNCA** mencione apps concorrentes.\n\n**Tarefa:**\nGere um relatório em HTML (sem texto fora do HTML) analisando os dados anuais: ${JSON.stringify(annualData)}.\nO relatório deve conter:\n1. Um resumo geral dos ganhos, gastos e saldo final do ano.\n2. O mês de maior gasto e o mês de maior ganho.\n3. Três insights estratégicos para o próximo ano.\n`;
+                const analysisResult = await this.callVercelFunction(prompt);
+                const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
+                App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
+            } catch (error) {
+                console.error("Erro ao obter análise anual da IA:", error);
+                App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados anuais.</p>';
+            }
+        },
+        async getChatbotResponse(userMessage) {
+            try {
+                const financialData = App.state.monthlyData;
+                const prompt = `**Contexto, Regras e Funcionalidades do App:**\n1. Você é o assistente de IA da plataforma "Rico Plus". Sua personalidade é prestativa e focada em ajudar.\n2. Você pode dar dicas financeiras gerais e conceituais (ex: importância de poupar).\n3. **REGRA CRÍTICA:** Ao sugerir uma AÇÃO PRÁTICA ou FERRAMENTA, você SÓ PODE se basear na seguinte lista de funcionalidades que REALMENTE EXISTEM no Rico Plus:\n    - Lançamento de ganhos (PJ/PF) e despesas.\n    - Categorização de gastos e definição de metas de orçamento.\n    - Resumos, saldos e gráficos.\n    - Lançamentos recorrentes.\n    - Gerenciamento de cartões de crédito.\n4. **NÃO INVENTE** funcionalidades que não estão na lista (ex: notificações).\n5. **NUNCA** mencione apps concorrentes. Se o usuário pedir uma ferramenta, reforce o uso do Rico Plus.\n\n**Tarefa:**\nResponda à pergunta do usuário: "${userMessage}". Use os dados financeiros a seguir como base: ${JSON.stringify(financialData)}.\nFormate sua resposta de forma clara usando Markdown.\n`;
+                const aiResponse = await this.callVercelFunction(prompt);
+                const messagesContainer = document.getElementById('chatbot-messages');
+                messagesContainer.removeChild(messagesContainer.lastChild);
+                const formattedResponse = marked.parse(aiResponse);
+                messagesContainer.innerHTML += `<div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);"><p class="font-bold mb-1">Assistente</p><div class="prose dark:prose-invert max-w-none">${formattedResponse}</div></div>`;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } catch (error) {
+                console.error("Erro na resposta do chatbot:", error);
+                const messagesContainer = document.getElementById('chatbot-messages');
+                messagesContainer.removeChild(messagesContainer.lastChild);
+                messagesContainer.innerHTML += `<div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);"><p class="font-bold mb-1">Assistente</p><p>Desculpe, não consegui processar sua pergunta. Tente novamente.</p></div>`;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        },
+        async getCategorySuggestion(description, entryId, button) {
+            const originalContent = button.innerHTML;
+            button.innerHTML = '...';
+            button.disabled = true;
+            try {
+                const availableCategories = App.state.categories.map(c => c.name).join(', ');
+                const prompt = `Analise a despesa: "${description}".\nQual das seguintes categorias melhor se encaixa? Categorias disponíveis: [${availableCategories}].\nResponda APENAS com o nome exato de uma das categorias da lista. Sem frases, apenas a categoria.`;
+                let suggestedCategory = await this.callVercelFunction(prompt);
+                suggestedCategory = suggestedCategory.trim().replace(/["'.]/g, '');
+                const entryElement = button.closest('.expense-entry-row');
+                const selectElement = entryElement.querySelector('[data-field="category"]');
+                const categoryExists = App.state.categories.find(c => c.name.toLowerCase() === suggestedCategory.toLowerCase());
+                if (selectElement && categoryExists) {
+                    selectElement.value = categoryExists.name;
+                    const event = new Event('input', { bubbles: true });
+                    selectElement.dispatchEvent(event);
+                } else {
+                    console.warn(`Categoria sugerida "${suggestedCategory}" não é válida ou não foi encontrada.`);
+                }
+            } catch (error) {
+                console.error("Erro ao obter sugestão de categoria:", error);
+            } finally {
+                button.innerHTML = originalContent;
+                button.disabled = false;
+            }
+        },
+        async callVercelFunction(prompt) {
+            // CORREÇÃO AQUI: Usando caminho relativo para evitar CORS e HTTPS problems
+            const VERCEL_API_URL = "/api/analyze";
+            const response = await fetch(VERCEL_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt })
+            });
+            if (!response.ok) {
+                throw new Error(`Erro na API da Vercel: ${response.statusText}`);
+            }
+            const data = await response.json();
+            return data.analysis;
+        }
     },
 
     render: {
