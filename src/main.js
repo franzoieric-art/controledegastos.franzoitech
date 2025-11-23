@@ -917,8 +917,7 @@ const App = {
                 const prompt = `**Contexto, Regras e Funcionalidades do App:**\n1. Você é o assistente de IA da plataforma "Rico Plus".\n2. Você pode dar dicas financeiras gerais, mas ao sugerir ações, SÓ PODE usar as funcionalidades existentes.\n3. Funcionalidades existentes: Lançamento de ganhos/despesas, categorização, metas de gastos, resumos, gráficos, lançamentos recorrentes, gestão de cartões, exportação PDF/CSV.\n4. **NÃO INVENTE** funcionalidades que não existem (ex: notificações).\n5. **NUNCA** mencione apps concorrentes.\n\n**Tarefa:**\nGere um relatório em HTML (sem texto fora do HTML) analisando os dados: ${JSON.stringify(monthData)}.\nO relatório deve conter:\n1. Um resumo dos ganhos e gastos.\n2. A maior categoria de despesa pessoal.\n3. Três sugestões práticas para melhorar a saúde financeira, baseadas nas funcionalidades existentes do Rico Plus.\n`;
                 const analysisResult = await this.callVercelFunction(prompt);
                 const cleanedResponse = App.helpers.cleanAIResponse(analysisResult);
-                App.ui.aiAnalysisResult.innerHTML = cleanedResponse;
-            } catch (error) {
+App.ui.aiAnalysisResult.innerHTML = `<div class="prose dark:prose-invert max-w-none">${cleanedResponse}</div>`;            } catch (error) {
                 console.error("Erro ao obter análise da IA:", error);
                 App.ui.aiAnalysisResult.innerHTML = '<p style="color: var(--red-color);">Ocorreu um erro ao tentar analisar os dados.</p>';
             }
