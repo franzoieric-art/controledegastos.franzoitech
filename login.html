@@ -4,394 +4,139 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Financeiro - Franzoi Tech</title>
+    <title>Painel Financeiro - Rico Plus</title>
+    
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="apple-mobile-web-app-title" content="FranzoiTech">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <style>
        :root {
-    --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
-    --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
-    --secondary-bg: #e8e8ed; --secondary-text: #1d1d1f; --border-color: #d2d2d7;
-    --green-color: #30a14f; --red-color: #d82c0d;
-}
-html.dark {
-    --bg-color: #000000; --card-bg: #1d1d1f; --text-color: #f5f5f7; --muted-text: #86868b;
-    --input-bg: #3a3a3c; --input-border: #545458; --primary-color: #2997ff; --primary-color-hover: #53b0ff;
-    --secondary-bg: #3a3a3c; --secondary-text: #f5f5f7; --border-color: #424245;
-    --green-color: #32d74b; --red-color: #ff453a;
-}
+            --bg-color: #f5f5f7; --card-bg: #ffffff; --text-color: #1d1d1f; --muted-text: #6e6e73;
+            --input-bg: #f5f5f7; --input-border: #d2d2d7; --primary-color: #0071e3; --primary-color-hover: #0077ed;
+            --secondary-bg: #e8e8ed; --secondary-text: #1d1d1f; --border-color: #d2d2d7;
+            --green-color: #30a14f; --red-color: #d82c0d;
+        }
+        html.dark {
+            --bg-color: #000000; --card-bg: #1d1d1f; --text-color: #f5f5f7; --muted-text: #86868b;
+            --input-bg: #3a3a3c; --input-border: #545458; --primary-color: #2997ff; --primary-color-hover: #53b0ff;
+            --secondary-bg: #3a3a3c; --secondary-text: #f5f5f7; --border-color: #424245;
+            --green-color: #32d74b; --red-color: #ff453a;
+        }
 
-/* --- CORREÇÃO DA "SANFONA" (LAYOUT SHIFT) --- */
-html {
-    overflow-y: scroll; /* Mantém a barra de rolagem sempre visível */
-}
+        html { overflow-y: scroll; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body.modal-open { overflow: hidden; padding-right: 0px !important; }
+        
+        .modal-overlay:not(.hidden) .modal-content { transform: scale(1); opacity: 1; }
+        
+        /* Container Principal */
+        .painel-principal {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 100vh;
+            max-width: 80rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-.painel-principal {
-    width: 100%;
-    flex-grow: 1;
-    min-height: 100vh; /* Garante altura mínima */
-    max-width: 80rem; /* Limita largura em telas gigantes */
-    margin-left: auto;
-    margin-right: auto;
-}
+        /* CSS DA IA (Corrigido para cores) */
+        #ai-analysis-result { font-size: 0.95rem; line-height: 1.7; }
+        #ai-analysis-result { color: #1f2937 !important; }
+        #ai-analysis-result strong, #ai-analysis-result b { color: #000000 !important; font-weight: 700; }
+        html.dark #ai-analysis-result { color: #e5e7eb !important; }
+        html.dark #ai-analysis-result strong, html.dark #ai-analysis-result b { color: #ffffff !important; }
+        #ai-analysis-result h1, #ai-analysis-result h2, #ai-analysis-result h3 { margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 700; line-height: 1.3; }
+        #ai-analysis-result h1, #ai-analysis-result h2, #ai-analysis-result h3 { color: #111827; }
+        html.dark #ai-analysis-result h1, html.dark #ai-analysis-result h2, html.dark #ai-analysis-result h3 { color: #f3f4f6 !important; }
+        #ai-analysis-result ul, #ai-analysis-result ol { margin-bottom: 1rem; padding-left: 1.5rem; list-style-position: outside; }
+        #ai-analysis-result ul { list-style-type: disc; }
+        
+        /* Componentes Gerais */
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
+        .input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
+        .input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
+        .muted-text { color: var(--muted-text); }
+        .remove-btn { background-color: var(--secondary-bg); color: var(--muted-text); border-radius: 9999px; width: 1.75rem; height: 1.75rem; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; }
+        .remove-btn:hover { background-color: var(--red-color); color: white; }
+        
+        /* Dropdown Menu */
+        .action-menu-dropdown {
+            position: absolute; top: 100%; right: 0; margin-top: 0.5rem; width: 12rem; z-index: 20;
+            background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); padding: 0.5rem;
+            opacity: 1; transform: translateY(0); transition: opacity 0.2s, transform 0.2s; pointer-events: auto;
+        }
+        .action-menu-dropdown.is-closed { opacity: 0; transform: translateY(-10px); pointer-events: none; }
 
-body { 
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-    background-color: var(--bg-color); 
-    color: var(--text-color);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-body.modal-open {
-    overflow: hidden;
-    padding-right: 0px !important; /* Evita o pulo da barra de rolagem */
-}
-.modal-overlay:not(.hidden) .modal-content {
-    transform: scale(1);
-    opacity: 1;
-}
+        /* Calendário */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; border: 1px solid var(--border-color); padding: 1rem; border-radius: 1.5rem; width: 100%; }
+        .calendar-header { text-align: center; font-weight: 600; color: var(--muted-text); padding-bottom: 0.5rem; font-size: 0.875rem; }
+        .calendar-day { display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s; position: relative; font-size: 0.9rem; }
+        .calendar-day.current-month:hover { background-color: var(--secondary-bg); }
+        .calendar-day.active { background-color: var(--primary-color); color: white; font-weight: 600; }
+        .calendar-day.has-entries::after { content: ''; position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background-color: var(--red-color); }
+        .calendar-day.active.has-entries::after { background-color: white; }
+        .calendar-nav-btn { font-size: 1.5rem; color: var(--primary-color); width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; }
 
-/* --- CORREÇÃO DO MODO ESCURO PARA A RESPOSTA DA IA --- */
-#ai-analysis-result {
-    font-size: 0.95rem;
-    line-height: 1.7; /* Mais espaço entre linhas para não parecer "espremido" */
-}
-
-/* === MODO CLARO (Padrão) === */
-/* Força texto escuro e fundo transparente ou claro */
-#ai-analysis-result {
-    color: #1f2937 !important; /* Cinza escuro quase preto */
-}
-
-#ai-analysis-result strong,
-#ai-analysis-result b {
-    color: #000000 !important; /* Preto puro para negrito */
-    font-weight: 700;
-}
-
-/* === MODO ESCURO (Quando html tem a classe .dark) === */
-html.dark #ai-analysis-result {
-    color: #e5e7eb !important; /* Cinza claro quase branco */
-}
-
-html.dark #ai-analysis-result strong,
-html.dark #ai-analysis-result b {
-    color: #ffffff !important; /* Branco puro */
-}
-
-/* === ORGANIZAÇÃO DO LAYOUT (Títulos e Espaços) === */
-
-/* Títulos gerados pela IA (H1, H2, H3) */
-#ai-analysis-result h1, 
-#ai-analysis-result h2, 
-#ai-analysis-result h3 {
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-/* Cores dos títulos */
-#ai-analysis-result h1, #ai-analysis-result h2, #ai-analysis-result h3 { color: #111827; } /* Claro */
-html.dark #ai-analysis-result h1, 
-html.dark #ai-analysis-result h2, 
-html.dark #ai-analysis-result h3 { color: #f3f4f6 !important; } /* Escuro */
-
-/* Parágrafos */
-#ai-analysis-result p {
-    margin-bottom: 1rem;
-    text-align: justify; /* Deixa o texto mais quadradinho e organizado */
-}
-
-/* Listas (Bolinhas e Números) */
-#ai-analysis-result ul, 
-#ai-analysis-result ol {
-    margin-bottom: 1rem;
-    padding-left: 1.5rem; /* Recuo para a esquerda */
-    list-style-position: outside;
-}
-
-#ai-analysis-result ul { list-style-type: disc; }
-#ai-analysis-result ol { list-style-type: decimal; }
-
-#ai-analysis-result li {
-    margin-bottom: 0.5rem;
-    padding-left: 0.5rem;
-}
-
-/* Blocos de destaque ou código */
-#ai-analysis-result blockquote,
-#ai-analysis-result pre {
-    background-color: rgba(128, 128, 128, 0.1);
-    border-left: 4px solid var(--primary-color);
-    padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 0.5rem;
-    font-style: italic;
-}
-
-
-.card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); }
-.input-field { border: 1px solid var(--input-border); background-color: var(--input-bg); color: var(--text-color); border-radius: 12px; }
-.input-field:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
-.muted-text { color: var(--muted-text); }
-input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-input[type="number"] { -moz-appearance: textfield; appearance: none; }
-.remove-btn { background-color: var(--secondary-bg); color: var(--muted-text); border-radius: 9999px; width: 1.75rem; height: 1.75rem; font-weight: 500; transition: background-color 0.2s, color 0.2s; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; }
-.remove-btn:hover { background-color: var(--red-color); color: white; }
-.month-content { display: none; } .month-content.active { display: block; }
-#save-feedback { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background-color: var(--green-color); color: white; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500; z-index: 100; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, transform 0.3s; }
-#save-feedback.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(-10px); }
-.accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; padding: 0 1.5rem; border-top: 1px solid var(--border-color); }
-.accordion-item.active .accordion-content { max-height: 1000px; padding: 1.5rem; }
-.accordion-trigger .arrow { transition: transform 0.3s ease-out; }
-.accordion-item.active .accordion-trigger .arrow { transform: rotate(180deg); }
-.prose { color: var(--text-color); } .prose h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5em; }
-.prose p { margin-bottom: 1em; line-height: 1.6; } .prose ul { list-style-position: inside; margin-bottom: 1em; padding-left: 1em; }
-.prose li { margin-bottom: 0.5em; }
-.tooltip-container { position: relative; display: inline-flex; align-items: center; }
-.tooltip-text { visibility: hidden; width: 160px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 10; bottom: 125%; left: 50%; margin-left: -80px; opacity: 0; transition: opacity 0.2s; font-size: 0.8rem; pointer-events: none; }
-.tooltip-container:focus .tooltip-text { visibility: visible; opacity: 1; }
-.action-buttons { display: flex; flex-direction: column; gap: 0.5rem; }
-@media (max-width: 640px) {
-    .modal-content {
-        width: calc(100% - 2rem); /* Ocupa a largura toda com 1rem de margem de cada lado */
-        max-height: 85vh; /* Limita a altura a 85% da tela */
-    }
-}
-#theme-toggle-btn { font-size: 1.25rem !important; color: var(--text-color) !important; background-image: none !important; line-height: 1; }
-#theme-toggle-btn::before, #theme-toggle-btn::after { content: none !important; display: none !important; }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; border: 1px solid var(--border-color); padding: 1rem; border-radius: 1.5rem; width: 100%; }
-.calendar-header { text-align: center; font-weight: 600; color: var(--muted-text); padding-bottom: 0.5rem; font-size: 0.875rem; }
-.calendar-day { display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s, color 0.2s; position: relative; }
-.calendar-day.not-current-month { color: var(--muted-text); opacity: 0.5; cursor: default; }
-.calendar-day.current-month:hover { background-color: var(--secondary-bg); }
-.calendar-day.active { background-color: var(--primary-color); color: white; font-weight: 600; }
-.calendar-day.has-entries::after { content: ''; position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background-color: var(--red-color); }
-.calendar-day.active.has-entries::after { background-color: white; }
-[id^="expense-section-wrapper-"] .accordion-item { display: none; }
-[id^="expense-section-wrapper-"] .accordion-item.active { display: block; }
-.calendar-nav-header { border: 1px solid var(--border-color); }
-.calendar-nav-btn { font-size: 1.75rem; font-weight: 300; color: var(--primary-color); width: 2.5rem; height: 2.5rem; border-radius: 9999px; transition: background-color 0.2s, color 0.2s, transform 0.2s; display: flex; align-items: center; justify-content: center; line-height: 1; background-color: transparent; border: none; cursor: pointer; }
-.calendar-nav-btn:hover { background-color: var(--secondary-bg); color: var(--primary-color); transform: scale(1.1); }
-.calendar-nav-btn:active { transform: scale(0.95); }
-
-/*
- * =========================================
- * ESTILOS PARA BOTÕES - APPLE STYLE (ATUALIZADO)
- * =========================================
- */
-.button-group-container {
-    display: flex;
-    align-items: center;
-    background-color: rgba(128, 128, 128, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 9999px;
-    padding: 4px;
-    border: 1px solid rgba(128, 128, 128, 0.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    gap: 4px; /* Pequeno espaço entre os botões */
-}
-
-.action-buttons {
-    display: flex;
-    align-items: center;
-    gap: 0; /* Botões de ação ficam colados */
-}
-
-.apple-style-button {
-    background-color: transparent;
-    border: none;
-    color: var(--muted-text);
-    font-size: 0.875rem;
-    font-weight: 500;
-    padding: 8px 16px;
-    border-radius: 9999px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.apple-style-button:hover {
-    background-color: rgba(128, 128, 128, 0.15);
-    color: var(--text-color);
-}
-
-.apple-style-button:active {
-    background-color: rgba(128, 128, 128, 0.25);
-}
-
-.apple-style-button-destructive:hover {
-    color: var(--red-color);
-}
-
-.theme-toggle {
-    font-size: 1rem !important;
-    padding: 8px !important;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-
-/*
- * =========================================
- * ESTILOS RESPONSIVOS GERAIS
- * =========================================
- */
-
-@media (max-width: 640px) {
-    .button-group-container {
-        flex-direction: column;
-        border-radius: 20px; /* Um pouco mais arredondado */
-        width: auto; /* Deixa a largura ser automática */
-        padding: 6px;
-        gap: 6px; /* Espaço entre a fileira de cima e o botão de tema */
-    }
-
-    .action-buttons {
-        gap: 0;
-    }
-
-    .button-text {
-        display: none;
-    }
-
-    .button-icon {
-        display: block;
-    }
-
-    .apple-style-button {
-        padding: 10px; /* Padding igual em todos os lados para um círculo perfeito */
-        width: 44px; /* Tamanho padrão de toque Apple */
-        height: 44px;
-    }
-    
-    .theme-toggle {
-        padding: 10px !important;
-        width: 44px;
-        height: 44px;
-    }
-
-    /* Estilos responsivos para Modais */
-    .modal-content {
-    /* Animação suave de entrada */
-    transform: scale(0.95);
-    opacity: 0;
-    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
-}
-
-    #settings-modal .grid {
-        grid-template-columns: 1fr; /* Força o layout de 3 colunas a ser de 1 coluna */
-    }
-}
-
-/*
- * =========================================
- * ESTILOS PARA REPaginação DOS MODAIS (Apple Style)
- * =========================================
- */
-.settings-section-title {
-    font-size: 0.875rem; /* text-sm */
-    font-weight: 600;
-    color: var(--muted-text);
-    padding: 0 1rem;
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-}
-
-.settings-group {
-    background-color: var(--secondary-bg);
-    border-radius: 0.75rem; /* rounded-xl */
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-/* Estilos para o novo Accordion do modal "Gerenciar" */
-.settings-accordion-item {
-    background-color: var(--secondary-bg);
-    border-radius: 0.75rem; /* rounded-xl */
-    margin-bottom: 1rem;
-    overflow: hidden; /* Importante para o efeito de abrir/fechar */
-    border: 1px solid var(--border-color);
-}
-
-.settings-accordion-trigger {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    background-color: transparent;
-    border: none;
-    text-align: left;
-    color: var(--text-color);
-}
-
-.settings-accordion-content {
-    padding: 0 1rem; /* Padding horizontal, vertical é controlado pela animação */
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
-}
-
-.settings-accordion-item.active .settings-accordion-content {
-    max-height: 1000px; /* Um valor alto para permitir a expansão total */
-    padding: 0 1rem 1rem 1rem; /* Adiciona padding inferior quando aberto */
-}
-
-.settings-accordion-trigger .arrow {
-    transition: transform 0.3s ease;
-}
-
-.settings-accordion-item.active .settings-accordion-trigger .arrow {
-    transform: rotate(180deg);
-}
-</style>
+        /* Accordion */
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; padding: 0 1.5rem; border-top: 1px solid var(--border-color); }
+        .accordion-item.active .accordion-content { max-height: 1000px; padding: 1.5rem; }
+        .accordion-trigger .arrow { transition: transform 0.3s; }
+        .accordion-item.active .accordion-trigger .arrow { transform: rotate(180deg); }
+        .month-content { display: none; } .month-content.active { display: block; }
+        
+        /* Mobile Fixes */
+        @media (max-width: 640px) {
+            .modal-content { width: calc(100% - 2rem); max-height: 85vh; }
+            .calendar-day { height: 36px; font-size: 0.8rem; }
+        }
+    </style>
 </head>
-<body class="p-2 sm:p-4">
-    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white"><svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><h2 class="text-xl font-semibold">Carregando dados...</h2><p class="text-sm">Isso pode levar alguns segundos.</p></div>
+<body class="p-2 sm:p-4 min-h-screen flex flex-col">
+    
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-70 flex-col items-center justify-center hidden z-50 text-white">
+        <svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <h2 class="text-xl font-semibold">Carregando dados...</h2>
+    </div>
 
-    <div id="auth-screen">
-        <div class="w-full max-w-md bg-[var(--card-bg)] p-8 sm:p-10 rounded-2xl shadow-sm border border-[var(--border-color)]">
-            <div class="text-center mb-8">
-                <div class="flex justify-center mb-4">
-<img src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/30cd2b50cb7d032f5820b3d601e7601d61ce275a/ricoplus-landing-page/logoricoplus.png" alt="Logo Rico Plus" class="h-20 w-auto">                </div>
+    <div id="auth-screen" class="flex items-center justify-center min-h-[90vh] w-full">
+        <div class="w-full max-w-md bg-[var(--card-bg)] p-8 sm:p-10 rounded-2xl shadow-lg border border-[var(--border-color)]">
+            <div class="text-center mb-8 flex flex-col items-center">
+                <img src="/images/logoricoplus.png" alt="Logo Rico Plus" class="h-24 w-auto mb-4 object-contain">
                 <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-[var(--text-color)]">Acesso ao Painel</h1>
                 <p class="text-[var(--muted-text)] mt-2">Exclusivo para membros Rico Plus.</p>
             </div>
             
             <div class="space-y-4">
-                <input type="email" id="email-input" placeholder="Email" class="w-full p-3 rounded-xl border bg-[var(--input-bg)] border-[var(--input-border)] focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-50 outline-none transition-all">
-                <input type="password" id="password-input" placeholder="Senha" class="w-full p-3 rounded-xl border bg-[var(--input-bg)] border-[var(--input-border)] focus:border-[var(--primary-color)] focus:ring-2 focus:ring-[var(--primary-color)] focus:ring-opacity-50 outline-none transition-all">
+                <input type="email" id="email-input" placeholder="Email" class="w-full p-3 rounded-xl border bg-[var(--input-bg)] border-[var(--input-border)] focus:border-[var(--primary-color)] focus:ring-2 outline-none transition-all">
+                <input type="password" id="password-input" placeholder="Senha" class="w-full p-3 rounded-xl border bg-[var(--input-bg)] border-[var(--input-border)] focus:border-[var(--primary-color)] focus:ring-2 outline-none transition-all">
                 <input type="password" id="confirm-password-input" placeholder="Confirmar Senha" class="w-full p-3 rounded-xl border bg-[var(--input-bg)] border-[var(--input-border)] hidden">
             </div>
 
             <div id="auth-error" class="text-red-500 text-sm mt-4 text-center h-4"></div>
 
             <div class="mt-6">
-                <button id="main-auth-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors disabled:opacity-50 bg-[var(--primary-color)] hover:bg-[var(--primary-color-hover)]">Entrar</button>
+                <button id="main-auth-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors bg-[var(--primary-color)] hover:bg-[var(--primary-color-hover)]">Entrar</button>
             </div>
             
             <div class="mt-4 text-center">
@@ -400,128 +145,119 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
         </div>
     </div>
 
-    <div id="app-screen" class="hidden">
+    <div id="app-screen" class="hidden w-full flex flex-col items-center">
+        
         <div id="chatbot-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-end justify-end p-4 hidden z-50 transition-opacity">
             <div class="modal-content card rounded-2xl shadow-xl w-full max-w-md h-2/3 flex flex-col transform translate-y-8 transition-transform">
-                <div class="flex justify-between items-center p-4 border-b flex-shrink-0" style="border-color: var(--border-color);"><h2 class="text-xl font-bold">Assistente IA</h2><button id="close-chatbot-modal-btn" class="px-3 py-1 rounded-lg" style="background-color: var(--secondary-bg);">&times;</button></div>
-                <div id="chatbot-messages" class="flex-grow p-4 overflow-y-auto space-y-4">
-                    <div class="p-3 rounded-lg max-w-[85%] text-sm" style="background-color: var(--secondary-bg);"><p class="font-bold mb-1">Assistente</p><p>Olá! Como posso ajudar com suas finanças hoje?</p></div>
-                </div>
-                <div class="p-4 border-t flex gap-2 flex-shrink-0" style="border-color: var(--border-color);"><input type="text" id="chatbot-input" placeholder="Ex: Qual foi meu maior gasto em Setembro?" class="flex-grow p-3 input-field"><button id="chatbot-send-btn" class="px-5 py-3 text-white font-semibold rounded-xl" style="background-color: var(--primary-color);">Enviar</button></div>
-            </div>
-        </div>
-        <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl transform flex flex-col max-h-[90vh] p-0">
                 <div class="flex justify-between items-center p-4 border-b flex-shrink-0" style="border-color: var(--border-color);">
-                    <h2 class="text-xl font-bold">Minha Conta</h2>
-                    <button id="close-account-modal-btn" class="px-3 py-1 rounded-lg text-sm font-semibold" style="background-color: var(--secondary-bg);">&times; Fechar</button>
+                    <h2 class="text-xl font-bold">Assistente IA</h2>
+                    <button id="close-chatbot-modal-btn" class="px-3 py-1 rounded-lg bg-[var(--secondary-bg)]">&times;</button>
                 </div>
-                <div class="overflow-y-auto p-4 sm:p-6">
-                    <div>
-                        <h3 class="settings-section-title">Perfil</h3>
-                        <div class="settings-group space-y-4">
-                            <div>
-                                <label for="user-name-input" class="block text-sm font-medium muted-text mb-1">Nome Completo</label>
-                                <input type="text" id="user-name-input" placeholder="Seu nome" class="w-full p-3 input-field">
-                            </div>
-                            <div>
-                                <label for="user-email-display" class="block text-sm font-medium muted-text mb-1">Email</label>
-                                <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled="" style="opacity: 0.7;">
-                            </div>
-                        </div>
-                        <button id="save-profile-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors" style="background-color: var(--primary-color);">Salvar Alterações</button>
+                <div id="chatbot-messages" class="flex-grow p-4 overflow-y-auto space-y-4">
+                    <div class="p-3 rounded-lg max-w-[85%] text-sm bg-[var(--secondary-bg)]">
+                        <p class="font-bold mb-1">Assistente</p>
+                        <p>Olá! Como posso ajudar com suas finanças hoje?</p>
                     </div>
-                    
-                    <div class="mt-8">
-                        <h3 class="settings-section-title">Integrações</h3>
-                        <div class="settings-group">
-                            <h4 class="text-lg font-bold mb-1">Assistente IA via WhatsApp</h4>
-                            <p class="muted-text text-sm mb-4">Configure a integração para interagir com seu painel diretamente do WhatsApp.</p>
-                            <div class="p-3 mb-4 rounded-xl text-center text-sm" style="background-color: var(--input-bg);">✨ <span class="font-semibold">Funcionalidade em desenvolvimento.</span> Disponível em breve!</div>
-                        </div>
-                    </div>
+                </div>
+                <div class="p-4 border-t flex gap-2 flex-shrink-0" style="border-color: var(--border-color);">
+                    <input type="text" id="chatbot-input" placeholder="Digite sua pergunta..." class="flex-grow p-3 input-field">
+                    <button id="chatbot-send-btn" class="px-5 py-3 text-white font-semibold rounded-xl bg-[var(--primary-color)]">Enviar</button>
                 </div>
             </div>
         </div>
+
         <div id="settings-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl transform flex flex-col max-h-[90vh] p-0">
-                <div class="flex justify-between items-center p-4 sm:p-6 border-b flex-shrink-0" style="border-color: var(--border-color);">
-                    <h2 class="text-xl sm:text-2xl font-bold">Gerenciar</h2>
-                    <button id="close-modal-btn" class="px-3 py-1.5 rounded-lg text-sm font-semibold" style="background-color: var(--secondary-bg); color: var(--secondary-text);">
-                        Fechar
-                    </button>
+                <div class="flex justify-between items-center p-4 border-b flex-shrink-0" style="border-color: var(--border-color);">
+                    <h2 class="text-xl font-bold">Gerenciar</h2>
+                    <button id="close-modal-btn" class="px-3 py-1.5 rounded-lg text-sm bg-[var(--secondary-bg)]">Fechar</button>
                 </div>
-                <div id="settings-accordion-container" class="overflow-y-auto p-4 sm:p-6">
+                <div id="settings-accordion-container" class="overflow-y-auto p-4">
                     <div class="settings-accordion-item">
-                        <div class="settings-accordion-trigger">
-                            <span>Cartões de Crédito</span>
-                            <span class="arrow muted-text">▼</span>
-                        </div>
+                        <div class="settings-accordion-trigger"><span>Cartões de Crédito</span><span class="arrow muted-text">▼</span></div>
                         <div class="settings-accordion-content">
                             <div class="flex gap-2 mb-4">
                                 <input type="text" id="new-card-name" placeholder="Nome do Cartão" class="flex-grow p-2 input-field">
-                                <button id="add-card-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button>
+                                <button id="add-card-btn" class="px-4 py-2 text-white rounded-lg bg-[var(--primary-color)]">Adicionar</button>
                             </div>
                             <div id="card-list" class="flex flex-col gap-2"></div>
                         </div>
                     </div>
                     <div class="settings-accordion-item">
-                        <div class="settings-accordion-trigger">
-                            <span>Categorias e Metas</span>
-                            <span class="arrow muted-text">▼</span>
-                        </div>
+                        <div class="settings-accordion-trigger"><span>Categorias</span><span class="arrow muted-text">▼</span></div>
                         <div class="settings-accordion-content">
                             <div class="flex gap-2 mb-4">
                                 <input type="text" id="new-category-name" placeholder="Nova Categoria" class="flex-grow p-2 input-field">
-                                <button id="add-category-btn" class="px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar</button>
+                                <button id="add-category-btn" class="px-4 py-2 text-white rounded-lg bg-[var(--primary-color)]">Adicionar</button>
                             </div>
                             <div id="category-list" class="flex flex-col gap-2"></div>
                         </div>
                     </div>
                     <div class="settings-accordion-item">
-                        <div class="settings-accordion-trigger">
-                            <span>Lançamentos Recorrentes</span>
-                            <span class="arrow muted-text">▼</span>
-                        </div>
+                        <div class="settings-accordion-trigger"><span>Lançamentos Recorrentes</span><span class="arrow muted-text">▼</span></div>
                         <div class="settings-accordion-content">
-                            <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm" style="background-color: var(--input-bg); border-color: var(--input-border);">
+                            <div id="recurring-form" class="space-y-2 p-3 border rounded-xl mb-4 text-sm bg-[var(--input-bg)] border-[var(--input-border)]">
                                 <input type="text" id="recurring-desc" placeholder="Descrição" class="w-full p-2 input-field">
-                                <div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia do Mês" min="1" max="31" class="w-full p-2 input-field"></div>
+                                <div class="grid grid-cols-2 gap-2"><input type="number" id="recurring-amount" placeholder="Valor" class="w-full p-2 input-field"><input type="number" id="recurring-day" placeholder="Dia" min="1" max="31" class="w-full p-2 input-field"></div>
                                 <select id="recurring-type" class="w-full p-2 input-field"></select>
                                 <div id="recurring-expense-fields" class="space-y-2 hidden"><select id="recurring-category" class="w-full p-2 input-field"></select><select id="recurring-payment" class="w-full p-2 input-field"></select><select id="recurring-card" class="w-full p-2 input-field hidden"></select></div>
-                                <button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg" style="background-color: var(--primary-color);">Adicionar Recorrência</button>
+                                <button id="add-recurring-btn" class="w-full px-4 py-2 text-white rounded-lg bg-[var(--primary-color)]">Salvar Recorrência</button>
                             </div>
                             <div id="recurring-list" class="flex flex-col gap-2"></div>
                         </div>
                     </div>
-                </div> 
-            </div> 
-        </div> 
+                </div>
+            </div>
+        </div>
+
+        <div id="account-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl transform flex flex-col max-h-[90vh] p-0">
+                <div class="flex justify-between items-center p-4 border-b flex-shrink-0" style="border-color: var(--border-color);">
+                    <h2 class="text-xl font-bold">Minha Conta</h2>
+                    <button id="close-account-modal-btn" class="px-3 py-1 rounded-lg text-sm bg-[var(--secondary-bg)]">Fechar</button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium muted-text mb-1">Nome</label>
+                        <input type="text" id="user-name-input" class="w-full p-3 input-field">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium muted-text mb-1">Email</label>
+                        <input type="email" id="user-email-display" class="w-full p-3 input-field" disabled style="opacity: 0.7;">
+                    </div>
+                    <button id="save-profile-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl bg-[var(--primary-color)]">Salvar Perfil</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="ai-analysis-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+            <div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]">
+                <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                    <h2 class="text-2xl font-bold">Análise Financeira com IA</h2>
+                    <button id="close-ai-modal-btn" class="px-4 py-2 rounded-lg bg-[var(--secondary-bg)]">Fechar</button>
+                </div>
+                <div id="ai-analysis-result" class="overflow-y-auto">
+                    <p class="muted-text">Analisando seus dados...</p>
+                </div>
+            </div>
+        </div>
 
         <div id="confirm-recurring-delete-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="modal-content card rounded-2xl shadow-xl w-full max-w-lg p-6 transform scale-95">
                 <h2 class="text-xl font-bold mb-4">Confirmar Remoção</h2>
-                <p class="text-[var(--muted-text)] mb-6">
-                    Você está prestes a remover um lançamento recorrente. O que você deseja fazer com os lançamentos que já foram criados nos meses anteriores?
-                </p>
+                <p class="muted-text mb-6">Você está removendo uma recorrência. O que deseja fazer com os lançamentos passados?</p>
                 <div class="space-y-3">
-                    <button id="delete-future-recurring-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl shadow-md transition-colors bg-[var(--primary-color)] hover:bg-[var(--primary-color-hover)]">
-                        Remover a partir do mês atual
-                    </button>
-                    <button id="delete-all-recurring-btn" class="w-full px-6 py-3 font-semibold rounded-xl transition-colors bg-[var(--secondary-bg)] hover:bg-[var(--red-color)] hover:text-white">
-                        Remover todos os lançamentos (histórico completo)
-                    </button>
+                    <button id="delete-future-recurring-btn" class="w-full px-6 py-3 text-white font-semibold rounded-xl bg-[var(--primary-color)]">Remover deste mês em diante</button>
+                    <button id="delete-all-recurring-btn" class="w-full px-6 py-3 font-semibold rounded-xl bg-[var(--secondary-bg)] hover:bg-[var(--red-color)] hover:text-white">Remover TUDO (histórico)</button>
                 </div>
-                <div class="mt-6 text-center">
-                    <button id="cancel-delete-recurring-btn" class="text-sm text-[var(--muted-text)] hover:underline">Cancelar</button>
-                </div>
+                <div class="mt-6 text-center"><button id="cancel-delete-recurring-btn" class="text-sm muted-text hover:underline">Cancelar</button></div>
             </div>
         </div>
-        <div id="ai-analysis-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50"><div class="modal-content card rounded-2xl shadow-xl w-full max-w-2xl p-6 transform scale-95 flex flex-col max-h-[90vh]"><div class="flex justify-between items-center mb-4 flex-shrink-0"><h2 class="text-2xl font-bold">Análise Financeira com IA</h2><button id="close-ai-modal-btn" class="px-4 py-2 rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);">Fechar</button></div><div id="ai-analysis-result" class="overflow-y-auto prose dark:prose-invert"><p class="muted-text">Analisando seus dados...</p></div></div></div>
+
         <div class="painel-principal max-w-7xl mx-auto card p-4 md-p-8 rounded-2xl relative">
             <div id="save-feedback">Salvo ✓</div>
+            
             <div id="user-header" class="flex flex-row items-center justify-between mb-8 pb-6 border-b" style="border-color: var(--border-color);">
-                
                 <div class="flex items-center gap-4">
                     <label for="avatar-upload-input" class="cursor-pointer group relative flex-shrink-0">
                         <img id="user-avatar" src="https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/main/ricoplus-landing-page/images/default-avatar.svg" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 transition-all group-hover:opacity-80" style="border-color: var(--border-color);">
@@ -530,43 +266,28 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
                         </div>
                     </label>
                     <input type="file" id="avatar-upload-input" class="hidden" accept="image/png, image/jpeg">
-                    
                     <div class="flex flex-col">
                         <p id="time-greeting" class="text-xs sm:text-sm font-medium muted-text leading-none mb-1">Boa tarde!</p>
                         <h2 id="greeting-text" class="text-xl sm:text-2xl font-bold leading-none tracking-tight">Olá, Visitante</h2>
                     </div>
                 </div>
-
                 <div class="flex items-center bg-[var(--secondary-bg)] rounded-full p-1 border border-[var(--border-color)]">
-                    <button id="theme-toggle-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--card-bg)] transition-colors text-lg">
-                        ☀️
-                    </button>
-                    
+                    <button id="theme-toggle-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--card-bg)] transition-colors text-lg">☀️</button>
                     <div class="w-px h-5 bg-[var(--border-color)] mx-1"></div>
-
                     <div id="action-menu-container" class="relative">
                         <button id="action-menu-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--card-bg)] transition-colors text-[var(--muted-text)]">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.02-.398-1.11-.94l-.149-.894c-.07-.424-.384-.764-.78-.93-.398-.164-.855-.142-1.205.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.02-.398-1.11-.94l-.149-.894c-.07-.424-.384-.764-.78-.93-.398-.164-.855-.142-1.205.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                         </button>
-                        
                         <div id="action-menu-dropdown" class="action-menu-dropdown is-closed" style="top: 125%; right: 0;">
-                            <a href="#" id="manage-account-btn" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--secondary-bg)] transition-colors">
-                                👤 Minha Conta
-                            </a>
-                            <a href="#" id="manage-settings-btn" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--secondary-bg)] transition-colors">
-                                ⚙️ Configurações
-                            </a>
+                            <a href="#" id="manage-account-btn" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--secondary-bg)] transition-colors">👤 Minha Conta</a>
+                            <a href="#" id="manage-settings-btn" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-[var(--secondary-bg)] transition-colors">⚙️ Configurações</a>
                             <div class="my-1.5 h-px bg-[var(--border-color)]"></div>
-                            <a href="#" id="logout-btn" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-[var(--red-color)] hover:bg-[var(--secondary-bg)] transition-colors">
-                                🚪 Sair
-                            </a>
+                            <a href="#" id="logout-btn" class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg text-[var(--red-color)] hover:bg-[var(--secondary-bg)] transition-colors">🚪 Sair</a>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="text-center mb-8 space-y-2">
                 <p class="text-xs font-semibold" style="color: var(--primary-color);">Rico Plus <span class="muted-text">by Franzoi Tech</span></p>
                 <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Painel Financeiro</h1>
@@ -580,7 +301,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: none; }
                 <span class="font-semibold" style="color: var(--primary-color);">Rico Plus</span> by Franzoi Tech | Versão 1.12 | Desenvolvido por <a href="#" target="_blank" class="underline" style="color: var(--muted-text);">Eric Franzoi</a>
             </p>
         </footer>
-            <button id="floating-chatbot-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full text-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: var(--primary-color); color: white;">🤖</button>
+        <button id="floating-chatbot-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full text-3xl flex items-center justify-center shadow-lg transition-transform hover:scale-110" style="background-color: var(--primary-color); color: white;">🤖</button>
     </div> 
 
     <script type="module" src="/src/main.js"></script>
