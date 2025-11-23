@@ -1,6 +1,6 @@
 import './input.css';
 
-// Importações corretas para o Vite
+// Importações do Firebase
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
@@ -22,7 +22,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Elementos da UI Globais
+// Elementos Globais da UI
 const authScreen = document.getElementById('auth-screen');
 const appScreen = document.getElementById('app-screen');
 const mainAuthBtn = document.getElementById('main-auth-btn');
@@ -32,7 +32,7 @@ const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const loadingOverlay = document.getElementById('loading-overlay');
 let isLoginMode = true;
 
-// --- LISTENERS DE AUTENTICAÇÃO (Rodam apenas uma vez no load da página) ---
+// --- LISTENERS DE AUTENTICAÇÃO (Executam apenas uma vez no carregamento) ---
 const handleAuthKeyPress = (event) => { if (event.key === 'Enter') { event.preventDefault(); mainAuthBtn.click(); } };
 if(document.getElementById('email-input')) document.getElementById('email-input').addEventListener('keydown', handleAuthKeyPress);
 if(document.getElementById('password-input')) document.getElementById('password-input').addEventListener('keydown', handleAuthKeyPress);
@@ -45,8 +45,7 @@ const applyTheme = (theme) => {
     if (themeToggleBtn) {
         themeToggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
-    // Só tenta atualizar gráfico se o App já estiver carregado
-    if (window.App && App.state.currentUserId && App.state.monthlyData[App.state.activeMonthIndex]) { 
+    if (window.App && App.state.currentUserId && App.state.monthlyData && App.state.monthlyData[App.state.activeMonthIndex]) { 
         App.showMonth(App.state.activeMonthIndex); 
     }
 };
@@ -120,11 +119,11 @@ if (forgotPasswordLink) {
     });
 }
 
-// --- LÓGICA PRINCIPAL DA APLICAÇÃO ---
+// --- APLICAÇÃO PRINCIPAL ---
 const App = {
     state: {
         currentUserId: null,
-        listenersBound: false, // <--- CORREÇÃO 1: Flag para evitar listeners duplicados
+        listenersBound: false, // <--- CORREÇÃO FUNDAMENTAL: Flag para evitar listeners duplicados
         profile: { name: '', avatarUrl: '' },
         integrations: { whatsapp: { phoneNumberId: '', accessToken: '', webhookVerifyToken: '' } },
         creditCards: [],
@@ -154,7 +153,6 @@ const App = {
     init(userId) {
         this.state.currentUserId = userId;
         
-        // Mapear elementos UI
         this.ui.monthContentContainer = document.getElementById('monthContentContainer');
         this.ui.settingsModal = document.getElementById('settings-modal');
         this.ui.accountModal = document.getElementById('account-modal');
@@ -171,11 +169,11 @@ const App = {
 
         this.loadData();
 
-        // <--- CORREÇÃO 1: Só adiciona os eventos se ainda não foram adicionados
+        // <--- TRAVA DE SEGURANÇA: Só adiciona os eventos se a flag for falsa
         if (!this.state.listenersBound) {
             this.bindGlobalEventListeners();
             this.state.listenersBound = true; 
-            console.log("Listeners globais inicializados com sucesso.");
+            console.log("Listeners globais inicializados (ÚNICA VEZ).");
         }
     },
 
@@ -198,10 +196,12 @@ const App = {
         generateRandomToken() { return [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join(''); }
     },
 
+    // Lógica de Upload SEM Storage (Base64 no Firestore)
     handleAvatarUpload(event) {
         const file = event.target.files[0];
         if (!file || !this.state.currentUserId) return;
 
+        // Limite de 700KB
         if (file.size > 700 * 1024) {
             alert("A imagem é muito grande! Escolha uma foto menor que 700KB.");
             return;
@@ -255,7 +255,6 @@ const App = {
     async loadData() {
         if (!this.state.currentUserId) return;
         
-        // <--- CORREÇÃO 2: Try/Finally para garantir que o overlay suma
         try {
             const docSnap = await getDoc(doc(db, 'users', this.state.currentUserId));
             if (docSnap.exists()) {
@@ -268,7 +267,7 @@ const App = {
                 this.state.recurringEntries = d.recurringEntries || [];
             }
             
-            // Inicializa estrutura de dados se necessário
+            // Inicializa meses se estiverem vazios
             for (let i = 0; i < 12; i++) {
                 if (!this.state.monthlyData[i]) { this.state.monthlyData[i] = {}; }
                 this.state.monthlyData[i].pjEntries = this.state.monthlyData[i].pjEntries || [];
@@ -276,7 +275,6 @@ const App = {
                 if (!Array.isArray(this.state.monthlyData[i].expenses) || this.state.monthlyData[i].expenses.length < 31) {
                     this.state.monthlyData[i].expenses = Array(31).fill(null).map(() => ({ personalEntries: [], businessEntries: [] }));
                 }
-                // Migração de dados antigos/segurança
                 this.state.monthlyData[i].expenses.forEach(day => {
                     if (day && day.personalEntries) {
                         day.personalEntries.forEach(entry => { if (!entry.category) entry.category = 'Outros'; });
@@ -294,9 +292,10 @@ const App = {
 
         } catch (error) { 
             console.error("Erro crítico ao carregar dados:", error); 
-            alert("Ocorreu um erro ao carregar seus dados. Por favor, recarregue a página.");
+            // Comentei o alert para não irritar se for um erro menor, mas deixei o log
+            // alert("Ocorreu um erro ao carregar seus dados. Por favor, recarregue a página.");
         } finally {
-            // Garante que o overlay suma mesmo se der erro
+            // Garante que o loading suma
             if (loadingOverlay) loadingOverlay.classList.add('hidden');
         }
     },
@@ -385,7 +384,6 @@ const App = {
         const appliedRecurringIds = new Set();
         const month = this.state.monthlyData[monthIndex];
         
-        // Coleta IDs já aplicados
         month.pfEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
         month.pjEntries.forEach(e => { if (e.recurringId) appliedRecurringIds.add(e.recurringId); });
         month.expenses.forEach(day => {
@@ -432,13 +430,11 @@ const App = {
         }
     },
 
-    // MÉTODOS DE EXPORTAÇÃO (CSV/PDF) MANTIDOS IGUAIS
     exportMonthToCSV(monthIndex) {
         const monthData = this.state.monthlyData[monthIndex];
         if (!monthData) { return; }
         const monthName = this.constants.monthNames[monthIndex];
         
-        // Cálculos
         const pjTotal = monthData.pjEntries.reduce((s, e) => s + e.amount, 0);
         const pfTotal = monthData.pfEntries.reduce((s, e) => s + e.amount, 0);
         const personalTotal = monthData.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0);
@@ -515,7 +511,6 @@ const App = {
             doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - 14, pageHeight - 10, { align: 'right' });
         };
 
-        // Dados para o PDF
         const pjTotal = monthData.pjEntries.reduce((s, e) => s + e.amount, 0);
         const pfTotal = monthData.pfEntries.reduce((s, e) => s + e.amount, 0);
         const personalTotal = monthData.expenses.flat().reduce((a, day) => a + day.personalEntries.reduce((s, e) => s + e.amount, 0), 0);
@@ -631,7 +626,6 @@ const App = {
             signOut(auth).then(() => { console.log("Logout success"); }).catch(console.error);
         });
 
-        // Modals Close Buttons
         document.getElementById('close-modal-btn')?.addEventListener('click', () => {
             document.body.classList.remove('modal-open');
             App.ui.settingsModal.classList.add('hidden');
@@ -826,7 +820,6 @@ const App = {
             // Settings Removals
             if (t.matches('.remove-card-btn')) {
                 const cardNameToRemove = t.dataset.cardName;
-                // Remove do histórico? Depende da regra de negócio. Aqui apenas remove da lista de seleção.
                 this.state.creditCards = this.state.creditCards.filter(c => c !== cardNameToRemove);
                 this.render.renderCardList();
                 this.saveDataToFirestore();
@@ -941,6 +934,40 @@ const App = {
     },
 
     render: {
+        updateHeader() {
+            const name = App.state.profile.name?.split(' ')[0] || 'Visitante';
+            document.getElementById('greeting-text').textContent = `Olá, ${name}`;
+            const hour = new Date().getHours();
+            let greeting = 'Boa tarde!';
+            if (hour >= 5 && hour < 12) { greeting = 'Bom dia!'; }
+            else if (hour >= 18 || hour < 5) { greeting = 'Boa noite!'; }
+            document.getElementById('time-greeting').textContent = greeting;
+            const avatarUrl = App.state.profile.avatarUrl || 'https://raw.githubusercontent.com/franzoieric-art/controledegastos.franzoitech/main/ricoplus-landing-page/images/default-avatar.svg';
+            document.getElementById('user-avatar').src = avatarUrl;
+        },
+        renderCalendarView(monthIndex) {
+            const container = document.getElementById(`calendar-container-${monthIndex}`);
+            if (!container) return;
+            const year = new Date().getFullYear();
+            const firstDay = new Date(year, monthIndex, 1);
+            const lastDay = new Date(year, monthIndex + 1, 0);
+            const startingDayOfWeek = firstDay.getDay();
+            const monthName = App.constants.monthNames[monthIndex];
+            let headerHTML = `<div class="calendar-nav-header flex items-center justify-between mb-4 p-2 rounded-xl" style="background-color: var(--input-bg);"><button class="calendar-nav-btn" data-action="prev-month" title="Mês Anterior">‹</button><div class="flex flex-col sm:flex-row items-center gap-1 sm:gap-4"><h3 class="text-lg font-semibold text-center">${monthName} ${year}</h3><button class="px-3 py-1 text-xs font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-action="show-annual">Balanço Anual</button></div><button class="calendar-nav-btn" data-action="next-month" title="Próximo Mês">›</button></div>`;
+            let gridHTML = '<div class="calendar-grid">';
+            ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(day => { gridHTML += `<div class="calendar-header">${day}</div>`; });
+            for (let i = 0; i < startingDayOfWeek; i++) { gridHTML += '<div></div>'; }
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayData = App.state.monthlyData[monthIndex].expenses[day - 1];
+                let classes = 'calendar-day current-month';
+                if (dayData && (dayData.personalEntries.length > 0 || dayData.businessEntries.length > 0)) { classes += ' has-entries'; }
+                gridHTML += `<div class="${classes}" data-day="${day - 1}">${day}</div>`;
+            }
+            gridHTML += '</div>';
+            container.innerHTML = headerHTML + gridHTML;
+        },
+        createMonthContentHTML: (monthIndex) => { return `<div id="month-${monthIndex}-content" class="month-content"><div class="flex justify-end gap-2 mb-4"><button class="export-csv-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar CSV</button><button class="export-pdf-btn px-4 py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}">Exportar PDF</button></div><div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"><div class="lg:col-span-1 p-5 rounded-2xl card border-t-4 border-yellow-400"><h2 class="text-xl font-semibold mb-4">Ganhos Pessoa Jurídica</h2><div id="pj-entries-container-${monthIndex}" class="flex flex-col gap-3 mb-3"></div><button class="add-entry-btn mt-2 w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}" data-type="pj">+ Adicionar Ganho PJ</button></div><div class="lg:col-span-1 p-5 rounded-2xl card border-t-4 border-green-400"><h2 class="text-xl font-semibold mb-4">Ganhos Pessoa Física</h2><div id="pf-entries-container-${monthIndex}" class="flex flex-col gap-3 mb-3"></div><button class="add-entry-btn mt-2 w-full py-2 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${monthIndex}" data-type="pf">+ Adicionar Ganho PF</button></div><div class="lg:col-span-1 grid gap-6"><div><div class="p-5 rounded-2xl card border-t-4 border-blue-400 space-y-4"><div class="space-y-1"><label class="block text-sm font-medium muted-text">Caixa da empresa:</label><p id="companyCash-${monthIndex}" class="text-2xl font-semibold">R$ 0,00</p></div><div class="space-y-1"><label class="block text-sm font-medium muted-text">Caixa pessoal:</label><p id="personalCash-${monthIndex}" class="text-2xl font-semibold">R$ 0,00</p></div></div></div><div><div id="summary-card-${monthIndex}" class="p-5 rounded-2xl card border-t-4 border-purple-400"><h2 class="text-xl font-semibold mb-4">Resumo do Mês</h2><div class="space-y-2 text-sm"><div class="flex justify-between items-center"><span>Gasto Pessoal:</span><span id="totalPersonalExpenses-${monthIndex}" class="font-semibold" style="color: var(--red-color);">R$ 0,00</span></div><div class="flex justify-between items-center"><span>Gasto Empresa:</span><span id="totalBusinessExpenses-${monthIndex}" class="font-semibold" style="color: var(--red-color);">R$ 0,00</span></div><div class="flex justify-between items-center pt-2 border-t" style="border-color: var(--border-color);"><span>Saldo Pessoal:</span><span id="remainingPersonal-${monthIndex}" class="font-semibold">R$ 0,00</span></div><div class="flex justify-between items-center"><span>Saldo Empresa:</span><span id="remainingBusiness-${monthIndex}" class="font-semibold">R$ 0,00</span></div><div class="flex justify-between items-center border-t pt-2 mt-2" style="border-color: var(--border-color);"><span class="font-semibold">Saldo Total:</span><span id="remainingTotal-${monthIndex}" class="text-xl font-bold">R$ 0,00</span></div></div><div id="budget-alerts-${monthIndex}" class="mt-3 text-xs"></div></div></div></div></div><div class="text-center mb-4"><button class="ai-analysis-btn px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);" onmouseover="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color-hover')" onmouseout="this.style.backgroundColor=getComputedStyle(this).getPropertyValue('--primary-color')" data-month-index="${monthIndex}">Analisar Mês com IA ✨</button></div><div id="calendar-container-${monthIndex}" class="mb-8"></div><div id="expense-section-wrapper-${monthIndex}" class=""><div id="expense-accordion-container-${monthIndex}" class="space-y-2 mb-8"></div></div><div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-8"><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Balanço do Mês</h2><div class="relative mx-auto" style="max-width: 300px; height: 300px;"><canvas id="budgetPieChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Gastos por Pagamento</h2><div class="relative mx-auto" style="max-width: 300px; height: 300px;"><canvas id="paymentMethodChart-${monthIndex}"></canvas></div></div><div class="card p-6 rounded-2xl"><h2 class="text-xl font-semibold text-center mb-4">Metas de Gastos (Pessoal)</h2><div class="relative mx-auto" style="height: 300px;"><canvas id="budgetGoalsChart-${monthIndex}"></canvas></div></div></div></div>` },
+        createBalanceContentHTML: () => { return `<div id="month-12-content" class="month-content"><div class="flex items-center justify-center gap-4 mb-8"><h2 class="text-3xl font-bold">Balanço Anual</h2><button class="px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-action="back-to-months">← Voltar</button></div><div class="text-center mb-8 -mt-4"><button id="ai-annual-analysis-btn" class="px-5 py-2 text-white font-semibold rounded-xl shadow-sm transition-colors" style="background-color: var(--primary-color);">Analisar Ano com IA ✨</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-center"><div class="card border-t-4 border-yellow-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PJ</span><span id="totalAnnualPJ" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-green-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Total Ganhos PF</span><span id="totalAnnualPF" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-red-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Gastos Totais</span><span id="totalAnnualExpenses" class="text-2xl font-semibold">R$ 0,00</span></div><div class="card border-t-4 border-blue-400 p-5 rounded-2xl"><span class="block text-sm muted-text mb-2">Saldo Final</span><span id="annualBalance" class="text-2xl font-bold">R$ 0,00</span><p id="annualPerformance" class="text-lg font-semibold mt-1"></p></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="card p-6 rounded-2xl lg:col-span-2"><h3 class="text-xl font-semibold text-center mb-4">Desempenho Mensal</h3><div class="relative mx-auto" style="height: 400px;"><canvas id="monthlyPerformanceBarChart"></canvas></div></div><div class="card p-6 rounded-2xl"><h3 class="text-xl font-semibold text-center mb-4">Maiores Gastos do Ano (Top 5)</h3><div id="top-spends-container" class="text-sm space-y-2 max-h-96 overflow-y-auto p-2"></div></div></div></div>` },
         createEntryElement: (config) => {
             const { monthIndex, dayIndex, category, entry, type } = config;
             const d = document.createElement('div');
@@ -958,113 +985,46 @@ const App = {
             d.innerHTML = `<input type="text" value="${entry.description}" placeholder="Descrição" class="entry-input flex-grow p-2 input-field text-sm" data-field="description"><input type="number" value="${entry.amount}" min="0" step="0.01" placeholder="0,00" class="entry-input w-28 p-2 input-field text-sm" data-field="amount">${s}${aiBtn}${p}<span class="card-selector-container">${c}</span>${r}`;
             return d;
         },
-        // ... (Outros métodos de renderização mantidos iguais para economizar espaço, pois não afetam a lógica do bug)
-        // Certifique-se de que renderPJEntries, renderPFEntries, etc. estejam aqui.
-        // Vou incluir os principais para garantir que o copy-paste funcione.
         renderPJEntries: (m) => { const c = document.getElementById(`pj-entries-container-${m}`); if (!c) return; c.innerHTML = ''; App.state.monthlyData[m].pjEntries.forEach(e => c.appendChild(App.render.createEntryElement({ monthIndex: m, entry: e, type: 'pj' }))); },
         renderPFEntries: (m) => { const c = document.getElementById(`pf-entries-container-${m}`); if (!c) return; c.innerHTML = ''; App.state.monthlyData[m].pfEntries.forEach(e => c.appendChild(App.render.createEntryElement({ monthIndex: m, entry: e, type: 'pf' }))); },
         renderExpenseTable: (m) => { const container = document.getElementById(`expense-accordion-container-${m}`); if (!container) return; container.innerHTML = ''; for (let day = 0; day < 31; day++) { const item = document.createElement('div'); item.className = 'accordion-item card rounded-xl overflow-hidden'; item.innerHTML = `<div class="accordion-trigger flex justify-between items-center p-4 cursor-pointer" style="background-color: var(--input-bg);"><span class="font-semibold">Dia ${day + 1}</span><span class="arrow text-xl muted-text">▼</span></div><div class="accordion-content"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><h3 class="font-semibold mb-3">Gastos Pessoais</h3><div id="personal-entries-${m}-${day}" class="flex flex-col gap-3"></div><button class="add-entry-btn mt-3 px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="personal">+ Gasto Pessoal</button></div><div><h3 class="font-semibold mb-3">Gastos da Empresa</h3><div id="business-entries-${m}-${day}" class="flex flex-col gap-3"></div><button class="add-entry-btn mt-3 px-3 py-1.5 text-sm font-semibold rounded-lg" style="background-color: var(--secondary-bg); color: var(--secondary-text);" data-month-index="${m}" data-day="${day}" data-type="expense" data-category="business">+ Gasto Empresa</button></div></div></div>`; container.appendChild(item); ['personal', 'business'].forEach(type => { const entriesContainer = item.querySelector(`#${type}-entries-${m}-${day}`); App.state.monthlyData[m].expenses[day][`${type}Entries`].forEach(e => entriesContainer.appendChild(App.render.createEntryElement({ monthIndex: m, dayIndex: day, category: type, entry: e, type: 'expense' }))); }); } },
         updateBudgetAlerts: (m) => { const c = document.getElementById(`budget-alerts-${m}`); if (!c) return; const expenses = App.state.categories.reduce((a, cat) => ({...a, [cat.name]: 0 }), {}); App.state.monthlyData[m].expenses.forEach(d => { d.personalEntries.forEach(e => { if (expenses[e.category] !== undefined) expenses[e.category] += e.amount; }); }); const alerts = App.state.categories.map(cat => (expenses[cat.name] > cat.budget && cat.budget > 0) ? `<li style="color: var(--red-color);">${cat.name}: ${App.helpers.formatCurrency(expenses[cat.name] - cat.budget)} acima da meta.</li>` : '').filter(Boolean); c.innerHTML = alerts.length > 0 ? `<p class="font-semibold mt-2">Atenção ao Orçamento:</p><ul class="list-disc list-inside ml-4">${alerts.join('')}</ul>` : ''; },
-        
-        // ... (Mantendo Chart e Modal renders) ...
         updateAllCharts: (m, totals) => {
             const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
             const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color');
             const options = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartTextColor, font: { family: 'Inter' } } } } };
             const barOptions = {...options, scales: { y: { ticks: { color: chartTextColor }, grid: { color: gridColor } }, x: { ticks: { color: chartTextColor }, grid: { color: gridColor } } } };
-            
             if (App.state.chartInstances.pie) App.state.chartInstances.pie.destroy();
-            const pieCanvas = document.getElementById(`budgetPieChart-${m}`);
-            if(pieCanvas) {
-                App.state.chartInstances.pie = new Chart(pieCanvas.getContext('2d'), { type: 'pie', data: { labels: ['Pessoais', 'Empresa', 'Saldo'], datasets: [{ data: [totals.totalPersonal, totals.totalBusiness, Math.max(0, totals.remainingBudget)], backgroundColor: ['#ff453a', '#32d74b', '#2997ff'] }] }, options });
-            }
-
+            App.state.chartInstances.pie = new Chart(document.getElementById(`budgetPieChart-${m}`).getContext('2d'), { type: 'pie', data: { labels: ['Pessoais', 'Empresa', 'Saldo'], datasets: [{ data: [totals.totalPersonal, totals.totalBusiness, Math.max(0, totals.remainingBudget)], backgroundColor: ['#ff453a', '#32d74b', '#2997ff'] }] }, options });
             const paymentLabels = [...App.constants.basePaymentMethods.filter(m => m !== 'Crédito'), ...App.state.creditCards.map(c => `Crédito (${c})`)];
             const paymentTotals = Object.fromEntries(paymentLabels.map(l => [l, 0]));
             App.state.monthlyData[m].expenses.forEach(d => {
                 [...d.personalEntries, ...d.businessEntries].forEach(e => { let k = e.paymentMethod === 'Crédito' ? `Crédito (${e.card})` : e.paymentMethod; if (paymentTotals[k] !== undefined) paymentTotals[k] += e.amount; }); });
             const paymentColors = ['#007BFF', '#FD7E14', '#DC3545', '#20C997', '#6F42C1', '#D63384', '#198754', '#6C757D'];
-            
             if (App.state.chartInstances.payment) App.state.chartInstances.payment.destroy();
-            const payCanvas = document.getElementById(`paymentMethodChart-${m}`);
-            if(payCanvas) {
-                App.state.chartInstances.payment = new Chart(payCanvas.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: paymentLabels,
-                        datasets: [{
-                            data: Object.values(paymentTotals),
-                            backgroundColor: paymentColors,
-                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
-                            borderWidth: 2
-                        }]
-                    },
-                    options
-                });
-            }
-
+            App.state.chartInstances.payment = new Chart(document.getElementById(`paymentMethodChart-${m}`).getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: paymentLabels,
+                    datasets: [{
+                        data: Object.values(paymentTotals),
+                        backgroundColor: paymentColors,
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                        borderWidth: 2
+                    }]
+                },
+                options
+            });
             const expensesByCategory = App.state.categories.reduce((a, c) => ({...a, [c.name]: 0 }), {});
             App.state.monthlyData[m].expenses.forEach(d => { d.personalEntries.forEach(e => { if (expensesByCategory[e.category] !== undefined) expensesByCategory[e.category] += e.amount; }); });
             const spentData = App.state.categories.map(c => expensesByCategory[c.name]);
             const budgetData = App.state.categories.map(c => c.budget);
             const barColors = spentData.map((s, i) => (s > budgetData[i] && budgetData[i] > 0) ? '#ff9500' : '#ff453a');
-            
             if (App.state.chartInstances.goals) App.state.chartInstances.goals.destroy();
-            const goalCanvas = document.getElementById(`budgetGoalsChart-${m}`);
-            if(goalCanvas) {
-                App.state.chartInstances.goals = new Chart(goalCanvas.getContext('2d'), { type: 'bar', data: { labels: App.state.categories.map(c => c.name), datasets: [{ label: 'Gasto', data: spentData, backgroundColor: barColors }, { label: 'Meta', data: budgetData, backgroundColor: '#2997ff' }] }, options: {...barOptions, indexAxis: 'y' } });
-            }
+            App.state.chartInstances.goals = new Chart(document.getElementById(`budgetGoalsChart-${m}`).getContext('2d'), { type: 'bar', data: { labels: App.state.categories.map(c => c.name), datasets: [{ label: 'Gasto', data: spentData, backgroundColor: barColors }, { label: 'Meta', data: budgetData, backgroundColor: '#2997ff' }] }, options: {...barOptions, indexAxis: 'y' } });
         },
-        
-        renderBalanceSummary: () => { 
-            // (Lógica idêntica ao anterior)
-            let totals = { pj: 0, pf: 0, personal: 0, business: 0 }; 
-            let monthlyPerformance = { gains: [], expenses: [] }; 
-            let allPersonalSpends = []; 
-            for (let i = 0; i < 12; i++) { 
-                if (!App.state.monthlyData[i]) { monthlyPerformance.gains.push(0); monthlyPerformance.expenses.push(0); continue; }; 
-                const monthData = App.state.monthlyData[i]; 
-                let monthGains = 0; 
-                let monthExpenses = 0; 
-                monthData.pjEntries.forEach(e => { totals.pj += e.amount; monthGains += e.amount; }); 
-                monthData.pfEntries.forEach(e => { totals.pf += e.amount; monthGains += e.amount; }); 
-                monthData.expenses.forEach(day => { 
-                    day.personalEntries.forEach(e => { totals.personal += e.amount; monthExpenses += e.amount; if (e.amount > 0) allPersonalSpends.push({...e, month: i }); }); 
-                    day.businessEntries.forEach(e => { totals.business += e.amount; monthExpenses += e.amount; }); 
-                }); 
-                monthlyPerformance.gains.push(monthGains); 
-                monthlyPerformance.expenses.push(monthExpenses); 
-            } 
-            const balance = (totals.pj + totals.pf) - (totals.personal + totals.business); 
-            const setT = (id, v) => { if(document.getElementById(id)) document.getElementById(id).textContent = App.helpers.formatCurrency(v); };
-            setT('totalAnnualPJ', totals.pj);
-            setT('totalAnnualPF', totals.pf);
-            setT('totalAnnualExpenses', totals.personal + totals.business);
-            setT('annualBalance', balance);
-            
-            const perfEl = document.getElementById('annualPerformance');
-            if(perfEl) {
-                perfEl.textContent = balance >= 0 ? 'Positivo' : 'Negativo'; 
-                perfEl.style.color = balance >= 0 ? 'var(--green-color)' : 'var(--red-color)'; 
-            }
-            
-            const top5spends = allPersonalSpends.sort((a, b) => b.amount - a.amount).slice(0, 5); 
-            const topContainer = document.getElementById('top-spends-container');
-            if(topContainer) topContainer.innerHTML = top5spends.map(spend => `<div class="p-2 rounded-lg" style="background-color: var(--input-bg);"><strong class="text-color">${spend.category}:</strong> ${App.helpers.formatCurrency(spend.amount)} <span class="text-xs muted-text">(${spend.description} em ${App.constants.monthNames[spend.month]})</span></div>`).join('') || '<p class="muted-text">Nenhum gasto pessoal registrado.</p>'; 
-            App.render.updateAnnualCharts(monthlyPerformance); 
-        },
-        
-        updateAnnualCharts: (performance) => { 
-            const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color'); 
-            const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color'); 
-            const barOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartTextColor } } }, scales: { y: { ticks: { color: chartTextColor }, grid: { color: gridColor } }, x: { ticks: { color: chartTextColor }, grid: { color: gridColor } } } }; 
-            if (App.state.chartInstances.annualBar) App.state.chartInstances.annualBar.destroy(); 
-            const chartEl = document.getElementById('monthlyPerformanceBarChart');
-            if(chartEl) {
-                App.state.chartInstances.annualBar = new Chart(chartEl.getContext('2d'), { type: 'bar', data: { labels: App.constants.monthNames.slice(0, 12), datasets: [{ label: 'Ganhos Totais', data: performance.gains, backgroundColor: '#32d74b' }, { label: 'Gastos Totais', data: performance.expenses, backgroundColor: '#ff453a' }] }, options: barOptions }); 
-            }
-        },
-        
+        renderBalanceSummary: () => { let totals = { pj: 0, pf: 0, personal: 0, business: 0 }; let monthlyPerformance = { gains: [], expenses: [] }; let allPersonalSpends = []; for (let i = 0; i < 12; i++) { if (!App.state.monthlyData[i]) { monthlyPerformance.gains.push(0); monthlyPerformance.expenses.push(0); continue; }; const monthData = App.state.monthlyData[i]; let monthGains = 0; let monthExpenses = 0; monthData.pjEntries.forEach(e => { totals.pj += e.amount; monthGains += e.amount; }); monthData.pfEntries.forEach(e => { totals.pf += e.amount; monthGains += e.amount; }); monthData.expenses.forEach(day => { day.personalEntries.forEach(e => { totals.personal += e.amount; monthExpenses += e.amount; if (e.amount > 0) allPersonalSpends.push({...e, month: i }); }); day.businessEntries.forEach(e => { totals.business += e.amount; monthExpenses += e.amount; }); }); monthlyPerformance.gains.push(monthGains); monthlyPerformance.expenses.push(monthExpenses); } const balance = (totals.pj + totals.pf) - (totals.personal + totals.business); document.getElementById('totalAnnualPJ').textContent = App.helpers.formatCurrency(totals.pj); document.getElementById('totalAnnualPF').textContent = App.helpers.formatCurrency(totals.pf); document.getElementById('totalAnnualExpenses').textContent = App.helpers.formatCurrency(totals.personal + totals.business); document.getElementById('annualBalance').textContent = App.helpers.formatCurrency(balance); const perfEl = document.getElementById('annualPerformance'); perfEl.textContent = balance >= 0 ? 'Positivo' : 'Negativo'; perfEl.style.color = balance >= 0 ? 'var(--green-color)' : 'var(--red-color)'; const top5spends = allPersonalSpends.sort((a, b) => b.amount - a.amount).slice(0, 5); document.getElementById('top-spends-container').innerHTML = top5spends.map(spend => `<div class="p-2 rounded-lg" style="background-color: var(--input-bg);"><strong class="text-color">${spend.category}:</strong> ${App.helpers.formatCurrency(spend.amount)} <span class="text-xs muted-text">(${spend.description} em ${App.constants.monthNames[spend.month]})</span></div>`).join('') || '<p class="muted-text">Nenhum gasto pessoal registrado.</p>'; App.render.updateAnnualCharts(monthlyPerformance); },
+        updateAnnualCharts: (performance) => { const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color'); const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color'); const barOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: chartTextColor } } }, scales: { y: { ticks: { color: chartTextColor }, grid: { color: gridColor } }, x: { ticks: { color: chartTextColor }, grid: { color: gridColor } } } }; if (App.state.chartInstances.annualBar) App.state.chartInstances.annualBar.destroy(); App.state.chartInstances.annualBar = new Chart(document.getElementById('monthlyPerformanceBarChart').getContext('2d'), { type: 'bar', data: { labels: App.constants.monthNames.slice(0, 12), datasets: [{ label: 'Ganhos Totais', data: performance.gains, backgroundColor: '#32d74b' }, { label: 'Gastos Totais', data: performance.expenses, backgroundColor: '#ff453a' }] }, options: barOptions }); },
         renderCardList: () => { App.ui.cardListContainer.innerHTML = App.state.creditCards.map(c => `<div class="flex items-center justify-between p-2 rounded-lg" style="background-color: var(--input-bg);"><span class="text-color">${c}</span><button class="remove-card-btn text-red-500 hover:text-red-700" data-card-name="${c}">×</button></div>`).join(''); },
         renderCategoryList: () => { App.ui.categoryListContainer.innerHTML = App.state.categories.map(c => `<div class="flex items-center justify-between p-2 rounded-lg gap-2" style="background-color: var(--input-bg);"><input type="text" value="${c.name}" class="category-name-input flex-grow p-1 input-field" data-old-name="${c.name}"><input type="number" value="${c.budget}" min="0" class="category-budget-input w-24 p-1 input-field" data-category-name="${c.name}"><button class="remove-category-btn text-red-500 hover:text-red-700" data-category-name="${c.name}">×</button></div>`).join(''); },
         renderRecurringList: () => { App.ui.recurringListContainer.innerHTML = App.state.recurringEntries.map((r, i) => `<div class="text-xs p-2 rounded-lg flex justify-between items-center" style="background-color: var(--input-bg);"><div><p class="font-bold text-color">${r.description} (${App.helpers.formatCurrency(r.amount)})</p><p class="muted-text">Todo dia ${r.dayOfMonth} - ${r.type}</p></div><button class="remove-recurring-btn text-red-500 hover:text-red-700 font-bold" data-index="${i}">×</button></div>`).join(''); },
@@ -1113,7 +1073,7 @@ onAuthStateChanged(auth, user => {
     } else {
         console.log("STATUS: Usuário está DESLOGADO.");
         App.state.currentUserId = null;
-        App.state.listenersBound = false; // Reseta flag ao deslogar
+        App.state.listenersBound = false; 
         authScreen.classList.remove('hidden');
         appScreen.classList.add('hidden');
     }
